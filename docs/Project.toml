@@ -1,0 +1,11 @@
+# Don't forget to run
+#
+#     pkg> dev ..
+#
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
+WflowRaster = "4f6096bb-53fb-52e5-9c9b-c80f9faef879"
+
+[compat]
+Documenter = "1"

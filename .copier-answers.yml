@@ -1,0 +1,15 @@
+# Changes here will be overwritten by Copier
+AnswerStrategy: recommended
+Authors: Joseph A.P. Pollacco,
+CodeOfConductContact: Joseph A.P. Pollacco
+ConfigIndentation: 3
+JuliaIndentation: 3
+JuliaMinVersion: '1.11'
+License: MIT
+LicenseCopyrightHolders: Joseph A.P. Pollacco,
+MarkdownIndentation: 3
+PackageName: WflowRaster
+PackageOwner: AquaPore
+PackageUUID: 4f6096bb-53fb-52e5-9c9b-c80f9faef879
+_commit: v0.15.0
+_src_path: https://github.com/JuliaBesties/BestieTemplate.jl

@@ -1,0 +1,9 @@
+name = "WflowRaster"
+uuid = "4f6096bb-53fb-52e5-9c9b-c80f9faef879"
+authors = [
+    "Joseph A.P. Pollacco",
+]
+version = "0.1.0"
+
+[compat]
+julia = "1.11"
