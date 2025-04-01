@@ -1,9 +1,33 @@
 name = "WflowRaster"
 uuid = "4f6096bb-53fb-52e5-9c9b-c80f9faef879"
-authors = [
-    "Joseph A.P. Pollacco",
-]
+authors = ["Joseph A.P. Pollacco"]
 version = "0.1.0"
 
+[deps]
+ArchGDAL = "c9ce4bd3-c3d5-55b8-8973-c0e20141b8c3"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+CoordinateTransformations = "150eb455-5306-5404-9cee-2592286d6298"
+GDAL = "add2ef01-049f-52c4-9ee2-e494f65e021a"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+GMT = "5752ebe1-31b9-557e-87aa-f909b540aa54"
+GeoArrays = "2fb1d81b-e6a0-5fc5-82e6-8e06903437ab"
+GeoTIFF = "c470187e-1474-4b46-a068-a417f109db17"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+RasterDataSources = "3cb90ccd-e1b6-4867-9617-4276c8b2ca36"
+Rasters = "a3a2b9e3-a471-40c9-b274-f788e487c689"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+
 [compat]
+ArchGDAL = "0.10.8"
+CairoMakie = "0.13.2"
+CoordinateTransformations = "0.6.4"
+GDAL = "1.10.0"
+GLMakie = "0.11.3"
+GMT = "0.44.8"
+GeoArrays = "0.9.4"
+GeoTIFF = "0.4.1"
+Makie = "0.22.2"
+RasterDataSources = "0.7.0"
+Rasters = "0.14.2"
+Revise = "3.7.2"
 julia = "1.11"
