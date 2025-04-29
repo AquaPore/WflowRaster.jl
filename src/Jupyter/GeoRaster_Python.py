@@ -17,14 +17,14 @@ pyexec(read("python_code.py", String),Main)
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #		FUNCTION : DEM_2_FLOWDIRECTION
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        function DEM_2_FLOWDIRECTION(Path_Input, Path_Output)
+        function DEM_2_FLOWDIRECTION(Path_InputGis, Path_OutputJulia)
 
             rasterio = PythonCall.pyimport("rasterio")
             pyflwdir = PythonCall.pyimport("pyflwdir")
 
             # PythonCall.@pyexec """
-            #     def DEM_2_FLOWDIRECTION(Path_Input, Path_Output):
-            #         with rasterio.open(Path_Input, "r") as src:
+            #     def DEM_2_FLOWDIRECTION(Path_InputGis, Path_OutputJulia):
+            #         with rasterio.open(Path_InputGis, "r") as src:
             #             elevtn = src.read(1)
             #             nodata = src.nodata
             #             transform = src.transform
@@ -40,13 +40,13 @@ pyexec(read("python_code.py", String),Main)
 
             #         # Write to tiff file
             #         prof.update(dtype=FlowDirection_Array.dtype, nodata=False)
-            #         with rasterio.open(Path_Output, "w", **prof) as src:
+            #         with rasterio.open(Path_OutputJulia, "w", **prof) as src:
             #             src.write(FlowDirection_Array, 1)
 
             #         return FlowDirection_Array, FlowDirection_Pyflwdir
             #         """ => DEM_2_FLOWDIRECTION
 
-            #     FlowDirection_Array, FlowDirection_Pyflwdir = PythonCall.pyconvert(Any, DEM_2_FLOWDIRECTION(Path_Input, Path_Output))
+            #     FlowDirection_Array, FlowDirection_Pyflwdir = PythonCall.pyconvert(Any, DEM_2_FLOWDIRECTION(Path_InputGis, Path_OutputJulia))
 
         FlowDirection_Array=0; FlowDirection_Pyflwdir=0
         return FlowDirection_Array, FlowDirection_Pyflwdir
@@ -71,3 +71,27 @@ pyexec(read("python_code.py", String),Main)
 
     return P_Int1, P_Float1, P_String1, P_Vector1
     end
+
+
+#==========================
+include(raw"E:\JOE3\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\GeoRaster.jl")
+using .geoRaster
+
+P_Int=1; P_Float=2.0; P_String=3; P_Vector = [1.0, 2.0, 3.0, 4.0]
+P_Int1, P_Float1, P_String1, P_Vector1 = geoRaster.PYTHON_2_JULIA(P_Int, P_Float, P_String, P_Vector)
+
+@show P_Int1, P_Float1, P_String1, P_Vector1
+
+P_Vector1[1]
+
+#=================
+
+include(raw"E:\JOE3\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\GeoRaster.jl")
+using .geoRaster
+
+Path_Input_Dem     = joinpath(Path_Root, Path_InputGis, Input_Dem)
+Path_OutputJulia_Ldd    = joinpath(Path_Root, Path_OutputJulia, "Ldd.tiff")
+
+FlowDirection_Array, FlowDirection_Pyflwdir = geoRaster.DEM_2_FLOWDIRECTION(Path_Input_Dem, Path_OutputJulia_Ldd)
+
+#=================
