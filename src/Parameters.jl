@@ -4,7 +4,7 @@
 # =============================================================
 
 # PLOTTING
-	Flag_Plots = true
+	Flag_Plots = false
 
 
 # ======= PATHS =======
@@ -25,6 +25,8 @@
 	River_Input   = "Timoleague_River.shp"
 	Temporary_Dem = "Temporary_DEM.tif"
 
+	# === Input  Forcing ===
+		Forcing_Input = "forcing.Timoleague.csv"
 
 	# === Input from Python ===
    Ldd_Python         = "Ldd.tiff"
@@ -63,4 +65,6 @@
 	# RIVER PARAMETERS
 		P_RiverWidth = 2 # [m]
 		P_RiverDepth = 5;  # must be an integer [m]
+
+	# DATES
 

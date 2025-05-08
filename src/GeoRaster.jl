@@ -104,9 +104,9 @@ module geoRaster
         # Create a NetCDF file
             NetCDF = NCDatasets.NCDataset(Path_NetCDF_Full,"c")
 
-        # Define the dimension "lon" and "lat"
-            NCDatasets.defDim(NetCDF,"lon", Metadatas.N_Width)
-            NCDatasets.defDim(NetCDF,"lat", Metadatas.N_Height)
+        # Define the dimension "x" and "y"
+            NCDatasets.defDim(NetCDF,"x", Metadatas.N_Width)
+            NCDatasets.defDim(NetCDF,"y", Metadatas.N_Height)
 
         # Define a global attribute
             NetCDF.attrib["title"]   = "Timoleague instates dataset"
@@ -116,7 +116,7 @@ module geoRaster
         # == LDD input ==========================================
          	Keys = splitext(Ldd_Wflow)[1]
 				println(Keys)
-         	Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+         	Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("x","y"))
 
             Ldd_NetCDF[:,:] = Ldd_Mask
 
@@ -126,7 +126,7 @@ module geoRaster
         # == SUBCATCHMENT input ==========================================
             Keys = splitext(Subcatch_Wflow)[1]
 				println(Keys)
-            Subcatchment_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+            Subcatchment_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("x","y"))
 
             Subcatchment_NetCDF[:,:] = Subcatchment
 
@@ -136,7 +136,7 @@ module geoRaster
         # == SLOPE input ==========================================
 		      Keys = splitext(Slope_Wflow)[1]
 				println(Keys)
-            Slope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("lon","lat"))
+            Slope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
 
             Slope_NetCDF[:,:] = Slope_Mask
 
@@ -146,7 +146,7 @@ module geoRaster
         # == RIVER input ==========================================
 				Keys = splitext(River_Wflow)[1]
 				println(Keys)
-            River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+            River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("x","y"))
 
             River_NetCDF[:,:] = River_Mask
 
@@ -157,7 +157,7 @@ module geoRaster
 		  		Keys = splitext(RiverSlope_Wflow)[1]
 				println(Keys)
 
-            River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("lon","lat"))
+            River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
 
             River_NetCDF[:,:] = RiverSlope
 
@@ -168,7 +168,7 @@ module geoRaster
 		  		Keys = splitext(RiverWidth_Wflow)[1]
 				println(Keys)
 
-            RiverWidth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+            RiverWidth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("x","y"))
 
             RiverWidth_NetCDF[:,:] = RiverWidth
 
@@ -179,7 +179,7 @@ module geoRaster
 		  		Keys = splitext(RiverDepth_Wflow)[1]
 				println(Keys)
 
-            RiverDepth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+            RiverDepth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("x","y"))
 
             RiverDepth_NetCDF[:,:] = RiverDepth
 
@@ -192,13 +192,118 @@ module geoRaster
     # ------------------------------------------------------------------
 
 
-
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#		FUNCTION : TIMESERIES_2_NETCDF
+	#		FUNCTION : TIMESERIES_2_NetCDFmeteo
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIMESERIES_2_NETCDF()
+		include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
+		using NCDatasets, Dates, CSV, Tables
 
-		return
+		function TIMESERIES_2_NETCDF(Metadatas, Subcatchment)
+		    # Read the CSV file
+                Path_Input  = joinpath(Path_Root, Path_InputForcing, Forcing_Input)
+                println(Path_Input)
+
+                Data₀ = CSV.File(Path_Input, header=true)
+
+                Year   = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Year))
+                Month  = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Month))
+                Day    = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Day))
+                Hour   = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Hour))
+
+                Precip = convert(Vector{Float64}, Tables.getcolumn(Data₀, :precip))
+                Pet    = convert(Vector{Float64}, Tables.getcolumn(Data₀, :pet))
+                Temp   = convert(Vector{Float64}, Tables.getcolumn(Data₀, :temp))
+
+                Time_Array = Dates.DateTime.(Year, Month, Day, Hour) #  <"standard"> "proleptic_gregorian" calendar
+
+                Nit    = length(Year)
+
+                Nit = 100
+
+            # Create a 3D array for the time series
+                Precip_Array = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height, Nit)
+                Pet_Array    = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height, Nit)
+                Temp_Array   = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height, Nit)
+
+                # Transform the data to a 3D array
+                for iX=1:Metadatas.N_Width
+                    for iY=1:Metadatas.N_Height
+                        if Subcatchment[iX,iY] == 1
+                            for iT=1:Nit
+                                Precip_Array[iX,iY,iT] = Precip[iT]
+                                Pet_Array[iX,iY,iT]    = Pet[iT]
+                                Temp_Array[iX,iY,iT]   = Temp[iT]
+                            end
+                        end
+
+                    end # for iY=1:Metadatas.N_Height
+                end # for iX=1:Metadatas.N_Width
+
+        # NETCDF
+			Path_NetCDFmeteo_Output  = joinpath(Path_Root, Path_OutputTimeSeriesWflow, NetCDF_Forcing)
+			isfile(Path_NetCDFmeteo_Output) && rm(Path_NetCDFmeteo_Output, force=true)
+      	    println(Path_NetCDFmeteo_Output)
+
+        # Create a NetCDFmeteo file
+            NetCDFmeteo = NCDatasets.NCDataset(Path_NetCDFmeteo_Output,"c")
+
+        # Define the dimension "x" and "y" and time
+            NCDatasets.defDim(NetCDFmeteo,"x", Metadatas.N_Width)
+            NCDatasets.defDim(NetCDFmeteo,"y", Metadatas.N_Height)
+			NCDatasets.defDim(NetCDFmeteo,"time", Nit)
+
+        # Define a global attribute
+            NetCDFmeteo.attrib["title"]   = "Timoleague climate dataset"
+            NetCDFmeteo.attrib["creator"] = "Joseph A.P. POLLACCO"
+            NetCDFmeteo.attrib["unit"]   = "mm"
+
+
+        # == time input ==========================================
+		  	Keys = "time"
+            println(Keys)
+
+            Time_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Time_Array[1:Nit], ("time",), deflatelevel=9, shuffle=true)
+
+
+            # Time_NetCDF[:] = Time_Array[1:Nit]
+
+            # Time_NetCDF.attrib["units"] = "Dates.DateTime({Int64})"
+            Time_NetCDF.attrib["calendar"] = "proleptic_gregorian"
+
+        # == Precipitation input ==========================================
+            Keys = "precip"
+            println(Keys)
+
+            Precip_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float64, ("x", "y", "time"))
+            Precip_NetCDF[:,:,:] = Precip_Array
+
+            Precip_NetCDF.attrib["units"] = "mm"
+            Precip_NetCDF.attrib["comments"] = "precipitation"
+
+
+        # == Potential evapotranspiration input ==========================================
+            Keys = "pet"
+            println(Keys)
+
+            Pet_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float64, ("x", "y", "time"))
+            Pet_NetCDF[:,:,:] = Pet_Array
+
+            Pet_NetCDF.attrib["units"] = "mm"
+            Pet_NetCDF.attrib["comments"] = "potential evapotranspiration"
+
+        # == Potential temperature input ==========================================
+            Keys = "temp"
+            println(Keys)
+
+            Temp_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float64, ("x", "y", "time"))
+            Temp_NetCDF[:,:,:] = Temp_Array
+
+            Temp_NetCDF.attrib["units"] = "mm"
+            Temp_NetCDF.attrib["comments"] = "potential evapotranspiration"
+
+
+		close(NetCDFmeteo)
+		return NetCDFmeteo, Path_NetCDFmeteo_Output, Time_Array
 		end  # function: TIMESERIES_2_NETCDF
 	# ------------------------------------------------------------------
 end #module geoRaster
