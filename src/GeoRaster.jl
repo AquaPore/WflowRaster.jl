@@ -88,6 +88,117 @@ module geoRaster
     # ----------------------------------------------------------------
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#		FUNCTION : CONVERT_2_NETCDF(
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
+    using NCDatasets
+
+    function TIFF_2_NETCDF(Ldd_Mask, Metadatas, River_Mask, River_Wflow, RiverDepth, RiverDepth_Wflow, RiverSlope, RiverSlope_Wflow, RiverWidth, RiverWidth_Wflow, Slope_Mask, Subcatch_Wflow, Subcatchment)
+
+        Path_NetCDF_Full  = joinpath(Path_Root, Path_NetCDF, NetCDF_Instates)
+
+        isfile(Path_NetCDF_Full) && rm(Path_NetCDF_Full, force=true)
+        println(Path_NetCDF_Full)
+
+        # Create a NetCDF file
+            NetCDF = NCDatasets.NCDataset(Path_NetCDF_Full,"c")
+
+        # Define the dimension "lon" and "lat"
+            NCDatasets.defDim(NetCDF,"lon", Metadatas.N_Width)
+            NCDatasets.defDim(NetCDF,"lat", Metadatas.N_Height)
+
+        # Define a global attribute
+            NetCDF.attrib["title"]   = "Timoleague instates dataset"
+            NetCDF.attrib["creator"] = "Joseph A.P. POLLACCO"
 
 
+        # == LDD input ==========================================
+         	Keys = splitext(Ldd_Wflow)[1]
+				println(Keys)
+         	Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+
+            Ldd_NetCDF[:,:] = Ldd_Mask
+
+            Ldd_NetCDF.attrib["units"] = "1-9"
+            Ldd_NetCDF.attrib["comments"] = "Derived from hydromt.flw.d8_from_dem"
+
+        # == SUBCATCHMENT input ==========================================
+            Keys = splitext(Subcatch_Wflow)[1]
+				println(Keys)
+            Subcatchment_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+
+            Subcatchment_NetCDF[:,:] = Subcatchment
+
+            Subcatchment_NetCDF.attrib["units"] = "1"
+            Subcatchment_NetCDF.attrib["comments"] = "Derived from hydromt"
+
+        # == SLOPE input ==========================================
+		      Keys = splitext(Slope_Wflow)[1]
+				println(Keys)
+            Slope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("lon","lat"))
+
+            Slope_NetCDF[:,:] = Slope_Mask
+
+            Slope_NetCDF.attrib["units"] = "-"
+            Slope_NetCDF.attrib["comments"] = "Derived from hydromt"
+
+        # == RIVER input ==========================================
+				Keys = splitext(River_Wflow)[1]
+				println(Keys)
+            River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+
+            River_NetCDF[:,:] = River_Mask
+
+            River_NetCDF.attrib["units"] = "0/1"
+            River_NetCDF.attrib["comments"] = "Derived from hydromt"
+
+        # == RIVER-SLOPE input ==========================================
+		  		Keys = splitext(RiverSlope_Wflow)[1]
+				println(Keys)
+
+            River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("lon","lat"))
+
+            River_NetCDF[:,:] = RiverSlope
+
+            River_NetCDF.attrib["units"] = "Slope"
+            River_NetCDF.attrib["comments"] = "Derived from hydromt"
+
+        # == RIVER-WIDTH input ==========================================
+		  		Keys = splitext(RiverWidth_Wflow)[1]
+				println(Keys)
+
+            RiverWidth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+
+            RiverWidth_NetCDF[:,:] = RiverWidth
+
+            RiverWidth_NetCDF.attrib["units"] = "m"
+            RiverWidth_NetCDF.attrib["comments"] = "Derived from hydromt"
+
+        # == RIVER-DEPTH input ==========================================
+		  		Keys = splitext(RiverDepth_Wflow)[1]
+				println(Keys)
+
+            RiverDepth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("lon","lat"))
+
+            RiverDepth_NetCDF[:,:] = RiverDepth
+
+            RiverDepth_NetCDF.attrib["units"] = "Slope"
+            RiverDepth_NetCDF.attrib["comments"] = "Derived from hydromt"
+
+    close(NetCDF)
+    return NetCDF, Path_NetCDF_Full
+    end  # function: TIFF_2_NETCDF
+    # ------------------------------------------------------------------
+
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : TIMESERIES_2_NETCDF
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function TIMESERIES_2_NETCDF()
+
+		return
+		end  # function: TIMESERIES_2_NETCDF
+	# ------------------------------------------------------------------
 end #module geoRaster
