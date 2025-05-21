@@ -66,6 +66,9 @@
 		P_RiverWidth = 2.0::Float64 # [m]
 		P_RiverDepth = 5.0::Float64;  # must be an integer [m]
 
+	# OUTLETS COORDINATES
+		OutletCoordinate = [146707.700, 42167.995]
+
 	# DATES
 	Base.@kwdef mutable struct DATES
       Start_Year  = 2010 :: Int64

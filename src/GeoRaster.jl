@@ -24,48 +24,6 @@ module geoRaster
 		  Extent
 	 end # struct METADATA
 
-	 # ================================================================
-		# Plotting parameters
-				ColourOption_No    = 1
-				Linewidth          = 2
-				height             = 400
-				labelsize          = 20
-				textcolor          = :blue
-				textsize           = 20
-				titlecolor         = :navyblue
-				titlesize          = 18.0
-				width              = height * 1.0
-				xgridstyle         = :dash
-				xgridvisible       = true
-				xlabelSize         = 20
-				xlabelpadding      = 5
-				xminortickalign    = 1.0
-				xminorticksvisible = true
-				xtickalign         = 0.9 # 0 is inside and 1 is outside
-				xticklabelrotation = π / 4.0
-				xticksize          = 10
-				xticksmirrored     = false
-				xtickwidt          = 0.5
-				xtrimspine         = false
-				ygridstyle         = :dash
-				ygridvisible       = false
-				ylabelpadding      = xlabelpadding
-				ylabelsize         = xlabelSize
-				yminortickalign    = xminortickalign
-				yminorticksvisible = true
-				ytickalign         = xtickalign
-				yticksize          = xticksize
-				yticksmirrored     = false
-				ytickwidt          = xtickwidt
-				ytrimspine         = false
-
-				Linewidth = 4
-				xlabelSize = 30
-				xticksize = 10
-				xgridvisible = false
-				Width = 800 # 800
-				Height = 200
-
 
 	 """
 		  Deriving metadata from the GeoTiff file
@@ -121,16 +79,52 @@ module geoRaster
 	 # ----------------------------------------------------------------
 
 
-	 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	 #		FUNCTION : iXY_2_COORD
-	 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		  using GeoArrays
-		  function iXY_2_COORD(iX, iY, Path)
-				Grid = GeoArrays.read(Path)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : LAT_LONG_2_iCOORD
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		using Rasters
 
-				Coord_X, Coord_Y = GeoArrays.coords(Grid, (iX, iY))
+		function LAT_LONG_2_iCOORD(;Map, Longitude_X, Latitude_Y)
 
-				println(Coord_X," " ,Coord_Y)
+         Longitude_X = OutletCoordinate[1]
+         Latitude_Y  = OutletCoordinate[2]
+
+         Longitude   = Rasters.lookup(Map, X)
+         Latitude    = Rasters.lookup(Map, Y)
+
+         Longitude_Sort = sort(Longitude)
+         println(Longitude_Sort[1:10])
+
+			Latitude_Sort  = sort(Latitude)
+         println(Latitude_Sort[1:10])
+
+         Nlongitude     = length(Longitude_Sort)
+         Nlatitude      = length(Latitude_Sort)
+
+			@assert Longitude_Sort[1] < Longitude_X < Longitude_Sort[end]
+			@assert Latitude_Sort[1] < Latitude_Y <  Latitude_Sort[end]
+
+			# Longitude
+				iLong = 0
+				for i=1:Nlongitude
+					iLong += 1
+					if Longitude_Sort[i] > Longitude_X
+						break
+					end
+				end # for i=1:Nlongitude
+				iLong -= 1
+
+			# Latitude
+				iLat = 0
+				for i=1:Nlatitude
+					iLat += 1
+					if Latitude_Sort[iLat] > Latitude_Y
+						break
+					end # if Latitude_Sort[iLat] ≥ Lat_Y
+				end # i=1:Nlatitude
+				iLat -= 1
+
+			return iLat, iLong, Latitude, Longitude
 		  end
 	 # ----------------------------------------------------------------
 
@@ -319,13 +313,19 @@ module geoRaster
 					 # Transform the data to a 3D array
 						Threads.@threads for iX=1:Metadatas.N_Width
 							Threads.@threads for iY=1:Metadatas.N_Height
-									if Subcatchment[iX,iY] == 1
-										Threads.@threads for iT=1:Nit
-											Precip_Array[iX,iY,iT] = Precip[iT]
-											Pet_Array[iX,iY,iT]    = Pet[iT]
-											Temp_Array[iX,iY,iT]   = Temp[iT]
-										end
-									end
+
+								if Subcatchment[iX,iY] == 1
+
+									# Need to correct for upside down maps
+									iYcor = Metadatas.N_Height - iY + 1
+
+									Threads.@threads for iT=1:Nit
+											Precip_Array[iX,iYcor,iT] = Precip[iT]
+											Pet_Array[iX,iYcor,iT]    = Pet[iT]
+											Temp_Array[iX,iYcor,iT]   = Temp[iT]
+									end # Threads.@threads for iT=1:Nit
+
+								end # if Subcatchment[iX,iY] == 1
 							end # for iY=1:Metadatas.N_Height
 						end # for iX=1:Metadatas.N_Width
 
@@ -395,45 +395,6 @@ module geoRaster
 		end  # function: TIMESERIES_2_NETCDF
 	# ------------------------------------------------------------------
 
-
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#		FUNCTION : HEATMAP_TIME
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		using GLMakie
-		function HEATMAP_TIME(;Path=Path, NameOutput="q_land", Layer=1)
-			Output_NCDatasets = NCDatasets.NCDataset(Path)
-
-			Data = Output_NCDatasets[NameOutput]
-			Data = Array(Data)
-
-				N_Lon = size(Data)[1]
-				N_Lat  = size(Data)[2]
-				N_Time  = size(Data)[3]
-		  Pmin, Pmax = extrema(x for x ∈ skipmissing(Data) if !isnan(x))
-		  @show Pmin Pmax
-
-		  function DATA_3D_2_2D(Data; iTime=iTime, Dimensions=Dimensions, Layer=Layer)
-				return Data[:,:, iTime]
-		  end
-
-		  Fig = Figure(size=(Width, Height * 4.0))
-
-		  Ax_1 = Axis(Fig[1, 1], title=NameOutput, xlabelsize=xlabelSize, ylabelsize=xlabelSize, xticksize=xticksize, xgridvisible=xgridvisible, ygridvisible=xgridvisible)
-
-		  sg = SliderGrid(Fig[2, 1],
-		  (label="iTime", range=1:1:N_Time, startvalue=1),
-		  width=550, tellheight=true)
-
-		  iTime = sg.sliders[1].value
-
-		  Data_Time = lift((iTime) -> DATA_3D_2_2D(Data; iTime=iTime, Dimensions), iTime)
-
-		  Data_Plot = heatmap!(Ax_1, 1:N_Lon, 1:N_Lat, Data_Time, colorrange=(Pmin, Pmax), colormap =:hawaii50)
-
-		  Colorbar(Fig[1, 2], Data_Plot; label=NameOutput, width=20, ticks = Pmin:(Pmax-Pmin)/5:Pmax)
-
-		  Fig
-	 end
 
 
 end #module geoRaster
