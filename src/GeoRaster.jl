@@ -84,8 +84,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		using Rasters
 
-		function LAT_LONG_2_iCOORD(;Map, Longitude_X, Latitude_Y)
-
+		function LAT_LONG_2_iCOORD(;Map, OutletCoordinate)
          Longitude_X = OutletCoordinate[1]
          Latitude_Y  = OutletCoordinate[2]
 
@@ -93,10 +92,10 @@ module geoRaster
          Latitude    = Rasters.lookup(Map, Y)
 
          Longitude_Sort = sort(Longitude)
-         println(Longitude_Sort[1:10])
+         # println(Longitude_Sort[1:10])
 
 			Latitude_Sort  = sort(Latitude)
-         println(Latitude_Sort[1:10])
+         # println(Latitude_Sort[1:10])
 
          Nlongitude     = length(Longitude_Sort)
          Nlatitude      = length(Latitude_Sort)
@@ -156,7 +155,7 @@ module geoRaster
 
 		  # == LDD input ==========================================
 				Keys = splitext(Ldd_Wflow)[1]
-				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("x","y"))
+				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
 
 				Ldd_NetCDF .= Array(Ldd_Mask)
 
@@ -188,7 +187,7 @@ module geoRaster
 
 		  # == RIVER input ==========================================
 				Keys = splitext(River_Wflow)[1]
-				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("x","y"))
+				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
 
 				River_NetCDF .= Array(River_Mask)
 

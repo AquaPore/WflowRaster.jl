@@ -35,8 +35,8 @@
    Subcatch_Python    = "Subcatchment.tiff"
 
 	# === Output Julia ===
-	Dem_Julia        = "Timoleague_DEM.tif"
-	Dem_Julia_Mask   = "Timoleague_DEM_Mask.tif"
+	Dem_Julia        = "Timoleague_DEM.tiff"
+	Dem_Julia_Mask   = "Timoleague_DEM_Mask.tiff"
 	Outlet_Julia     = "Timololeague_Outlet.tiff"
 
 	# === Output wflow ===
@@ -58,9 +58,9 @@
 
 	# Resampling method of DEM in 2 steps:
 		ResampleMethod₁ = :min
-		ΔX₁             = 3 # [m] Gridded spatial resolution
+		ΔX₁             = 3.0 # [m] Gridded spatial resolution
 		ResampleMethod₂ = :cubicspline
-		ΔX₂             = 5; # [m] Gridded spatial resolution
+		ΔX₂             = 5.0; # [m] Gridded spatial resolution
 
 	# RIVER PARAMETERS
 		P_RiverWidth = 2.0::Float64 # [m]
