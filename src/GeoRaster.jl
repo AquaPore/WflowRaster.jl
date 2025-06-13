@@ -80,10 +80,31 @@ module geoRaster
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : MASK
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function MASK(;Crs, Input, Lat, Lon, Mask, N_Height, N_Width)
+
+				Output_Mask = Rasters.Raster((Lon, Lat), crs=Crs)
+
+				for iX=1:N_Width
+					for iY=1:N_Height
+						if Mask[iX,iY] > 0
+							Output_Mask[iX,iY] = Input[iX,iY]
+						else
+							Output_Mask[iX,iY] = NaN
+						end
+					end # for iY=1:Metadatas.N_Height
+				end # for iX=1:Metadatas.N_Width
+
+			return Output_Mask
+			end  # function: mask
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : LAT_LONG_2_iCOORD
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		using Rasters
-
 		function LAT_LONG_2_iCOORD(;Map, OutletCoordinate)
          Longitude_X = OutletCoordinate[1]
          Latitude_Y  = OutletCoordinate[2]
@@ -91,39 +112,30 @@ module geoRaster
          Longitude   = Rasters.lookup(Map, X)
          Latitude    = Rasters.lookup(Map, Y)
 
-         Longitude_Sort = sort(Longitude)
-         # println(Longitude_Sort[1:10])
-
-			Latitude_Sort  = sort(Latitude)
-         # println(Latitude_Sort[1:10])
-
-         Nlongitude     = length(Longitude_Sort)
-         Nlatitude      = length(Latitude_Sort)
-
-			@assert Longitude_Sort[1] < Longitude_X < Longitude_Sort[end]
-			@assert Latitude_Sort[1] < Latitude_Y <  Latitude_Sort[end]
+         Nlongitude     = length(Longitude)
+         Nlatitude      = length(Latitude)
 
 			# Longitude
 				iLong = 0
 				for i=1:Nlongitude
-					iLong += 1
-					if Longitude_Sort[i] > Longitude_X
+					if Longitude_X ≤ Longitude[i]
 						break
 					end
+					iLong = i
 				end # for i=1:Nlongitude
-				iLong -= 1
 
 			# Latitude
 				iLat = 0
-				for i=1:Nlatitude
-					iLat += 1
-					if Latitude_Sort[iLat] > Latitude_Y
+				for i=Nlatitude:-1:1
+					if Latitude[i] ≥ Latitude_Y
 						break
 					end # if Latitude_Sort[iLat] ≥ Lat_Y
+					iLat = i
 				end # i=1:Nlatitude
-				iLat -= 1
 
-			return iLat, iLong, Latitude, Longitude
+				println( "LAT_LONG_2_iCOORD:  Nlongitude= $Nlongitude iLongitude= $iLong Nlatitude= $Nlatitude iLatitude= $iLat" )
+
+			return iLat, iLong, Latitude, Longitude, Nlatitude, Nlongitude
 		  end
 	 # ----------------------------------------------------------------
 
