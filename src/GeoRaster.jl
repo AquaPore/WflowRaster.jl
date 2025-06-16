@@ -6,6 +6,8 @@ module geoRaster
 	 using Rasters, GeoTIFF, Extents, Geomorphometry
 	 using Base
 	using NCDatasets
+	using CSV, DataFrames, GeoDataFrames, Rasters
+	using CairoMakie, Colors, ColorSchemes
 
 	 # using PythonCall
 
@@ -138,6 +140,80 @@ module geoRaster
 			return iLat, iLong, Latitude, Longitude, Nlatitude, Nlongitude
 		  end
 	 # ----------------------------------------------------------------
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#		FUNCTION : LOOKUPTABLE_2_MAPS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	function LOOKUPTABLE_2_MAPS(;🎏_Plots, Crs, Dem_Resample_Mask, LookupTable, Path_InputGis, Path_InputLookuptable, Path_Root, Map_Shp, ΔX)
+
+		# READING THE LOOKUP TABLE
+			Path_LookupHydro = joinpath(Path_Root, Path_InputLookuptable, LookupTable)
+			println(Path_LookupHydro)
+
+			LookupHydro = DataFrames.DataFrame(CSV.File(Path_LookupHydro, header=true))
+
+			# Cleaning the headers with only the variables of interest
+				Header₀ = DataFrames.names(LookupHydro)
+				Remove = .!(occursin.("CODE_CLASS", Header₀))
+				Header₁  =  Header₀[Remove]
+				Remove = .!(occursin.("CLASS", Header₁))
+				Header  =  Header₁[Remove]
+
+			# Creating a dictionary
+				N_Class = length(LookupHydro[!,:CLASS])
+				Class_Vector = 1:1:N_Class
+
+				Dict_Class_2_Index = Dict(LookupHydro[!,:CLASS] .=> Class_Vector)
+
+				println(LookupHydro[!,:CLASS])
+
+		# READING THE SHAPEFILE
+			Path_InputSoils = joinpath(Path_Root, Path_InputGis, Map_Shp)
+			println(Path_InputSoils)
+
+			SoilMap_Shapefile= GeoDataFrames.read(Path_InputSoils)
+
+			# Creating new columns from the Lookup table
+				for iiHeader in Header
+					# Initializing a new column
+					SoilMap_Shapefile[!, Symbol(iiHeader)] .= 1.0
+
+					for (i, iiDrainage) in enumerate(SoilMap_Shapefile[!, :Drainage_C])
+						if ismissing(iiDrainage)
+							iiDrainage = "missing"
+						end
+						iClass = Dict_Class_2_Index[iiDrainage]
+						SoilMap_Shapefile[!, Symbol(iiHeader)][i] = LookupHydro[!,iiHeader][iClass]
+					end
+				end
+
+		# SAVING MAPS
+			for iiHeader in Header
+				SoilMap = Rasters.rasterize(last, SoilMap_Shapefile;  fill =Symbol(iiHeader), res=ΔX, to=Dem_Resample_Mask, missingval=NaN, crs=Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
+
+				Path_Output = joinpath(Path_Root, Path_OutputWflow, iiHeader * ".tiff")
+				Rasters.write(Path_Output, SoilMap; ext=".tiff", force=true, verbose=true)
+				println(Path_Output)
+
+			# Plotting the maps
+				if 🎏_Plots
+
+					include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\GeoPlot.jl")
+
+					CairoMakie.activate!()
+					Fig_13 =  CairoMakie.Figure()
+					Axis_13 = CairoMakie.Axis(Fig_13[1, 1], title="Soil Map: $iiHeader", xlabel= L"$Latitude$", ylabel=L"$Longitude$",  ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlesize=titlesize, titlecolor=titlecolor)
+
+					Map_13 = CairoMakie.heatmap!(Axis_13, SoilMap, colormap=:viridis)
+
+					CairoMakie.Colorbar(Fig_13[1, 2], Map_13, label = iiHeader , width = 15, ticksize = 15, tickalign = 0.5)
+					display(Fig_13)
+				end
+			end # for iiHeader in Header
+	return nothing
+	end  # function: LOOKUPTABLE_2_MAPS
+	# ------------------------------------------------------------------
+
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

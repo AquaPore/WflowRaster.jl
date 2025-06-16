@@ -6,7 +6,7 @@
 # FLAGS
 	🎏_Plots = true
 		🎏_Plot_TimeSeries = false
-		🎏_Plot_FlowAccumulation = false
+		🎏_Plot_FlowAccumulation = true
 
 	🎏_TimeSeries = false
 	🎏_NetCDF = false
