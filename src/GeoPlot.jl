@@ -40,17 +40,76 @@
 
 module geoPlot
 
+	# Plotting parameters
+		ColourOption_No    = 1
+		Linewidth          = 2
+		height             = 400
+		labelsize          = 20
+		textcolor          = :blue
+		textsize           = 20
+		titlecolor         = :navyblue
+		titlesize          = 20.0
+		width              = height * 1.0
+		xgridstyle         = :dash
+		xgridvisible       = true
+		xlabelSize         = 20
+		xlabelpadding      = 5
+		xminortickalign    = 1.0
+		xminorticksvisible = true
+		xtickalign         = 0.9 # 0 is inside and 1 is outside
+		xticklabelrotation = π / 4.0
+		xticksize          = 10
+		xticksmirrored     = false
+		xtickwidt          = 0.5
+		xtrimspine         = false
+		ygridstyle         = :dash
+		ygridvisible       = false
+		ylabelpadding      = xlabelpadding
+		ylabelsize         = xlabelSize
+		yminortickalign    = xminortickalign
+		yminorticksvisible = true
+		ytickalign         = xtickalign
+		yticksize          = xticksize
+		yticksmirrored     = false
+		ytickwidt          = xtickwidt
+		ytrimspine         = false
+		Linewidth          = 4
+		xticksize          = 10
+		xgridvisible       = false
+		Width              = 800 # 800
+		Height             = 200
+		ColourOption = [ :curl, :magma ,:CMRmap, :Spectral_11, :lajolla, :plasma, :viridis, :greys, :matter, :romaO, :delta, :rain]
 
-# ================================================================
+
+	using CairoMakie, Colors, ColorSchemes
+	using GLMakie, NCDatasets
+	include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : HEATMAP
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function HEATMAP(;🎏_Colorbar=true, Input, Label, Title, titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=:viridis)
+
+   		CairoMakie.activate!()
+   		Fig_100 =  CairoMakie.Figure()
+
+   		Axis_100 = CairoMakie.Axis(Fig_100[1, 1], title=Title, xlabel= L"$Latitude$", ylabel=L"$Longitude$",  ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlesize=titlesize, titlecolor=titlecolor)
+
+   		Map_100 = CairoMakie.plot!(Axis_100, Input, colormap=colormap)
+
+			if 🎏_Colorbar
+   			CairoMakie.Colorbar(Fig_100[1,2], Map_100, label=Label, width=15, ticksize=15, tickalign=0.5)
+			end
+
+   		CairoMakie.display(Fig_100)
+		return nothing
+		end  # function: HEATMAP
+		# ------------------------------------------------------------------
 
 
-
-	 	 include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : HEATMAP_TIME
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		using GLMakie, NCDatasets
 		function HEATMAP_TIME(;Path=Path, NameOutput="q_land", Layer=1)
 			Output_NCDatasets = NCDatasets.NCDataset(Path)
 
@@ -87,5 +146,4 @@ module geoPlot
 	 end # HEATMAP_TIME
 
 
-
-end # plotRaster
+end # geoPlot

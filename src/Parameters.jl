@@ -8,9 +8,12 @@
 		🎏_Plot_TimeSeries = false
 		🎏_Plot_FlowAccumulation = true
 
-	🎏_TimeSeries = false
+	🎏_TimeSeries = true
 	🎏_NetCDF = false
 	🎏_SoilMap = true
+	🎏_RoadMap = true
+
+
 
 # ======= PATHS =======
 	Path_Root         = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
@@ -26,12 +29,13 @@
 
 	# ====== FILES NAME =======
 	# === Input  GIS ===
-   Dem_Input     = "Timoleague_DTM_1m.tif"
-   Outlet_Input  = "Timoleague_Outlet_Hydro.shp"
-   River_Input   = "Timoleague_River.shp"
-   Temporary_Dem = "Temporary_DEM.tif"
-   SoilMap_Shp = 		"SoilMap.shp"
-	SoilMap_Raster = "SoilMap_Raster.tif"
+   Dem_Input      = "Timoleague_DTM_1m.tif"
+   Outlet_Input   = "Timoleague_Outlet_Hydro.shp"
+   River_Input    = "Timoleague_River.shp"
+   Temporary_Dem  = "Temporary_DEM.tif"
+   SoilMap_Shp    = "SoilMap.shp"
+   SoilMap_Raster = "SoilMap_Raster.tif"
+   Roads_Shp      = "Roads2.shp"
 
 	# === Input  Forcing ===
 		Forcing_Input = "forcing.Timoleague.csv"
@@ -56,6 +60,7 @@
    River_Wflow       = "wflow_river.tiff"
    Slope_Wflow       = "Slope.tiff"
    Subcatch_Wflow    = "wflow_subcatch.tiff"
+	Impermable_Wflow  = "Wflow_Impermeable.tiff"
 
 	# === Lookup tables ===
 	Lookup_Hydro = "LookupTable_Hydro.csv"

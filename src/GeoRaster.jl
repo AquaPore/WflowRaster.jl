@@ -34,7 +34,10 @@ module geoRaster
 	 #		FUNCTION : RASTER_METADATA
 	 # ================================================================
 
-	 	 include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
+	 	include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
+
+		include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\GeoPlot.jl")
+
 
 		  function RASTER_METADATA(Path; Verbose=true)
 				Grid = Rasters.Raster(Path, lazy=true)
@@ -197,20 +200,10 @@ module geoRaster
 
 			# Plotting the maps
 				if 🎏_Plots
-
-					include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\GeoPlot.jl")
-
-					CairoMakie.activate!()
-					Fig_13 =  CairoMakie.Figure()
-					Axis_13 = CairoMakie.Axis(Fig_13[1, 1], title="Soil Map: $iiHeader", xlabel= L"$Latitude$", ylabel=L"$Longitude$",  ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlesize=titlesize, titlecolor=titlecolor)
-
-					Map_13 = CairoMakie.heatmap!(Axis_13, SoilMap, colormap=:viridis)
-
-					CairoMakie.Colorbar(Fig_13[1, 2], Map_13, label = iiHeader , width = 15, ticksize = 15, tickalign = 0.5)
-					display(Fig_13)
+					geoPlot.HEATMAP(;🎏_Colorbar=true, Input=SoilMap, Label="$iiHeader", Title="Soil Map: $iiHeader", titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=:viridis)
 				end
 			end # for iiHeader in Header
-	return nothing
+	return Header
 	end  # function: LOOKUPTABLE_2_MAPS
 	# ------------------------------------------------------------------
 
