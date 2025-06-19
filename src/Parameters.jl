@@ -8,50 +8,55 @@
 		🎏_Plot_TimeSeries = false
 		🎏_Plot_FlowAccumulation = true
 
-	🎏_TimeSeries = true
-	🎏_NetCDF = false
-	🎏_SoilMap = true
-	🎏_RoadMap = true
+   🎏_TimeSeries    = true
+   🎏_NetCDF        = true
+   🎏_SoilMap       = true
+   🎏_VegetationMap = true
+   🎏_RoadMap       = true
 
 
 
 # ======= PATHS =======
 	Path_Root         = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
 
-   Path_InputForcing          = "InputTimeSeries/TimeSeries_Process"
-   Path_InputGis              = "InputGis"
-   Path_InputLookuptable      = "LookupTables"
-   Path_NetCDF                = "OutputNetCDF"
-   Path_OutputJulia           = "OutputJulia"
-   Path_OutputPython          = "OutputPython"
-   Path_OutputTimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
-   Path_OutputWflow           = "OutputWflow"
+	Path_InputForcing          = "InputTimeSeries/TimeSeries_Process"
+	Path_InputGis              = "InputGis"
+	Path_InputLookuptable      = "LookupTables"
+	Path_NetCDF                = "OutputNetCDF"
+	Path_OutputJulia           = "OutputJulia"
+	Path_OutputPython          = "OutputPython"
+	Path_OutputTimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
+	Path_OutputWflow           = "OutputWflow"
 
-	# ====== FILES NAME =======
-	# === Input  GIS ===
-   Dem_Input      = "Timoleague_DTM_1m.tif"
-   Outlet_Input   = "Timoleague_Outlet_Hydro.shp"
-   River_Input    = "Timoleague_River.shp"
-   Temporary_Dem  = "Temporary_DEM.tif"
-   SoilMap_Shp    = "SoilMap.shp"
-   SoilMap_Raster = "SoilMap_Raster.tif"
-   Roads_Shp      = "Roads2.shp"
+# ======= INPUT GIS =======
+	# === Shape file ===
+      Landuse_Shp       = "Landuse.shp"
+      Outlet_Shp        = "Timoleague_Outlet_Hydro.shp"
+      River_Shp         = "Timoleague_River.shp"
+      Roads_Shp         = "Roads2.shp"
+      SoilMap_Shp       = "SoilMap.shp"
+      VegetationMap_Shp = "Landuse.shp"
 
-	# === Input  Forcing ===
-		Forcing_Input = "forcing.Timoleague.csv"
+	# === Raster file ===
+      Dem_Input      = "Timoleague_DTM_1m.tif"
+      SoilMap_Raster = "SoilMap_Raster.tif"
+      Temporary_Dem  = "Temporary_DEM.tif"
 
-	# === Input from Python ===
+# === Input  Forcing ===
+	Forcing_Input = "forcing.Timoleague.csv"
+
+# === Input from Python ===
    Ldd_Python         = "Ldd.tiff"
    RiverLength_Python = "RiverLength.tiff"
    Slope_Python       = "Slope.tiff"
    Subcatch_Python    = "Subcatchment.tiff"
 
-	# === Output Julia ===
+# === Output Julia ===
 	Dem_Julia        = "Timoleague_DEM.tiff"
 	Dem_Julia_Mask   = "Timoleague_DEM_Mask.tiff"
 	Outlet_Julia     = "Timololeague_Outlet.tiff"
 
-	# === Output wflow ===
+# === Output wflow ===
    Ldd_Wflow         = "wflow_ldd.tiff"
    RiverDepth_Wflow  = "wflow_riverdepth.tiff"
    RiverLength_Wflow = "wflow_riverlength.tiff"
@@ -62,12 +67,16 @@
    Subcatch_Wflow    = "wflow_subcatch.tiff"
 	Impermable_Wflow  = "Wflow_Impermeable.tiff"
 
-	# === Lookup tables ===
-	Lookup_Hydro = "LookupTable_Hydro.csv"
+# === Lookup tables ===
+   Lookup_Hydro      = "LookupTable_Hydro.csv"
+   Lookup_Vegetation = "LookupTable_Veg.csv"
 
-	# === Output netCDF ===
+# === Output netCDF ===
 	NetCDF_Instates  = "instates-Timoleague.nc"
 	NetCDF_Forcing  = "forcing-Timoleague.nc"
+
+
+# -----------------------------------------------------------------------------------------
 
 	# Coordinate reference system
 		Crs             = 29902    # [-] This is the default projection TM65 / Irish Grid

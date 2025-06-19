@@ -40,6 +40,10 @@
 
 module geoPlot
 
+	using CairoMakie, Colors, ColorSchemes
+	using GLMakie, NCDatasets
+	include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
+
 	# Plotting parameters
 		ColourOption_No    = 1
 		Linewidth          = 2
@@ -80,15 +84,10 @@ module geoPlot
 		Height             = 200
 		ColourOption = [ :curl, :magma ,:CMRmap, :Spectral_11, :lajolla, :plasma, :viridis, :greys, :matter, :romaO, :delta, :rain]
 
-
-	using CairoMakie, Colors, ColorSchemes
-	using GLMakie, NCDatasets
-	include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
-
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : HEATMAP
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function HEATMAP(;🎏_Colorbar=true, Input, Label, Title, titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=:viridis)
+		function HEATMAP(;🎏_Colorbar=true, Input, Label="", Title, titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=:viridis)
 
    		CairoMakie.activate!()
    		Fig_100 =  CairoMakie.Figure()
@@ -102,7 +101,7 @@ module geoPlot
 			end
 
    		CairoMakie.display(Fig_100)
-		return nothing
+		# return nothing
 		end  # function: HEATMAP
 		# ------------------------------------------------------------------
 

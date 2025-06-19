@@ -147,158 +147,178 @@ module geoRaster
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		FUNCTION : LOOKUPTABLE_2_MAPS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	function LOOKUPTABLE_2_MAPS(;🎏_Plots, Crs, Dem_Resample_Mask, LookupTable, Path_InputGis, Path_InputLookuptable, Path_Root, Map_Shp, ΔX)
+	function LOOKUPTABLE_2_MAPS(;🎏_Plots, Crs, Dem_Resample_Mask, Lat, Lon, LookupTable, Map_Shp, Map_Value, Metadatas, Path_InputGis, Path_InputLookuptable, Path_Root, Subcatchment, TitleMap, ΔX, Missingval=NaN, Colormap=:viridis)
 
 		# READING THE LOOKUP TABLE
-			Path_LookupHydro = joinpath(Path_Root, Path_InputLookuptable, LookupTable)
-			println(Path_LookupHydro)
+			Path_Lookup = joinpath(Path_Root, Path_InputLookuptable, LookupTable)
+			println(Path_Lookup)
 
-			LookupHydro = DataFrames.DataFrame(CSV.File(Path_LookupHydro, header=true))
+			Lookup = DataFrames.DataFrame(CSV.File(Path_Lookup, header=true))
 
 			# Cleaning the headers with only the variables of interest
-				Header₀ = DataFrames.names(LookupHydro)
+				Header₀ = DataFrames.names(Lookup)
 				Remove = .!(occursin.("CODE_CLASS", Header₀))
 				Header₁  =  Header₀[Remove]
 				Remove = .!(occursin.("CLASS", Header₁))
 				Header  =  Header₁[Remove]
 
 			# Creating a dictionary
-				N_Class = length(LookupHydro[!,:CLASS])
+				N_Class = length(Lookup[!,:CLASS])
 				Class_Vector = 1:1:N_Class
 
-				Dict_Class_2_Index = Dict(LookupHydro[!,:CLASS] .=> Class_Vector)
+				Dict_Class_2_Index = Dict(Lookup[!,:CLASS] .=> Class_Vector)
 
-				println(LookupHydro[!,:CLASS])
+				println(Lookup[!,:CLASS])
 
 		# READING THE SHAPEFILE
-			Path_InputSoils = joinpath(Path_Root, Path_InputGis, Map_Shp)
-			println(Path_InputSoils)
+			Path_Input = joinpath(Path_Root, Path_InputGis, Map_Shp)
+			println(Path_Input)
 
-			SoilMap_Shapefile= GeoDataFrames.read(Path_InputSoils)
+			Map_Shapefile= GeoDataFrames.read(Path_Input)
 
 			# Creating new columns from the Lookup table
 				for iiHeader in Header
 					# Initializing a new column
-					SoilMap_Shapefile[!, Symbol(iiHeader)] .= 1.0
+					Map_Shapefile[!, Symbol(iiHeader)] .= 1.0
 
-					for (i, iiDrainage) in enumerate(SoilMap_Shapefile[!, :Drainage_C])
+					for (i, iiDrainage) in enumerate(Map_Shapefile[!, Map_Value])
 						if ismissing(iiDrainage)
 							iiDrainage = "missing"
 						end
 						iClass = Dict_Class_2_Index[iiDrainage]
-						SoilMap_Shapefile[!, Symbol(iiHeader)][i] = LookupHydro[!,iiHeader][iClass]
+						Map_Shapefile[!, Symbol(iiHeader)][i] = Lookup[!,iiHeader][iClass]
 					end
 				end
 
 		# SAVING MAPS
+			Maps_Output = []
 			for iiHeader in Header
-				SoilMap = Rasters.rasterize(last, SoilMap_Shapefile;  fill =Symbol(iiHeader), res=ΔX, to=Dem_Resample_Mask, missingval=NaN, crs=Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
+				Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill =Symbol(iiHeader), res=ΔX, to=Dem_Resample_Mask, missingval=Missingval, crs=Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
+
+				   Map = geoRaster.MASK(;Crs=Metadatas.Crs_GeoFormat, Input=Map₁, Lat=Lat, Lon=Lon, Mask=Subcatchment, N_Height=Metadatas.N_Height, N_Width=Metadatas.N_Width)
+
+					Maps_Output = push!(Maps_Output, Map)
 
 				Path_Output = joinpath(Path_Root, Path_OutputWflow, iiHeader * ".tiff")
-				Rasters.write(Path_Output, SoilMap; ext=".tiff", force=true, verbose=true)
-				println(Path_Output)
+					Rasters.write(Path_Output, Map; ext=".tiff", force=true, verbose=true)
+					println(Path_Output)
 
 			# Plotting the maps
 				if 🎏_Plots
-					geoPlot.HEATMAP(;🎏_Colorbar=true, Input=SoilMap, Label="$iiHeader", Title="Soil Map: $iiHeader", titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=:viridis)
+					geoPlot.HEATMAP(;🎏_Colorbar=true, Input=Map, Label="$iiHeader", Title="$TitleMap : $iiHeader", titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=Colormap)
 				end
 			end # for iiHeader in Header
-	return Header
+
+		Dict_Class_2_Index = Lookup = empty
+
+	return Header, Maps_Output
 	end  # function: LOOKUPTABLE_2_MAPS
 	# ------------------------------------------------------------------
 
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#		FUNCTION : CONVERT_2_NETCDF(
+#		FUNCTION : CONVERT_2_NETCDF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	 include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
 	 using NCDatasets
 
-	 function TIFF_2_NETCDF(Ldd_Mask, Metadatas, River_Mask, River_Wflow, RiverDepth, RiverDepth_Wflow, RiverLength_Mask, RiverSlope, RiverSlope_Wflow, RiverWidth, RiverWidth_Wflow, Slope_Mask, Subcatch_Wflow, Subcatchment)
+	 function TIFF_2_NETCDF(Impermable_Wflow, Impermeable_Mask, Ldd_Mask, Metadatas, River_Mask, River_Wflow, RiverDepth, RiverDepth_Wflow, RiverLength_Mask, RiverSlope, RiverSlope_Wflow, RiverWidth, RiverWidth_Wflow, Slope_Mask, Soil_Header, Soil_Maps, Subcatch_Wflow, Subcatchment, Vegetation_Header, Vegetation_Maps)
 
-		  Path_NetCDF_Full  = joinpath(Path_Root, Path_NetCDF, NetCDF_Instates)
+		Path_NetCDF_Full  = joinpath(Path_Root, Path_NetCDF, NetCDF_Instates)
 
-		  isfile(Path_NetCDF_Full) && rm(Path_NetCDF_Full, force=true)
-		  println(Path_NetCDF_Full)
+		isfile(Path_NetCDF_Full) && rm(Path_NetCDF_Full, force=true)
+		println(Path_NetCDF_Full)
 
-		  # Create a NetCDF file
-				NetCDF = NCDatasets.NCDataset(Path_NetCDF_Full,"c")
+		# Create a NetCDF file
+			NetCDF = NCDatasets.NCDataset(Path_NetCDF_Full,"c")
 
-		  # Define the dimension "x" and "y"
-				NCDatasets.defDim(NetCDF,"x", Metadatas.N_Width)
-				NCDatasets.defDim(NetCDF,"y", Metadatas.N_Height)
+		# Define the dimension "x" and "y"
+			NCDatasets.defDim(NetCDF,"x", Metadatas.N_Width)
+			NCDatasets.defDim(NetCDF,"y", Metadatas.N_Height)
 
-		  # Define a global attribute
-				NetCDF.attrib["title"]   = "Timoleague instates dataset"
-				NetCDF.attrib["creator"] = "Joseph A.P. POLLACCO"
-
-
-		  # == LDD input ==========================================
-				Keys = splitext(Ldd_Wflow)[1]
-				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
-
-				Ldd_NetCDF .= Array(Ldd_Mask)
-
-				Ldd_NetCDF.attrib["units"] = "1-9"
-				Ldd_NetCDF.attrib["comments"] = "Derived from hydromt.flw.d8_from_dem"
-				println(Keys)
-
-		  # == SUBCATCHMENT input ==========================================
-				Keys = splitext(Subcatch_Wflow)[1]
-				Subcatchment_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("x","y"))
-
-				Subcatchment_NetCDF .= Array(Subcatchment)
-
-				Subcatchment_NetCDF.attrib["units"] = "true/false"
-				Subcatchment_NetCDF.attrib["comments"] = "Derived from hydromt"
-				println(Keys)
+		# Define a global attribute
+			NetCDF.attrib["title"]   = "Timoleague instates dataset"
+			NetCDF.attrib["creator"] = "Joseph A.P. POLLACCO"
 
 
-		  # == SLOPE input ==========================================
-				Keys = splitext(Slope_Wflow)[1]
-				Slope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
+		# == LDD input ==========================================
+			Keys = splitext(Ldd_Wflow)[1]
+			Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
 
-				Slope_NetCDF .= Array(Slope_Mask)
+			Ldd_NetCDF .= Array(Ldd_Mask)
 
-				Slope_NetCDF.attrib["units"] = "deg"
-				Slope_NetCDF.attrib["comments"] = "Derived from hydromt"
-				println(Keys)
-
-
-		  # == RIVER input ==========================================
-				Keys = splitext(River_Wflow)[1]
-				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
-
-				River_NetCDF .= Array(River_Mask)
-
-				River_NetCDF.attrib["units"] = "0/1"
-				River_NetCDF.attrib["comments"] = "Derived from hydromt"
-				println(Keys)
+			Ldd_NetCDF.attrib["units"] = "1-9"
+			Ldd_NetCDF.attrib["comments"] = "Derived from hydromt.flw.d8_from_dem"
+			println(Keys)
 
 
-		  # == RIVER-SLOPE input ==========================================
-		  		Keys = splitext(RiverSlope_Wflow)[1]
+		# == IMPERMEABLE input ==========================================
+			Keys = splitext(Impermable_Wflow)[1]
+			Impermeable_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
 
-				  RiverSlope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
+			Impermeable_NetCDF .= Array(Impermeable_Mask)
 
-				  RiverSlope_NetCDF.= Array(RiverSlope)
-
-				  RiverSlope_NetCDF.attrib["units"] = "Slope"
-				  RiverSlope_NetCDF.attrib["comments"] = "Derived from hydromt"
-				println(Keys)
+			Impermeable_NetCDF.attrib["units"] = "Bool"
+			Impermeable_NetCDF.attrib["comments"] = "Derived from roads"
+			println(Keys)
 
 
-		  # == RIVER-LENGTH input ==========================================
-		  		Keys = splitext(RiverLength_Wflow)[1]
+		# == SUBCATCHMENT input ==========================================
+			Keys = splitext(Subcatch_Wflow)[1]
+			Subcatchment_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int64, ("x","y"))
 
-				RiverLength_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
+			Subcatchment_NetCDF .= Array(Subcatchment)
 
-				RiverLength_NetCDF .= Array(RiverLength_Mask)
+			Subcatchment_NetCDF.attrib["units"] = "true/false"
+			Subcatchment_NetCDF.attrib["comments"] = "Derived from hydromt"
+			println(Keys)
 
-				RiverLength_NetCDF.attrib["units"] = "m"
-				RiverLength_NetCDF.attrib["comments"] = "Derived from hydromt"
-				println(Keys)
+
+		# == SLOPE input ==========================================
+			Keys = splitext(Slope_Wflow)[1]
+			Slope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
+
+			Slope_NetCDF .= Array(Slope_Mask)
+
+			Slope_NetCDF.attrib["units"] = "deg"
+			Slope_NetCDF.attrib["comments"] = "Derived from hydromt"
+			println(Keys)
+
+
+		# == RIVER input ==========================================
+			Keys = splitext(River_Wflow)[1]
+			River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
+
+			River_NetCDF .= Array(River_Mask)
+
+			River_NetCDF.attrib["units"] = "0/1"
+			River_NetCDF.attrib["comments"] = "Derived from hydromt"
+			println(Keys)
+
+
+		# == RIVER-SLOPE input ==========================================
+			Keys = splitext(RiverSlope_Wflow)[1]
+
+			RiverSlope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
+
+			RiverSlope_NetCDF.= Array(RiverSlope)
+
+			RiverSlope_NetCDF.attrib["units"] = "Slope"
+			RiverSlope_NetCDF.attrib["comments"] = "Derived from hydromt"
+			println(Keys)
+
+
+		# == RIVER-LENGTH input ==========================================
+			Keys = splitext(RiverLength_Wflow)[1]
+
+			RiverLength_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
+
+			RiverLength_NetCDF .= Array(RiverLength_Mask)
+
+			RiverLength_NetCDF.attrib["units"] = "m"
+			RiverLength_NetCDF.attrib["comments"] = "Derived from hydromt"
+			println(Keys)
 
 
 		# == RIVER-WIDTH input ==========================================
@@ -323,6 +343,35 @@ module geoRaster
 			RiverDepth_NetCDF.attrib["units"] = "m"
 			RiverDepth_NetCDF.attrib["comments"] = "Derived from hydromt"
 			println(Keys)
+
+
+		# == SOIL MAPS input ==========================================
+			printstyled("==== SOIL MAPS ====\n"; color=:green)
+			for (i, Keys) in enumerate(Soil_Header)
+
+				Soil_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
+
+				Soil_NetCDF .= Array(Soil_Maps[i])
+
+				Soil_NetCDF.attrib["units"] = "$Keys"
+				Soil_NetCDF.attrib["comments"] = "Derived from soil classification"
+				println(Keys)
+			end # for iiHeader in Soil_Header
+
+
+		# == VEGETATION MAPS input ==========================================
+			printstyled("==== VEGETATION MAPS ====\n"; color=:green)
+			for (i, Keys) in enumerate(Vegetation_Header)
+
+				Vegetation_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"))
+
+				Vegetation_NetCDF .= Array(Vegetation_Maps[i])
+
+				Vegetation_NetCDF.attrib["units"] = "$Keys"
+				Vegetation_NetCDF.attrib["comments"] = "Derived from vegetation classification"
+				println(Keys)
+			end # for iiHeader in Soil_Header
+
 
 	 close(NetCDF)
 	 return NetCDF, Path_NetCDF_Full
