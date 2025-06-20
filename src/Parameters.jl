@@ -4,7 +4,7 @@
 # =========================================
 
 # FLAGS
-   🎏_Plots                 = true
+   🎏_Plots                 = false
    🎏_Plot_TimeSeries       = false
    🎏_Plot_FlowAccumulation = true
    🎏_Plot_NetCDF           = false
