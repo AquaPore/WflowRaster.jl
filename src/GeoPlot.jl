@@ -1,88 +1,10 @@
-		# Plotting parameters
-         ColourOption_No    = 1
-         Linewidth          = 2
-         height             = 400
-         labelsize          = 20
-         textcolor          = :blue
-         textsize           = 20
-         titlecolor         = :navyblue
-         titlesize          = 20.0
-         width              = height * 1.0
-         xgridstyle         = :dash
-         xgridvisible       = true
-         xlabelSize         = 20
-         xlabelpadding      = 5
-         xminortickalign    = 1.0
-         xminorticksvisible = true
-         xtickalign         = 0.9 # 0 is inside and 1 is outside
-         xticklabelrotation = π / 4.0
-         xticksize          = 10
-         xticksmirrored     = false
-         xtickwidt          = 0.5
-         xtrimspine         = false
-         ygridstyle         = :dash
-         ygridvisible       = false
-         ylabelpadding      = xlabelpadding
-         ylabelsize         = xlabelSize
-         yminortickalign    = xminortickalign
-         yminorticksvisible = true
-         ytickalign         = xtickalign
-         yticksize          = xticksize
-         yticksmirrored     = false
-         ytickwidt          = xtickwidt
-         ytrimspine         = false
-         Linewidth          = 4
-         xticksize          = 10
-         xgridvisible       = false
-         Width              = 800 # 800
-         Height             = 200
-			ColourOption = [ :curl, :magma ,:CMRmap, :Spectral_11, :lajolla, :plasma, :viridis, :greys, :matter, :romaO, :delta, :rain]
 
 module geoPlot
-
 	using CairoMakie, Colors, ColorSchemes
 	using GLMakie, NCDatasets
-	include(raw"d:\JOE\MAIN\MODELS\WFLOW\WflowDataJoe\WflowRaster.jl\src\Parameters.jl")
-
-	# Plotting parameters
-		ColourOption_No    = 1
-		Linewidth          = 2
-		height             = 400
-		labelsize          = 20
-		textcolor          = :blue
-		textsize           = 20
-		titlecolor         = :navyblue
-		titlesize          = 20.0
-		width              = height * 1.0
-		xgridstyle         = :dash
-		xgridvisible       = true
-		xlabelSize         = 20
-		xlabelpadding      = 5
-		xminortickalign    = 1.0
-		xminorticksvisible = true
-		xtickalign         = 0.9 # 0 is inside and 1 is outside
-		xticklabelrotation = π / 4.0
-		xticksize          = 10
-		xticksmirrored     = false
-		xtickwidt          = 0.5
-		xtrimspine         = false
-		ygridstyle         = :dash
-		ygridvisible       = false
-		ylabelpadding      = xlabelpadding
-		ylabelsize         = xlabelSize
-		yminortickalign    = xminortickalign
-		yminorticksvisible = true
-		ytickalign         = xtickalign
-		yticksize          = xticksize
-		yticksmirrored     = false
-		ytickwidt          = xtickwidt
-		ytrimspine         = false
-		Linewidth          = 4
-		xticksize          = 10
-		xgridvisible       = false
-		Width              = 800 # 800
-		Height             = 200
-		ColourOption = [ :curl, :magma ,:CMRmap, :Spectral_11, :lajolla, :plasma, :viridis, :greys, :matter, :romaO, :delta, :rain]
+	# import ..Parameters
+	include("Parameters.jl")
+	include("PlotParameter.jl")
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : HEATMAP
@@ -101,9 +23,94 @@ module geoPlot
 			end
 
    		CairoMakie.display(Fig_100)
-		# return nothing
+		return nothing
 		end  # function: HEATMAP
-		# ------------------------------------------------------------------
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : HEATMAT_NETCDF
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function HEATMAT_NETCDF()
+			Output_NCDatasets = NCDatasets.NCDataset(Path_Static);
+
+			Keys = NCDatasets.keys(Output_NCDatasets)
+Keys_Select = []
+
+for iiKeys ∈ Keys
+	Output = Output_NCDatasets[iiKeys]
+	Dimensions = length(size(Output))
+
+	if Dimensions == 2 && length(iiKeys) ≥ 3
+		try
+			FillValue = Output_NCDatasets[iiKeys].attrib["_FillValue"]
+			Data = NetCDF.ncread(Path_Static, iiKeys)
+
+			push!(Keys_Select, String(iiKeys))
+		catch
+			println("Failed:  ", iiKeys)
+		end
+	end # Dimensions == 2
+end # for iiKeys ∈ Keys
+
+Keys_Select = String.(Keys_Select)
+
+# deleteat!(Keys_Select, "wFlow_pits")
+
+@show Keys_Select
+
+function PLOTTTING(Data, Data_Max, Data_Min, Fig, iCount, iiKeys, X_Data, Y_Data)
+
+	Ax_1 = Mke.Axis(Fig[1, 1], title=iiKeys, width=width, height=height)
+
+	Data_Plot =Mke.heatmap!(Ax_1, 1:X_Data, 1:Y_Data, Data, colorrange=(Data_Min, Data_Max), colormap =:hawaii50)
+
+	# Data_Plot =Mke.heatmap!(Ax_1, 1:X_Data, 1:Y_Data, Data,  colorrange=(0.0, maximum(Data)))
+
+	Mke.Colorbar(Fig[1, 2], Data_Plot, width=20)
+	return Fig
+
+end
+
+
+# Fig = Mke.Figure()
+# Mke.CairoMakie.activate!(type="svg", pt_per_unit=1)
+
+iCount=0
+for iiKeys in Keys_Select
+	Fig =  Mke.Figure()
+
+	iCount += 1
+	# println(iiKeys, " ", iCount)
+
+	Data = Output_NCDatasets[iiKeys]
+	Data = Array(Data)
+	FillValue = Output_NCDatasets[iiKeys].attrib["_FillValue"]
+	# Clean data
+	Data =  replace(Data, FillValue => NaN)
+	Data_Size = size(Data)
+	Y_Data =  Data_Size[2]
+	X_Data =  Data_Size[1]
+
+	Data_Min = minimum(skipmissing(Data))
+	Data_Max = maximum(skipmissing(Data))
+
+	if Data_Min + 0.0001 > Data_Max
+		Data_Max += 1
+	end
+
+	Fig = PLOTTTING(Data, Data_Max, Data_Min, Fig, iCount, iiKeys, X_Data, Y_Data)
+
+	println(Data[1,1])
+
+	Mke.display(Fig)
+
+end
+
+
+		return
+		end  # function: HEATMAT_NETCDF
+	# ------------------------------------------------------------------
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -118,31 +125,31 @@ module geoPlot
 				N_Lon = size(Data)[1]
 				N_Lat  = size(Data)[2]
 				N_Time  = size(Data)[3]
-		  Pmin, Pmax = extrema(x for x ∈ skipmissing(Data) if !isnan(x))
-		  @show Pmin Pmax
 
-		  function DATA_3D_2_2D(Data; iTime=iTime, Layer=Layer)
-				return Data[:,:, iTime]
-		  end
+			Pmin, Pmax = extrema(x for x ∈ skipmissing(Data) if !isnan(x))
+			@show Pmin Pmax
 
-		  Fig = Figure(size=(Width, Height * 4.0))
+			function DATA_3D_2_2D(Data; iTime=iTime, Layer=Layer)
+					return Data[:,:, iTime]
+			end
 
-		  Ax_1 = Axis(Fig[1, 1], title=NameOutput, xlabelsize=xlabelSize, ylabelsize=xlabelSize, xticksize=xticksize, xgridvisible=xgridvisible, ygridvisible=xgridvisible)
+			Fig = Figure(size=(Width, Height * 4.0))
 
-		  sg = SliderGrid(Fig[2, 1],
-		  (label="iTime", range=1:1:N_Time, startvalue=1),
-		  width=550, tellheight=true)
+			Ax_1 = Axis(Fig[1, 1], title=NameOutput, xlabelsize=xlabelSize, ylabelsize=xlabelSize, xticksize=xticksize, xgridvisible=xgridvisible, ygridvisible=xgridvisible)
 
-		  iTime = sg.sliders[1].value
+			sg = SliderGrid(Fig[2, 1],
+			(label="iTime", range=1:1:N_Time, startvalue=1),
+			width=550, tellheight=true)
 
-		  Data_Time = lift((iTime) -> DATA_3D_2_2D(Data; iTime=iTime), iTime)
+			iTime = sg.sliders[1].value
 
-		  Data_Plot = heatmap!(Ax_1, 1:N_Lon, 1:N_Lat, Data_Time, colorrange=(Pmin, Pmax), colormap =:hawaii50)
+			Data_Time = lift((iTime) -> DATA_3D_2_2D(Data; iTime=iTime), iTime)
 
-		  Colorbar(Fig[1, 2], Data_Plot; label=NameOutput, width=20, ticks = Pmin:(Pmax-Pmin)/5:Pmax)
+			Data_Plot = heatmap!(Ax_1, 1:N_Lon, 1:N_Lat, Data_Time, colorrange=(Pmin, Pmax), colormap =:hawaii50)
 
-		  Fig
-	 end # HEATMAP_TIME
+			Colorbar(Fig[1, 2], Data_Plot; label=NameOutput, width=20, ticks = Pmin:(Pmax-Pmin)/5:Pmax)
 
-
+			Fig
+	 	end # HEATMAP_TIME
+	# ------------------------------------------------------------------
 end # geoPlot

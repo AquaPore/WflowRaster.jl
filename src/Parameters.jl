@@ -1,11 +1,11 @@
 
-# =============================================================
-#		MODULE: cst
-# =============================================================
+# =========================================
+# 					PARAMETERS
+# =========================================
 
 # FLAGS
 	🎏_Plots = true
-		🎏_Plot_TimeSeries = false
+		🎏_Plot_TimeSeries = true
 		🎏_Plot_FlowAccumulation = true
 
    🎏_TimeSeries    = true
@@ -14,19 +14,18 @@
    🎏_VegetationMap = true
    🎏_RoadMap       = true
 
-
-
 # ======= PATHS =======
-	Path_Root         = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
+   Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
+   Path_Root_LookupTable = "DATA//Lookuptable"
 
 	Path_InputForcing          = "InputTimeSeries/TimeSeries_Process"
-	Path_InputGis              = "InputGis"
-	Path_InputLookuptable      = "LookupTables"
-	Path_NetCDF                = "OutputNetCDF"
-	Path_OutputJulia           = "OutputJulia"
-	Path_OutputPython          = "OutputPython"
-	Path_OutputTimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
-	Path_OutputWflow           = "OutputWflow"
+   Path_InputGis              = "InputGis"
+   Path_InputLookuptable      = "LookupTables"
+   Path_NetCDF                = "OutputNetCDF"
+   Path_OutputJulia           = "OutputJulia"
+   Path_OutputPython          = "OutputPython"
+   Path_OutputTimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
+   Path_OutputWflow           = "OutputWflow"
 
 # ======= INPUT GIS =======
 	# === Shape file ===
