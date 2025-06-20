@@ -194,7 +194,6 @@ module geoNetcdf
 				Nit₀  = length(Year)
 				True = fill(false::Bool, Nit₀)
 
-				println(Time_Array[1:10])
 				for iT=1:Nit₀
 					if (Start_DateTime ≤ Time_Array[iT] ≤ End_DateTime)
 						True[iT] = true

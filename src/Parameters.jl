@@ -6,10 +6,10 @@
 # FLAGS
    🎏_Plots                 = true
    🎏_Plot_TimeSeries       = false
-   🎏_Plot_FlowAccumulation = false
-   🎏_Plot_NetCDF           = true
+   🎏_Plot_FlowAccumulation = true
+   🎏_Plot_NetCDF           = false
 
-   🎏_TimeSeries    = true
+   🎏_TimeSeries    = false
    🎏_NetCDF        = true
    🎏_SoilMap       = true
    🎏_VegetationMap = true
