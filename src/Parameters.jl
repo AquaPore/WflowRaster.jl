@@ -4,12 +4,12 @@
 # =========================================
 
 # FLAGS
-   🎏_Plots                 = false
-   🎏_Plot_TimeSeries       = false
+   🎏_Plots                 = true
+   🎏_Plot_TimeSeries       = true
    🎏_Plot_FlowAccumulation = true
    🎏_Plot_NetCDF           = false
 
-   🎏_TimeSeries    = false
+   🎏_TimeSeries    = true
    🎏_NetCDF        = true
    🎏_SoilMap       = true
    🎏_VegetationMap = true
