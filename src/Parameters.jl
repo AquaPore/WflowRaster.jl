@@ -5,9 +5,9 @@
 
 # FLAGS
    🎏_Plots                 = true
-   🎏_Plot_TimeSeries       = true
+   🎏_Plot_TimeSeries       = false
    🎏_Plot_FlowAccumulation = true
-   🎏_Plot_NetCDF           = false
+   🎏_Plot_NetCDF           = true
 
    🎏_TimeSeries    = true
    🎏_NetCDF        = true

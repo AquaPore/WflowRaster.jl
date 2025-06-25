@@ -18,7 +18,7 @@ module geoPlot
 
 			Axis_100.yreversed = Yreversed
 
-			Map_100 = CairoMakie.plot!(Axis_100, Input, colormap=colormap)
+			Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=colormap)
 
 			if 🎏_Colorbar
 				CairoMakie.Colorbar(Fig_100[1,2], Map_100, label=Label, width=15, ticksize=15, tickalign=0.5)

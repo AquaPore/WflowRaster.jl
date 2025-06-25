@@ -250,14 +250,15 @@ module geoNetcdf
 				NetCDFmeteo = NCDatasets.NCDataset(Path_NetCDFmeteo_Output,"c")
 
 			# Define the dimension "x" and "y" and time
-				NCDatasets.defDim(NetCDFmeteo,"x", Metadatas.N_Width)
-				NCDatasets.defDim(NetCDFmeteo,"y", Metadatas.N_Height)
 				NCDatasets.defDim(NetCDFmeteo,"time", Nit)
+				NCDatasets.defDim(NetCDFmeteo,"y", Metadatas.N_Height)
+				NCDatasets.defDim(NetCDFmeteo,"x", Metadatas.N_Width)
 
 			# Define a global attribute
 				NetCDFmeteo.attrib["title"]   = "Timoleague climate dataset"
 				NetCDFmeteo.attrib["creator"] = "Joseph A.P. POLLACCO"
 				NetCDFmeteo.attrib["units"]   = "mm"
+				NetCDFmeteo.attrib["crs"]   = string(Metadatas.Crs_GeoFormat)
 
 
 			# == time input ==========================================
@@ -274,10 +275,10 @@ module geoNetcdf
 				Keys = "precip"
 				println(Keys)
 
-				Precip_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float64, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
+				Precip_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float32, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
 				Precip_NetCDF[:,:,:] = Precip_Array
 
-				Precip_NetCDF.attrib["units"] = "mm"
+				Precip_NetCDF.attrib["unit"] = "mm"
 				Precip_NetCDF.attrib["comments"] = "precipitation"
 
 
@@ -285,21 +286,22 @@ module geoNetcdf
 				Keys = "pet"
 				println(Keys)
 
-				Pet_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float64, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
+				Pet_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float32, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
 				Pet_NetCDF[:,:,:] = Pet_Array
 
-				Pet_NetCDF.attrib["units"] = "mm"
+				Pet_NetCDF.attrib["unit"] = "mm"
 				Pet_NetCDF.attrib["comments"] = "potential evapotranspiration"
 
 			# == Potential temperature input ==========================================
-				Keys = "temp"
+				Keys_Temp = "temp"
 				println(Keys)
 
-				Temp_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float64, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
+				Temp_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys_Temp, Float32, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
 				Temp_NetCDF[:,:,:] = Temp_Array
 
-				Temp_NetCDF.attrib["units"] = "mm"
-				Temp_NetCDF.attrib["comments"] = "potential evapotranspiration"
+				Temp_NetCDF.attrib["unit"] = " degree C."
+				Temp_NetCDF.attrib["comments"] = "Temperature"
+
 
 		close(NetCDFmeteo)
 		return NetCDFmeteo, Path_NetCDFmeteo_Output
@@ -310,7 +312,8 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : TIMESERIES_2_NetCDFmeteo
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIMESERIES_2_NETCDF_B(Metadatas, Subcatchment)
+		function TIMESERIES_2_NETCDF_B(Metadatas, Subcatchment; Keys_Precip="precip", Keys_Pet="pet", Keys_Temp="temp", Keys_Time="time" )
+
 			# Reading dates
 				Datewflow = DATES()
 				Start_DateTime = Dates.DateTime.(Datewflow.Start_Year, Datewflow.Start_Month, Datewflow.Start_Day, Datewflow.Start_Hour)
@@ -360,31 +363,11 @@ module geoNetcdf
             Time_Array = Time_Array[True[:]]
 
 			# Create a 3D array for the time series
-				Precip_Array = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height, Nit)
-				Pet_Array    = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height, Nit)
-				Temp_Array   = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height, Nit)
+				Precip_Array_iT = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height)
+				Pet_Array_iT    = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height)
+				Temp_Array_iT   = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height)
 
-			# Transform the data to a 3D array
-				for iX=1:Metadatas.N_Width
-					for iY=1:Metadatas.N_Height
-
-						if Subcatchment[iX,iY] == 1
-
-							# Need to correct for upside down maps
-							# iYcor = Metadatas.N_Height - iY + 1
-							iYcor = iY
-
-							for iT=1:Nit
-								Precip_Array[iX,iYcor,iT] = Precip[iT]
-								Pet_Array[iX,iYcor,iT]    = Pet[iT]
-								Temp_Array[iX,iYcor,iT]   = Temp[iT]
-							end # Threads.@threads for iT=1:Nit
-
-						end # if Subcatchment[iX,iY] == 1
-					end # for iY=1:Metadatas.N_Height
-				end # for iX=1:Metadatas.N_Width
-
-			# NETCDF
+			# Netcdf
 				Path_NetCDFmeteo_Output  = joinpath(Path_Root, Path_OutputTimeSeriesWflow, NetCDF_Forcing)
 				isfile(Path_NetCDFmeteo_Output) && rm(Path_NetCDFmeteo_Output, force=true)
 				println(Path_NetCDFmeteo_Output)
@@ -401,57 +384,52 @@ module geoNetcdf
 				NetCDFmeteo.attrib["title"]   = "Timoleague climate dataset"
 				NetCDFmeteo.attrib["creator"] = "Joseph A.P. POLLACCO"
 				NetCDFmeteo.attrib["units"]   = "mm"
-
+				NetCDFmeteo.attrib["crs"]   = string(Metadatas.Crs_GeoFormat)
 
 			# == time input ==========================================
-				Keys = "time"
-				println(Keys)
-
-				Time_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Time_Array[1:Nit], ("time",), deflatelevel=9, shuffle=true, fillvalue=NaN)
-
-				# Time_NetCDF[:] = Time_Array[1:Nit]
-				# Time_NetCDF.attrib["units"] = "Dates.DateTime({Int64})"
+				Time_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys_Time, Time_Array[1:Nit], ("time",), deflatelevel=9, shuffle=true, fillvalue=NaN)
 				Time_NetCDF.attrib["calendar"] = "proleptic_gregorian"
 
 			# == Precipitation input ==========================================
-				Keys = "precip"
-				println(Keys)
-
-				Precip_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float64, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
-				Precip_NetCDF[:,:,:] = Precip_Array
-
-				Precip_NetCDF.attrib["units"] = "mm"
-				Precip_NetCDF.attrib["comments"] = "precipitation"
-
+				Precip_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys_Precip, Float32, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
+					Precip_NetCDF.attrib["unit"] = "mm"
+					Precip_NetCDF.attrib["comments"] = "precipitation"
 
 			# == Potential evapotranspiration input ==========================================
-				Keys = "pet"
-				println(Keys)
+				Pet_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys_Pet, Float32, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
+					Pet_NetCDF.attrib["unit"] = "mm"
+					Pet_NetCDF.attrib["comments"] = "potential evapotranspiration"
 
-				Pet_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float64, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
-				Pet_NetCDF[:,:,:] = Pet_Array
+			# == temperature input ==========================================
+				Temp_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys_Temp, Float32, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
+					Temp_NetCDF.attrib["unit"] = " degree C."
+					Temp_NetCDF.attrib["comments"] = "Temperature"
 
-				Pet_NetCDF.attrib["units"] = "mm"
-				Pet_NetCDF.attrib["comments"] = "potential evapotranspiration"
+			# Transform the data to a 3D array
+				for iT=1:Nit
+					for iX=1:Metadatas.N_Width
+						for iY=1:Metadatas.N_Height
+							if Subcatchment[iX,iY] == 1
+								Precip_Array_iT[iX,iY] = Precip[iT]
+								Pet_Array_iT[iX,iY]    = Pet[iT]
+								Temp_Array_iT[iX,iY]   = Temp[iT]
+							else
+								Precip_Array_iT[iX,iY] = NaN
+								Pet_Array_iT[iX,iY]    = NaN
+								Temp_Array_iT[iX,iY]   = NaN
+							end # if Subcatchment[iX,iY] == 1
+						end # for iY=1:Metadatas.N_Height
+					end # for iX=1:Metadatas.N_Width
 
-			# == Potential temperature input ==========================================
-				Keys = "temp"
-				println(Keys)
-
-				Temp_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Float64, ("x", "y", "time"), deflatelevel=9, shuffle=true, fillvalue=NaN)
-				Temp_NetCDF[:,:,:] = Temp_Array
-
-				Temp_NetCDF.attrib["units"] = "mm"
-				Temp_NetCDF.attrib["comments"] = "potential evapotranspiration"
+					Precip_NetCDF[:,:,iT] = Precip_Array_iT
+					Pet_NetCDF[:,:,iT] = Pet_Array_iT
+					Temp_NetCDF[:,:,iT] = Temp_Array_iT
+				end #for iT=1:Nit
 
 		close(NetCDFmeteo)
 		return NetCDFmeteo, Path_NetCDFmeteo_Output
 		end  # function: TIMESERIES_2_NETCDF
 	# ------------------------------------------------------------------
-
-
-
-
 
 end  # module: geoNetcdf
 # ............................................................
