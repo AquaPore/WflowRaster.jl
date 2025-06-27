@@ -104,9 +104,9 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : LAT_LONG_2_iCOORD
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function LAT_LONG_2_iCOORD(;Map, OutletCoordinate)
-         Longitude_X = OutletCoordinate[1]
-         Latitude_Y  = OutletCoordinate[2]
+		function LAT_LONG_2_iCOORD(;Map, GaugeCoordinate)
+         Longitude_X = GaugeCoordinate[1]
+         Latitude_Y  = GaugeCoordinate[2]
 
          Longitude   = Rasters.lookup(Map, X)
          Latitude    = Rasters.lookup(Map, Y)

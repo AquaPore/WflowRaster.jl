@@ -9,9 +9,9 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : CONVERT_2_NETCDF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIFF_2_NETCDF(Impermable_Wflow, Impermeable_Mask, Ldd_Mask, Metadatas, River_Mask, River_Wflow, RiverDepth, RiverDepth_Wflow, RiverLength_Mask, RiverSlope, RiverSlope_Wflow, RiverWidth, RiverWidth_Wflow, Slope_Mask, Soil_Header, Soil_Maps, Subcatch_Wflow, Subcatchment, Vegetation_Header, Vegetation_Maps)
+		function TIFF_2_NETCDF(Impermable_Wflow, Impermeable_Mask, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, River_Wflow, RiverDepth, RiverDepth_Wflow, RiverLength_Mask, RiverSlope, RiverSlope_Wflow, RiverWidth, RiverWidth_Wflow, Slope_Mask, Soil_Header, Soil_Maps, Subcatch_Wflow, Subcatchment, Vegetation_Header, Vegetation_Maps)
 
-			Path_NetCDF_Full  = joinpath(Path_Root, Path_NetCDF, NetCDF_Instates)
+			Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, NetCDF_Instates)
 
 			isfile(Path_NetCDF_Full) && rm(Path_NetCDF_Full, force=true)
 			println(Path_NetCDF_Full)
@@ -27,6 +27,22 @@ module geoNetcdf
 				NetCDF.attrib["title"]   = "Timoleague instates dataset"
 				NetCDF.attrib["creator"] = "Joseph A.P. POLLACCO"
 
+
+			# == LATITUDE input ==========================================
+				Keys = "lon"
+				Longitude_NetCDF = NCDatasets.defVar(NetCDF, Keys, Longitude, ("x",), fillvalue=NaN)
+
+				Longitude_NetCDF.attrib["units"] = "m"
+				Longitude_NetCDF.attrib["comments"] = "Longitude"
+				println(Keys)
+
+			# == lONGITUDE input ==========================================
+				Keys = "lat"
+				Latitude_NetCDF = NCDatasets.defVar(NetCDF, Keys, Latitude,("y",), fillvalue=NaN)
+
+				Latitude_NetCDF.attrib["units"] = "m"
+				Latitude_NetCDF.attrib["comments"] = "Latitude"
+				println(Keys)
 
 			# == LDD input ==========================================
 				Keys = splitext(Ldd_Wflow)[1]
@@ -167,7 +183,7 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : TIMESERIES_2_NetCDFmeteo
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIMESERIES_2_NETCDF(Metadatas, Subcatchment)
+		function TIMESERIES_2_NETCDF(Latitude, Longitude, Metadatas, Subcatchment)
 			# Reading dates
 				Datewflow = DATES()
 				Start_DateTime = Dates.DateTime.(Datewflow.Start_Year, Datewflow.Start_Month, Datewflow.Start_Day, Datewflow.Start_Hour)
@@ -242,7 +258,7 @@ module geoNetcdf
 				end # for iX=1:Metadatas.N_Width
 
 			# NETCDF
-				Path_NetCDFmeteo_Output  = joinpath(Path_Root, Path_OutputTimeSeriesWflow, NetCDF_Forcing)
+				Path_NetCDFmeteo_Output  = joinpath(Path_Root_NetCDF, NetCDF_Forcing)
 				isfile(Path_NetCDFmeteo_Output) && rm(Path_NetCDFmeteo_Output, force=true)
 				println(Path_NetCDFmeteo_Output)
 
@@ -260,6 +276,22 @@ module geoNetcdf
 				NetCDFmeteo.attrib["units"]   = "mm"
 				NetCDFmeteo.attrib["crs"]   = string(Metadatas.Crs_GeoFormat)
 
+
+			# == LATITUDE input ==========================================
+				Keys = "lon"
+				Longitude_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Longitude, ("x",))
+
+				Longitude_NetCDF.attrib["units"] = "m"
+				Longitude_NetCDF.attrib["comments"] = "Longitude"
+				println(Keys)
+
+			# == lONGITUDE input ==========================================
+				Keys = "lat"
+				Latitude_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Latitude,("y",))
+
+				Latitude_NetCDF.attrib["units"] = "m"
+				Latitude_NetCDF.attrib["comments"] = "Latitude"
+				println(Keys)
 
 			# == time input ==========================================
 				Keys = "time"
@@ -387,7 +419,7 @@ module geoNetcdf
 				NetCDFmeteo.attrib["crs"]   = string(Metadatas.Crs_GeoFormat)
 
 			# == time input ==========================================
-				Time_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys_Time, Time_Array[1:Nit], ("time",), deflatelevel=9, shuffle=true, fillvalue=NaN)
+				Time_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys_Time, Time_Array[1:Nit], ("time",))
 				Time_NetCDF.attrib["calendar"] = "proleptic_gregorian"
 
 			# == Precipitation input ==========================================

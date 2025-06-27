@@ -4,10 +4,10 @@
 # =========================================
 
 # FLAGS
-   🎏_Plots                 = true
+   🎏_Plots                 = false
    🎏_Plot_TimeSeries       = false
-   🎏_Plot_FlowAccumulation = true
-   🎏_Plot_NetCDF           = true
+   🎏_Plot_FlowAccumulation = false
+   🎏_Plot_NetCDF           = false
 
    🎏_TimeSeries    = true
    🎏_NetCDF        = true
@@ -17,6 +17,7 @@
 
 # ======= PATHS =======
    Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
+   Path_Root_NetCDF      = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input\Timoleague"
    Path_Root_LookupTable = "DATA//Lookuptable"
 
 	Path_InputForcing          = "InputTimeSeries/TimeSeries_Process"
@@ -31,7 +32,7 @@
 # ======= INPUT GIS =======
 	# === Shape file ===
       Landuse_Shp       = "Landuse.shp"
-      Outlet_Shp        = "Timoleague_Outlet_Hydro.shp"
+      Gauge_Shp        = "Timoleague_Gauge_Hydro.shp"
       River_Shp         = "Timoleague_River.shp"
       Roads_Shp         = "Roads2.shp"
       SoilMap_Shp       = "SoilMap.shp"
@@ -54,7 +55,7 @@
 # === Output Julia ===
 	Dem_Julia        = "Timoleague_DEM.tiff"
 	Dem_Julia_Mask   = "Timoleague_DEM_Mask.tiff"
-	Outlet_Julia     = "Timololeague_Outlet.tiff"
+	Gauge_Julia     = "Timololeague_Gauge.tiff"
 
 # === Output wflow ===
    Ldd_Wflow         = "wflow_ldd.tiff"
@@ -65,14 +66,15 @@
    River_Wflow       = "wflow_river.tiff"
    Slope_Wflow       = "Slope.tiff"
    Subcatch_Wflow    = "wflow_subcatch.tiff"
-	Impermable_Wflow  = "Wflow_Impermeable.tiff"
+   Impermable_Wflow  = "PathFrac.tiff"
+   Gauge_Wflow       = "wflow_gauges_grdc.tiff"
 
 # === Lookup tables ===
    Lookup_Hydro      = "LookupTable_Hydro.csv"
    Lookup_Vegetation = "LookupTable_Veg.csv"
 
 # === Output netCDF ===
-	NetCDF_Instates  = "instates-Timoleague.nc"
+	NetCDF_Instates  = "staticmaps-Timoleague.nc"
 	NetCDF_Forcing  = "forcing-Timoleague.nc"
 
 
@@ -91,11 +93,11 @@
 		P_RiverWidth = 5.0::Float64 # [m]
 		P_RiverDepth = 10.0::Float64;  # must be an integer [m]
 
-	# OUTLETS COORDINATES
-		# OutletCoordinate = [146707.700, 42167.995]
-		# OutletCoordinate = [146709.504,42170.157]
+	# GaugeS COORDINATES
+		# GaugeCoordinate = [146707.700, 42167.995]
+		# GaugeCoordinate = [146709.504,42170.157]
 
-		OutletCoordinate = [146708.9364,42168.9515]
+		GaugeCoordinate = [146708.9364,42168.9515]
 
 	# DATES
 	Base.@kwdef mutable struct DATES
