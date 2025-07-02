@@ -27,52 +27,62 @@ module geoNetcdf
 				NetCDF.attrib["title"]   = "Timoleague instates dataset"
 				NetCDF.attrib["creator"] = "Joseph A.P. POLLACCO"
 
+			# Fixing longitude and latitude
+            Longitude₁ = Vector(Float64.(Longitude))
+            Latitude₁  = Vector(Float64.(Latitude))
+
+
+			# == LONGITUDE input ==========================================
+				Keys = "x"
+				Longitude_NetCDF = NCDatasets.defVar(NetCDF, Keys, Longitude₁, ("x",))
+
+				Longitude_NetCDF.attrib["units"] = "m"
+				Longitude_NetCDF.attrib["comments"] = "lon"
+				println(Keys)
+
+			# == LATITUDE input ==========================================
+				Keys = "y"
+				Latitude_NetCDF = NCDatasets.defVar(NetCDF, Keys, Latitude₁,("y",), fillvalue=NaN)
+
+				Latitude_NetCDF.attrib["units"] = "m"
+				Latitude_NetCDF.attrib["comments"] = "lat"
+				println(Keys)
 
 			# == LATITUDE input ==========================================
 				Keys = "lon"
-				Longitude_NetCDF = NCDatasets.defVar(NetCDF, Keys, Longitude, ("x",), fillvalue=NaN)
+				Longitude_NetCDF = NCDatasets.defVar(NetCDF, Keys, Longitude₁, ("x",), fillvalue=NaN)
 
 				Longitude_NetCDF.attrib["units"] = "m"
-				Longitude_NetCDF.attrib["comments"] = "Longitude"
+				Longitude_NetCDF.attrib["comments"] = "lon"
 				println(Keys)
 
 			# == lONGITUDE input ==========================================
 				Keys = "lat"
-				Latitude_NetCDF = NCDatasets.defVar(NetCDF, Keys, Latitude,("y",), fillvalue=NaN)
+				Latitude_NetCDF = NCDatasets.defVar(NetCDF, Keys, Latitude₁,("y",), fillvalue=NaN)
 
 				Latitude_NetCDF.attrib["units"] = "m"
-				Latitude_NetCDF.attrib["comments"] = "Latitude"
+				Latitude_NetCDF.attrib["comments"] = "lat"
 				println(Keys)
 
 			# == LDD input ==========================================
 				Keys = splitext(Ldd_Wflow)[1]
-				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
+				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, UInt8, ("x","y"), fillvalue=255)
 
 				Ldd_NetCDF .= Array(Ldd_Mask)
 
 				Ldd_NetCDF.attrib["units"] = "1-9"
 				Ldd_NetCDF.attrib["comments"] = "Derived from hydromt.flw.d8_from_dem"
-				println(Keys)
-
-
-			# == IMPERMEABLE input ==========================================
-				Keys = splitext(Impermable_Wflow)[1]
-				Impermeable_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
-
-				Impermeable_NetCDF .= Array(Impermeable_Mask)
-
-				Impermeable_NetCDF.attrib["units"] = "Bool"
-				Impermeable_NetCDF.attrib["comments"] = "Derived from roads"
+				Ldd_NetCDF.attrib["long_name"] = "ldd flow direction"
 				println(Keys)
 
 
 			# == SUBCATCHMENT input ==========================================
 				Keys = splitext(Subcatch_Wflow)[1]
-				Subcatchment_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
+				Subcatchment_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0)
 
 				Subcatchment_NetCDF .= Array(Subcatchment)
 
-				Subcatchment_NetCDF.attrib["units"] = "true/false"
+				Subcatchment_NetCDF.attrib["units"] = "1/0"
 				Subcatchment_NetCDF.attrib["comments"] = "Derived from hydromt"
 				println(Keys)
 
@@ -90,7 +100,7 @@ module geoNetcdf
 
 			# == RIVER input ==========================================
 				Keys = splitext(River_Wflow)[1]
-				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
+				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0)
 
 				River_NetCDF .= Array(River_Mask)
 
@@ -147,32 +157,48 @@ module geoNetcdf
 				println(Keys)
 
 
-			# == SOIL MAPS input ==========================================
-				printstyled("==== SOIL MAPS ====\n"; color=:green)
-				for (i, Keys) in enumerate(Soil_Header)
+			# == IMPERMEABLE input ==========================================
+				if 🎏_ImpermeableMap
+					Keys = splitext(Impermable_Wflow)[1]
+					Impermeable_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
-					Soil_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
+					Impermeable_NetCDF .= Array(Impermeable_Mask)
 
-					Soil_NetCDF .= Array(Soil_Maps[i])
-
-					Soil_NetCDF.attrib["units"] = "$Keys"
-					Soil_NetCDF.attrib["comments"] = "Derived from soil classification"
+					Impermeable_NetCDF.attrib["units"] = "Bool"
+					Impermeable_NetCDF.attrib["comments"] = "Derived from roads"
 					println(Keys)
-				end # for iiHeader in Soil_Header
+				end
+
+			# == SOIL MAPS input ==========================================
+				if 🎏_SoilMap
+				printstyled("==== SOIL MAPS ====\n"; color=:green)
+					for (i, Keys) in enumerate(Soil_Header)
+
+						Soil_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
+
+						Soil_NetCDF .= Array(Soil_Maps[i])
+
+						Soil_NetCDF.attrib["units"] = "$Keys"
+						Soil_NetCDF.attrib["comments"] = "Derived from soil classification"
+						println(Keys)
+					end # for iiHeader in Soil_Header
+				end
 
 
 			# == VEGETATION MAPS input ==========================================
+				if 🎏_VegetationMap
 				printstyled("==== VEGETATION MAPS ====\n"; color=:green)
-				for (i, Keys) in enumerate(Vegetation_Header)
+					for (i, Keys) in enumerate(Vegetation_Header)
 
-					Vegetation_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
+						Vegetation_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
-					Vegetation_NetCDF .= Array(Vegetation_Maps[i])
+						Vegetation_NetCDF .= Array(Vegetation_Maps[i])
 
-					Vegetation_NetCDF.attrib["units"] = "$Keys"
-					Vegetation_NetCDF.attrib["comments"] = "Derived from vegetation classification"
-					println(Keys)
-				end # for iiHeader in Soil_Header
+						Vegetation_NetCDF.attrib["units"] = "$Keys"
+						Vegetation_NetCDF.attrib["comments"] = "Derived from vegetation classification"
+						println(Keys)
+					end # for iiHeader in Soil_Header
+				end
 
 		close(NetCDF)
 		return NetCDF, Path_NetCDF_Full
@@ -276,10 +302,13 @@ module geoNetcdf
 				NetCDFmeteo.attrib["units"]   = "mm"
 				NetCDFmeteo.attrib["crs"]   = string(Metadatas.Crs_GeoFormat)
 
+			# Fixing longitude and latitude
+            Longitude₁ = Vector(Float64.(Longitude))
+            Latitude₁  = Vector(Float64.(Latitude))
 
 			# == LATITUDE input ==========================================
 				Keys = "lon"
-				Longitude_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Longitude, ("x",))
+				Longitude_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Longitude₁, ("x",))
 
 				Longitude_NetCDF.attrib["units"] = "m"
 				Longitude_NetCDF.attrib["comments"] = "Longitude"
@@ -287,21 +316,39 @@ module geoNetcdf
 
 			# == lONGITUDE input ==========================================
 				Keys = "lat"
-				Latitude_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Latitude,("y",))
+				Latitude_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Latitude₁,("y",))
 
 				Latitude_NetCDF.attrib["units"] = "m"
-				Latitude_NetCDF.attrib["comments"] = "Latitude"
+				Latitude_NetCDF.attrib["comments"] = "Latitude₁"
 				println(Keys)
 
 			# == time input ==========================================
 				Keys = "time"
-				println(Keys)
 
 				Time_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Time_Array[1:Nit], ("time",), deflatelevel=9, shuffle=true, fillvalue=NaN)
 
 				# Time_NetCDF[:] = Time_Array[1:Nit]
 				# Time_NetCDF.attrib["units"] = "Dates.DateTime({Int64})"
 				Time_NetCDF.attrib["calendar"] = "proleptic_gregorian"
+				println(Keys)
+
+			# == LATITUDE input ==========================================
+				Keys = "x"
+
+				Longitude_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Longitude₁, ("x",), deflatelevel=9, shuffle=true, fillvalue=NaN)
+
+				Longitude_NetCDF.attrib["units"] = "m"
+				Longitude_NetCDF.attrib["comments"] = "lon"
+				println(Keys)
+
+			# == lONGITUDE input ==========================================
+				Keys = "y"
+				Latitude_NetCDF = NCDatasets.defVar(NetCDFmeteo, Keys, Latitude₁,("y",))
+
+				Latitude_NetCDF.attrib["units"] = "m"
+				Latitude_NetCDF.attrib["comments"] = "lat"
+				println(Keys)
+
 
 			# == Precipitation input ==========================================
 				Keys = "precip"
@@ -333,7 +380,6 @@ module geoNetcdf
 
 				Temp_NetCDF.attrib["unit"] = " degree C."
 				Temp_NetCDF.attrib["comments"] = "Temperature"
-
 
 		close(NetCDFmeteo)
 		return NetCDFmeteo, Path_NetCDFmeteo_Output

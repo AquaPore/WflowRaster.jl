@@ -1,14 +1,16 @@
 
 module geoRaster
-	 using Revise
-	 using ArchGDAL
-		  const AG = ArchGDAL
-	 using Rasters, GeoTIFF, Extents, Geomorphometry
-	 using Base
+	using Revise
+	using ArchGDAL
+		const AG = ArchGDAL
+
+	using Rasters, GeoTIFF, Extents, Geomorphometry
+	using Base
 	using NCDatasets
 	using CSV, DataFrames, GeoDataFrames, Rasters
 	using CairoMakie, Colors, ColorSchemes
-	 # using PythonCall
+	using Revise
+	# using PythonCall
 
 	include("Parameters.jl")
 	include("GeoPlot.jl")
@@ -25,7 +27,7 @@ module geoRaster
 		  Coord_Y_Bottom :: Float64
 		  Crs            :: Int64
 		  Crs_GeoFormat
-		  Bands          :: Int64
+		#   Bands          :: Int64
 		  Extent
 	 end # struct METADATA
 
@@ -36,18 +38,18 @@ module geoRaster
 	 # ================================================================
 	 #		FUNCTION : RASTER_METADATA
 	 # ================================================================
-		function RASTER_METADATA(Path; Verbose=true)
-			Grid = Rasters.Raster(Path, lazy=true)
-			N_Width = size(Grid, X)
-			N_Height = size(Grid, Y)
-			ΔX =  step(dims(Grid, X)) |> abs
-			ΔY =  step(dims(Grid, Y)) |> abs
-			Crs_Rasters = Rasters.crs(Grid)
+		function RASTER_METADATA(Map; Verbose=true)
+			# Grid = Rasters.Raster(Path, lazy=true)
+			N_Width, N_Height  = size(Map)
+			ΔX       = step(dims(Map, X))
+			ΔY       = step(dims(Map, Y))
 
-			Coord_X_Left   = first(dims(Grid, X))
-			Coord_X_Right  = last(dims(Grid, X))
-			Coord_Y_Top    = first(dims(Grid ,Y))
-			Coord_Y_Bottom = last(dims(Grid,Y))
+			# Crs_Rasters = Rasters.crs(Map)
+
+			Coord_X_Left   = first(dims(Map, X))
+			Coord_X_Right  = last(dims(Map, X))
+			Coord_Y_Top    = first(dims(Map ,Y))
+			Coord_Y_Bottom = last(dims(Map,Y))
 
 			Extent = Extents.Extent(X=(Coord_X_Left, Coord_X_Right), Y=(Coord_Y_Bottom, Coord_Y_Top))
 
@@ -57,12 +59,12 @@ module geoRaster
 
 			Crs_GeoFormat = GeoFormatTypes.convert(WellKnownText, EPSG(Crs))
 
-			Grid_Ag = AG.readraster(Path)
-					Bands = AG.nraster(Grid_Ag)
+			# Grid_Ag = AG.readraster(Path)
+			# 	Bands = AG.nraster(Grid_Ag)
 
 			if Verbose
-				println(Path)
-				println("Bands = $Bands")
+				# println(Path)
+				# println("Bands = $Bands")
 				println("Crs = $Crs")
 				println("ΔX = $ΔX")
 				println("ΔY = $ΔY")
@@ -72,7 +74,10 @@ module geoRaster
 				println("Coord_Y_Top = $Coord_Y_Top, Coord_Y_Bottom = $Coord_Y_Bottom")
 			end
 
-			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Crs, Crs_GeoFormat, Bands, Extent)
+			@assert(N_Width == Int32((Coord_X_Right - Coord_X_Left) / ΔX +1))
+			@assert(N_Height == Int32((Coord_Y_Top - Coord_Y_Bottom) / -ΔY + 1))
+
+			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Crs, Crs_GeoFormat, Extent)
 
 		return Metadata
 		end # function RASTER_METADATA
@@ -82,20 +87,21 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : MASK
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function MASK(;Crs, Input, Lat, Lon, Mask, N_Height, N_Width)
+		function MASK(; Input, Latitude, Longitude, Mask, Missing=NaN, Crs)
 
-			Output_Mask = Rasters.Raster((Lon, Lat), crs=Crs)
+			N_Width, N_Height  = size(Input)
 
+			Output_Mask = Rasters.Raster((Longitude, Latitude), crs=Crs)
 			for iX=1:N_Width
 				for iY=1:N_Height
+					# if Mask[iX,iY] > 0.0001 || !(isnan(Mask[iX,iY]))
 					if Mask[iX,iY] > 0
 						Output_Mask[iX,iY] = Input[iX,iY]
 					else
-						Output_Mask[iX,iY] = NaN
+						Output_Mask[iX,iY] = Missing
 					end
 				end # for iY=1:Metadatas.N_Height
 			end # for iX=1:Metadatas.N_Width
-
 		return Output_Mask
 		end  # function: mask
 	# ------------------------------------------------------------------
@@ -105,14 +111,14 @@ module geoRaster
 	#		FUNCTION : LAT_LONG_2_iCOORD
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		function LAT_LONG_2_iCOORD(;Map, GaugeCoordinate)
-         Longitude_X = GaugeCoordinate[1]
-         Latitude_Y  = GaugeCoordinate[2]
+			Longitude_X = GaugeCoordinate[1]
+			Latitude_Y  = GaugeCoordinate[2]
 
-         Longitude   = Rasters.lookup(Map, X)
-         Latitude    = Rasters.lookup(Map, Y)
+			Longitude   = Rasters.lookup(Map, X)
+			Latitude    = Rasters.lookup(Map, Y)
 
-         Nlongitude     = length(Longitude)
-         Nlatitude      = length(Latitude)
+			Nlongitude     = length(Longitude)
+			Nlatitude      = length(Latitude)
 
 			# Longitude
 				iLong = 0
@@ -142,7 +148,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : LOOKUPTABLE_2_MAPS
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Crs, Dem_Resample_Mask, Lat, Lon, LookupTable, Map_Shp, Map_Value, Metadatas, Missingval=NaN, Path_InputGis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
+		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Crs, Dem_Resample_Mask, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Missingval=NaN, Path_InputGis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
 
 			# READING THE LOOKUP TABLE
 				Path_Home = @__DIR__
@@ -191,7 +197,7 @@ module geoRaster
 				for iiHeader in Header
 					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill =Symbol(iiHeader), res=ΔX, to=Dem_Resample_Mask, missingval=Missingval, crs=Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
 
-						Map = geoRaster.MASK(;Crs=Metadatas.Crs_GeoFormat, Input=Map₁, Lat=Lat, Lon=Lon, Mask=Subcatchment, N_Height=Metadatas.N_Height, N_Width=Metadatas.N_Width)
+						Map = geoRaster.MASK(;Crs=Metadatas.Crs_GeoFormat, Input=Map₁, Latitude, Longitude, Mask=Subcatchment)
 
 						Maps_Output = push!(Maps_Output, Map)
 
@@ -209,6 +215,37 @@ module geoRaster
 
 		return Header, Maps_Output
 		end  # function: LOOKUPTABLE_2_MAPS
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : TEST_SAMESIZE
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function TEST_SAMESIZE(; Map₁, Map₂,  Map₁_Nodata, Map₂_Nodata)
+			Nx₁, Ny₁ = size(Map₁)
+			Nx₂, Ny₂ = size(Map₂)
+
+			@assert Nx₁ == Nx₂
+			@assert Ny₁ == Ny₂
+
+			🎏_Map₁_Eq_Map₂ = true
+			for iX = 1:Nx₁
+				for iY = 1:Ny₁
+					Cond₁ = Map₁[iX, iY]==Map₁_Nodata || isnan(Map₁[iX, iY])
+					Cond₂ = Map₂[iX, iY]==Map₂_Nodata || isnan(Map₂[iX, iY])
+
+					if Cond₁ ⊻ Cond₂ #xor
+						display("Error [$iX  $iY], Map₁ = $(Map₁[iX, iY]) ≠ Map₂ = $(Map₂[iX, iY])")
+						🎏_Map₁_Eq_Map₂ = false
+						break
+					end
+				end
+			end
+
+			@assert 🎏_Map₁_Eq_Map₂
+
+		return 🎏_Map₁_Eq_Map₂
+		end  # function: TEST_SAMESIZE
 	# ------------------------------------------------------------------
 
 end #module geoRaster

@@ -4,16 +4,16 @@
 # =========================================
 
 # FLAGS
-   🎏_Plots                 = false
+   🎏_Plots                 = true
    🎏_Plot_TimeSeries       = false
-   🎏_Plot_FlowAccumulation = false
-   🎏_Plot_NetCDF           = false
+   🎏_Plot_FlowAccumulation = true
+   🎏_Plot_NetCDF           = true
 
    🎏_TimeSeries    = true
    🎏_NetCDF        = true
-   🎏_SoilMap       = true
-   🎏_VegetationMap = true
-   🎏_RoadMap       = true
+   🎏_SoilMap       = false
+   🎏_VegetationMap = false
+   🎏_ImpermeableMap       = false
 
 # ======= PATHS =======
    Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
@@ -39,7 +39,7 @@
       VegetationMap_Shp = "Landuse.shp"
 
 	# === Raster file ===
-      Dem_Input      = "Timoleague_DTM_1m.tif"
+      Dem_Input_Qgis      = "Timoleague_DTM_1m.tif"
       SoilMap_Raster = "SoilMap_Raster.tif"
       Temporary_Dem  = "Temporary_DEM.tif"
 
@@ -47,6 +47,7 @@
 	Forcing_Input = "forcing.Timoleague.csv"
 
 # === Input from Python ===
+   Dem_Input_Python      = "DemCorrected.tiff"
    Ldd_Python         = "Ldd.tiff"
    RiverLength_Python = "RiverLength.tiff"
    Slope_Python       = "Slope.tiff"
@@ -54,6 +55,7 @@
 
 # === Output Julia ===
 	Dem_Julia        = "Timoleague_DEM.tiff"
+   Dem_Julia_Corrected        = "Timoleague_DEM_Corrected.tiff"
 	Dem_Julia_Mask   = "Timoleague_DEM_Mask.tiff"
 	Gauge_Julia     = "Timololeague_Gauge.tiff"
 
