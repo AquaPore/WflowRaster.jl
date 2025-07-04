@@ -111,36 +111,40 @@ module geoRaster
 	#		FUNCTION : LAT_LONG_2_iCOORD
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		function LAT_LONG_2_iCOORD(;Map, GaugeCoordinate)
-			Longitude_X = GaugeCoordinate[1]
-			Latitude_Y  = GaugeCoordinate[2]
+         Longitude_X = GaugeCoordinate[1]
+         Latitude_Y  = GaugeCoordinate[2]
 
-			Longitude   = Rasters.lookup(Map, X)
-			Latitude    = Rasters.lookup(Map, Y)
+         Longitude  = Rasters.lookup(Map, X)
+         Latitude   = Rasters.lookup(Map, Y)
 
-			Nlongitude     = length(Longitude)
-			Nlatitude      = length(Latitude)
+         Nlongitude = length(Longitude)
+         Nlatitude  = length(Latitude)
 
 			# Longitude
-				iLong = 0
+				ΔX = Longitude[2] - Longitude[1]
+				@assert(Longitude[1] - ΔX / 2.0 ≤ Longitude_X ≤ Longitude[Nlongitude] + ΔX / 2.0)
+				iX = 1
 				for i=1:Nlongitude
-					if Longitude_X ≤ Longitude[i]
+					if Longitude[i] - ΔX / 2.0 ≤ Longitude_X < Longitude[i] + ΔX / 2.0
+						iX = i
 						break
 					end
-					iLong = i
 				end # for i=1:Nlongitude
 
 			# Latitude
-				iLat = 0
+			 	ΔY = Latitude[2] - Latitude[1]
+				@assert( Latitude[Nlatitude] + ΔY / 2.0  ≤ Latitude_Y ≤ Latitude[1] - ΔY / 2.0)
+				iY = Nlatitude
 				for i=Nlatitude:-1:1
-					if Latitude[i] ≥ Latitude_Y
+					if Latitude[i] + ΔY / 2.0  ≤ Latitude_Y < Latitude[i] - ΔY / 2.0
+						iY = i
 						break
-					end # if Latitude_Sort[iLat] ≥ Lat_Y
-					iLat = i
+					end # if Latitude_Sort[iY] ≥ Lat_Y
 				end # i=1:Nlatitude
 
-				println( "LAT_LONG_2_iCOORD:  Nlongitude= $Nlongitude iLongitude= $iLong Nlatitude= $Nlatitude iLatitude= $iLat" )
+				println( "LAT_LONG_2_iCOORD: [$iX ; $iY]" )
 
-		return iLat, iLong, Latitude, Longitude, Nlatitude, Nlongitude
+		return iY, iX
 		end
 	# ----------------------------------------------------------------
 

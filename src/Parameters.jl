@@ -33,13 +33,13 @@
 	# === Shape file ===
       Landuse_Shp       = "Landuse.shp"
       Gauge_Shp        = "Timoleague_Gauge_Hydro.shp"
-      River_Shp         = "Timoleague_River.shp"
+      River_Shp         = "Timoleague_River3.shp"
       Roads_Shp         = "Roads2.shp"
       SoilMap_Shp       = "SoilMap.shp"
       VegetationMap_Shp = "Landuse.shp"
 
 	# === Raster file ===
-      Dem_Input_Qgis      = "Timoleague_DTM_1m.tif"
+      Dem_Input_Qgis = "Timoleague_DTM_5m.tif"
       SoilMap_Raster = "SoilMap_Raster.tif"
       Temporary_Dem  = "Temporary_DEM.tif"
 
@@ -47,17 +47,18 @@
 	Forcing_Input = "forcing.Timoleague.csv"
 
 # === Input from Python ===
-   Dem_Input_Python      = "DemCorrected.tiff"
+   Dem_Input_Python   = "DemCorrected.tiff"
    Ldd_Python         = "Ldd.tiff"
    RiverLength_Python = "RiverLength.tiff"
    Slope_Python       = "Slope.tiff"
    Subcatch_Python    = "Subcatchment.tiff"
 
 # === Output Julia ===
-	Dem_Julia        = "Timoleague_DEM.tiff"
-   Dem_Julia_Corrected        = "Timoleague_DEM_Corrected.tiff"
-	Dem_Julia_Mask   = "Timoleague_DEM_Mask.tiff"
-	Gauge_Julia     = "Timololeague_Gauge.tiff"
+   Dem_Julia           = "Timoleague_DEM.tiff"
+   Dem_Julia_Corrected = "Timoleague_DEM_Corrected.tiff"
+   Dem_Julia_Mask      = "Timoleague_DEM_Mask.tiff"
+   Gauge_Julia         = "Timololeague_Gauge.tiff"
+   Pits_Julia          = "Timoleague_Pits.tiff"
 
 # === Output wflow ===
    Ldd_Wflow         = "wflow_ldd.tiff"
@@ -89,7 +90,7 @@
 		ResampleMethod₁ = :min
 		ΔX₁             = 5 # [m] Gridded spatial resolution
 		ResampleMethod₂ = :cubicspline
-		ΔX₂             = 10; # [m] Gridded spatial resolution should be a multiple of ΔX₁
+		ΔX₂             = 5; # [m] Gridded spatial resolution should be a multiple of ΔX₁
 
 	# RIVER PARAMETERS
 		P_RiverWidth = 5.0::Float64 # [m]
@@ -99,7 +100,8 @@
 		# GaugeCoordinate = [146707.700, 42167.995]
 		# GaugeCoordinate = [146709.504,42170.157]
 
-		GaugeCoordinate = [146708.9364,42168.9515]
+		# GaugeCoordinate = [146708.9364,42168.9515]
+      GaugeCoordinate = [146701.859, 42133.637]
 
 	# DATES
 	Base.@kwdef mutable struct DATES

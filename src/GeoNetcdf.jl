@@ -9,7 +9,7 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : CONVERT_2_NETCDF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIFF_2_NETCDF(Impermable_Wflow, Impermeable_Mask, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, River_Wflow, RiverDepth, RiverDepth_Wflow, RiverLength_Mask, RiverSlope, RiverSlope_Wflow, RiverWidth, RiverWidth_Wflow, Slope_Mask, Soil_Header, Soil_Maps, Subcatch_Wflow, Subcatchment, Vegetation_Header, Vegetation_Maps)
+		function TIFF_2_NETCDF(Gauge, Impermable_Wflow, Impermeable_Mask, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, River_Wflow, RiverDepth, RiverDepth_Wflow, RiverLength_Mask, RiverSlope, RiverSlope_Wflow, RiverWidth, RiverWidth_Wflow, Slope_Mask, Soil_Header, Soil_Maps, Subcatch_Wflow, Subcatchment, Vegetation_Header, Vegetation_Maps)
 
 			Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, NetCDF_Instates)
 
@@ -30,7 +30,6 @@ module geoNetcdf
 			# Fixing longitude and latitude
             Longitude₁ = Vector(Float64.(Longitude))
             Latitude₁  = Vector(Float64.(Latitude))
-
 
 			# == LONGITUDE input ==========================================
 				Keys = "x"
@@ -66,7 +65,7 @@ module geoNetcdf
 
 			# == LDD input ==========================================
 				Keys = splitext(Ldd_Wflow)[1]
-				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, UInt8, ("x","y"), fillvalue=255)
+				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, UInt8, ("x","y"), fillvalue=0)
 
 				Ldd_NetCDF .= Array(Ldd_Mask)
 
@@ -74,7 +73,6 @@ module geoNetcdf
 				Ldd_NetCDF.attrib["comments"] = "Derived from hydromt.flw.d8_from_dem"
 				Ldd_NetCDF.attrib["long_name"] = "ldd flow direction"
 				println(Keys)
-
 
 			# == SUBCATCHMENT input ==========================================
 				Keys = splitext(Subcatch_Wflow)[1]
@@ -84,6 +82,16 @@ module geoNetcdf
 
 				Subcatchment_NetCDF.attrib["units"] = "1/0"
 				Subcatchment_NetCDF.attrib["comments"] = "Derived from hydromt"
+				println(Keys)
+
+			# == GAUGES input ==========================================
+				Keys = splitext(Gauge_Wflow)[1]
+				Gauge_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0)
+
+				Gauge_NetCDF .= Array(Gauge)
+
+				Gauge_NetCDF.attrib["units"] = "1/0"
+				Gauge_NetCDF.attrib["comments"] = "Derived from hydromt"
 				println(Keys)
 
 
