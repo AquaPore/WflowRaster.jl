@@ -6,6 +6,49 @@ module geoNetcdf
 	include("Parameters.jl")
 	include("PlotParameter.jl")
 
+
+
+
+	using Rasters, GeoTIFF
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : NetCDF_2_GeoTIFF
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function NetCDF_2_GeoTIFF(Crs, Data, iiKeys, Latitude, Longitude, Path_Output_GeoTIFF₀)
+
+		Path_Output_GeoTIFF = joinpath(Path_Output_GeoTIFF₀, iiKeys ) *".tiff"
+		println(Path_Output_GeoTIFF)
+
+		N_Width, N_Height  = size(Data)
+		@show N_Width, N_Height
+
+		ΔX = (Longitude[end]- Longitude[1]) / (N_Width - 1)
+		ΔY = (Latitude[end]- Latitude[1]) / (N_Height - 1)
+
+		Longitude₁, Latitude₁ = Rasters.X(Longitude[1]:ΔX:Longitude[end], crs=Crs), Rasters.Y(Latitude[1]:ΔY: Latitude[end],crs=Crs)
+
+		@show length(Longitude₁) length(Latitude₁)
+
+		Map_GeoTIFF = Rasters.Raster((Longitude₁, Latitude₁), crs=Crs)
+		for iX=1:N_Width
+			for iY=1:N_Height
+			# println(Data[iX,iY])
+				if !(ismissing(Data[iX,iY]))
+					Map_GeoTIFF[iX,iY] = Data[iX,iY]
+				else
+					Map_GeoTIFF[iX,iY] = NaN
+				end
+			end # for iY=1:Metadatas.N_Height
+		end # for iX=1:Metadatas.N_Width
+		# return Output_Mask
+
+		Rasters.write(Path_Output_GeoTIFF, Map_GeoTIFF ; ext = ".tiff" , missingval= NaN, force=true, verbose=true)
+
+		return
+		end  # function: NetCDF_2_GeoTIFF
+	# ------------------------------------------------------------------
+
+
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : CONVERT_2_NETCDF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

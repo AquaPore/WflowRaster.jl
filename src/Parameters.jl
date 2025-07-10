@@ -88,9 +88,9 @@
 
 	# Resampling method of DEM in 2 steps:
 		ResampleMethod₁ = :min
-		ΔX₁             = 5 # [m] Gridded spatial resolution
+		ΔX₁             = 10 # [m] Gridded spatial resolution
 		ResampleMethod₂ = :cubicspline
-		ΔX₂             = 5; # [m] Gridded spatial resolution should be a multiple of ΔX₁
+		ΔX₂             = 10; # [m] Gridded spatial resolution should be a multiple of ΔX₁
 
 	# RIVER PARAMETERS
 		P_RiverWidth = 5.0::Float64 # [m]
