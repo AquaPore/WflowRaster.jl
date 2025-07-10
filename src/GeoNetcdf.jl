@@ -6,9 +6,6 @@ module geoNetcdf
 	include("Parameters.jl")
 	include("PlotParameter.jl")
 
-
-
-
 	using Rasters, GeoTIFF
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
