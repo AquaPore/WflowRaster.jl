@@ -84,7 +84,7 @@
 # -----------------------------------------------------------------------------------------
 
 	# Coordinate reference system
-		Crs             = 29902    # [-] This is the default projection TM65 / Irish Grid
+		Param_Crs             = 29902    # [-] This is the default projection TM65 / Irish Grid
 
 	# Resampling method of DEM in 2 steps:
 		ResampleMethod₁ = :min
@@ -97,11 +97,11 @@
 		P_RiverDepth = 10.0::Float64;  # must be an integer [m]
 
 	# GaugeS COORDINATES
-		# GaugeCoordinate = [146707.700, 42167.995]
-		# GaugeCoordinate = [146709.504,42170.157]
+		# Param_GaugeCoordinate = [146707.700, 42167.995]
+		# Param_GaugeCoordinate = [146709.504,42170.157]
 
-		# GaugeCoordinate = [146708.9364,42168.9515]
-      GaugeCoordinate = [146701.859, 42133.637]
+		# Param_GaugeCoordinate = [146708.9364,42168.9515]
+      Param_GaugeCoordinate = [146701.859, 42133.637]
 
 	# DATES
 	Base.@kwdef mutable struct DATES

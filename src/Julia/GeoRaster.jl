@@ -25,7 +25,7 @@ module geoRaster
 		  Coord_X_Right  :: Float64
 		  Coord_Y_Top    :: Float64
 		  Coord_Y_Bottom :: Float64
-		  Crs            :: Int64
+		  Param_Crs            :: Int64
 		  Crs_GeoFormat
 		#   Bands          :: Int64
 		  Extent
@@ -55,9 +55,9 @@ module geoRaster
 
 			# Grid_GeoTIFF = GeoTIFF.load(Path)
 			#     Grid_GeoTIFF_Metadata = GeoTIFF.metadata(Grid_GeoTIFF)
-						#  Crs = GeoTIFF.epsgcode(Grid_GeoTIFF_Metadata) |>Int
+						#  Param_Crs = GeoTIFF.epsgcode(Grid_GeoTIFF_Metadata) |>Int
 
-			Crs_GeoFormat = GeoFormatTypes.convert(WellKnownText, EPSG(Crs))
+			Crs_GeoFormat = GeoFormatTypes.convert(WellKnownText, EPSG(Param_Crs))
 
 			# Grid_Ag = AG.readraster(Path)
 			# 	Bands = AG.nraster(Grid_Ag)
@@ -65,7 +65,7 @@ module geoRaster
 			if Verbose
 				# println(Path)
 				# println("Bands = $Bands")
-				println("Crs = $Crs")
+				println("Param_Crs = $Param_Crs")
 				println("ΔX = $ΔX")
 				println("ΔY = $ΔY")
 				println("N_Width  = $N_Width")
@@ -77,7 +77,7 @@ module geoRaster
 			@assert(N_Width == Int32((Coord_X_Right - Coord_X_Left) / ΔX +1))
 			@assert(N_Height == Int32((Coord_Y_Top - Coord_Y_Bottom) / -ΔY + 1))
 
-			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Crs, Crs_GeoFormat, Extent)
+			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Param_Crs, Crs_GeoFormat, Extent)
 
 		return Metadata
 		end # function RASTER_METADATA
@@ -87,11 +87,11 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : MASK
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function MASK(; Input, Latitude, Longitude, Mask, Missing=NaN, Crs)
+		function MASK(; Input, Latitude, Longitude, Mask, Missing=NaN, Param_Crs)
 
 			N_Width, N_Height  = size(Input)
 
-			Output_Mask = Rasters.Raster((Longitude, Latitude), crs=Crs)
+			Output_Mask = Rasters.Raster((Longitude, Latitude), crs=Param_Crs)
 			for iX=1:N_Width
 				for iY=1:N_Height
 					# if Mask[iX,iY] > 0.0001 || !(isnan(Mask[iX,iY]))
@@ -110,9 +110,9 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : LAT_LONG_2_iCOORD
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function LAT_LONG_2_iCOORD(;Map, GaugeCoordinate)
-         Longitude_X = GaugeCoordinate[1]
-         Latitude_Y  = GaugeCoordinate[2]
+		function LAT_LONG_2_iCOORD(;Map, Param_GaugeCoordinate)
+         Longitude_X = Param_GaugeCoordinate[1]
+         Latitude_Y  = Param_GaugeCoordinate[2]
 
          Longitude  = Rasters.lookup(Map, X)
          Latitude   = Rasters.lookup(Map, Y)
@@ -152,7 +152,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : LOOKUPTABLE_2_MAPS
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Crs, Dem_Resample_Mask, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Missingval=NaN, Path_InputGis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
+		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Param_Crs, Dem_Resample_Mask, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Missingval=NaN, Path_InputGis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
 
 			# READING THE LOOKUP TABLE
 				Path_Home = @__DIR__
@@ -199,9 +199,9 @@ module geoRaster
 			# SAVING MAPS
 				Maps_Output = []
 				for iiHeader in Header
-					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill =Symbol(iiHeader), res=ΔX, to=Dem_Resample_Mask, missingval=Missingval, crs=Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
+					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill =Symbol(iiHeader), res=ΔX, to=Dem_Resample_Mask, missingval=Missingval, crs=Param_Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
 
-						Map = geoRaster.MASK(;Crs=Metadatas.Crs_GeoFormat, Input=Map₁, Latitude, Longitude, Mask=Subcatchment)
+						Map = geoRaster.MASK(;Param_Crs=Metadatas.Crs_GeoFormat, Input=Map₁, Latitude, Longitude, Mask=Subcatchment)
 
 						Maps_Output = push!(Maps_Output, Map)
 

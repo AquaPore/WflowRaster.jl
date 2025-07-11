@@ -11,7 +11,7 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : NetCDF_2_GeoTIFF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function NetCDF_2_GeoTIFF(Crs, Data, iiKeys, Latitude, Longitude, Path_Output_GeoTIFF₀)
+		function NetCDF_2_GeoTIFF(Param_Crs, Data, iiKeys, Latitude, Longitude, Path_Output_GeoTIFF₀)
 
 		Path_Output_GeoTIFF = joinpath(Path_Output_GeoTIFF₀, iiKeys ) *".tiff"
 		println(Path_Output_GeoTIFF)
@@ -22,11 +22,11 @@ module geoNetcdf
 		ΔX = (Longitude[end]- Longitude[1]) / (N_Width - 1)
 		ΔY = (Latitude[end]- Latitude[1]) / (N_Height - 1)
 
-		Longitude₁, Latitude₁ = Rasters.X(Longitude[1]:ΔX:Longitude[end], crs=Crs), Rasters.Y(Latitude[1]:ΔY: Latitude[end],crs=Crs)
+		Longitude₁, Latitude₁ = Rasters.X(Longitude[1]:ΔX:Longitude[end], crs=Param_Crs), Rasters.Y(Latitude[1]:ΔY: Latitude[end],crs=Param_Crs)
 
 		@show length(Longitude₁) length(Latitude₁)
 
-		Map_GeoTIFF = Rasters.Raster((Longitude₁, Latitude₁), crs=Crs)
+		Map_GeoTIFF = Rasters.Raster((Longitude₁, Latitude₁), crs=Param_Crs)
 		for iX=1:N_Width
 			for iY=1:N_Height
 			# println(Data[iX,iY])
