@@ -32,14 +32,14 @@
 # ======= INPUT GIS =======
 	# === Shape file ===
       Landuse_Shp       = "Landuse.shp"
-      Gauge_Shp        = "Timoleague_Gauge_Hydro.shp"
+      Gauge_Shp         = "Timoleague_Gauge_Hydro.shp"
       River_Shp         = "Timoleague_River3.shp"
       Roads_Shp         = "Roads2.shp"
       SoilMap_Shp       = "SoilMap.shp"
       VegetationMap_Shp = "Landuse.shp"
 
 	# === Raster file ===
-      Dem_Input_Qgis = "Timoleague_DTM_5m.tif"
+      Dem_Input_Qgis = "Timoleague_DTM_1m.tif"
       SoilMap_Raster = "SoilMap_Raster.tif"
       Temporary_Dem  = "Temporary_DEM.tif"
 
