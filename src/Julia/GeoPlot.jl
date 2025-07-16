@@ -1,7 +1,8 @@
 
 module geoPlot
-	using CairoMakie, Colors, ColorSchemes
-	using GLMakie, NCDatasets
+	using CairoMakie
+	#  Colors, ColorSchemes
+	# using GLMakie, NCDatasets
 	# import ..Parameters
 	include("Parameters.jl")
 	include("PlotParameter.jl")

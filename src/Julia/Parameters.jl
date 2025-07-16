@@ -4,9 +4,9 @@
 # =========================================
 
 # FLAGS
-   🎏_Plots                 = true
+   🎏_Plots                 = false
    🎏_Plot_TimeSeries       = false
-   🎏_Plot_FlowAccumulation = true
+   🎏_Plot_FlowAccumulation = false
    🎏_Plot_NetCDF           = true
 
    🎏_TimeSeries            = true
@@ -39,7 +39,7 @@
       VegetationMap_Shp = "Landuse.shp"
 
 	# === Raster file ===
-      Dem_Input_Qgis = "Timoleague_DTM_1m.tif"
+      Dem_Input_Qgis = "Timoleague_DTM_5m.tif"
       SoilMap_Raster = "SoilMap_Raster.tif"
       Temporary_Dem  = "Temporary_DEM.tif"
 
@@ -101,7 +101,8 @@
 		# Param_GaugeCoordinate = [146709.504,42170.157]
 
 		# Param_GaugeCoordinate = [146708.9364,42168.9515]
-      Param_GaugeCoordinate = [146701.859, 42133.637]
+      # Param_GaugeCoordinate = [146701.859, 42133.637]
+      Param_GaugeCoordinate =[146705.520,42165.261]
 
 	# DATES
 	Base.@kwdef mutable struct DATES

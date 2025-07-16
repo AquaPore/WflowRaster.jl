@@ -1,19 +1,17 @@
 
 module geoRaster
 	using Revise
-	using ArchGDAL
-		const AG = ArchGDAL
-
-	using Rasters, GeoTIFF, Extents, Geomorphometry
-	using Base
+	using Rasters, GeoFormatTypes, GeoTIFF, ArchGDAL
 	using NCDatasets
-	using CSV, DataFrames, GeoDataFrames, Rasters
-	using CairoMakie, Colors, ColorSchemes
-	using Revise
-	# using PythonCall
+	using CSV, DataFrames, GeoDataFrames
+
+	# using Base
+	# using CairoMakie, Colors, ColorSchemes
+	# using Geomorphometry
+
 
 	include("Parameters.jl")
-	include("GeoPlot.jl")
+	# include("GeoPlot.jl")
 	include("PlotParameter.jl")
 
 	 Base.@kwdef mutable struct METADATA
@@ -25,10 +23,8 @@ module geoRaster
 		  Coord_X_Right  :: Float64
 		  Coord_Y_Top    :: Float64
 		  Coord_Y_Bottom :: Float64
-		  Param_Crs            :: Int64
+		  Param_Crs       :: Int64
 		  Crs_GeoFormat
-		#   Bands          :: Int64
-		  Extent
 	 end # struct METADATA
 
 
@@ -51,20 +47,9 @@ module geoRaster
 			Coord_Y_Top    = first(dims(Map ,Y))
 			Coord_Y_Bottom = last(dims(Map,Y))
 
-			Extent = Extents.Extent(X=(Coord_X_Left, Coord_X_Right), Y=(Coord_Y_Bottom, Coord_Y_Top))
-
-			# Grid_GeoTIFF = GeoTIFF.load(Path)
-			#     Grid_GeoTIFF_Metadata = GeoTIFF.metadata(Grid_GeoTIFF)
-						#  Param_Crs = GeoTIFF.epsgcode(Grid_GeoTIFF_Metadata) |>Int
-
 			Crs_GeoFormat = GeoFormatTypes.convert(WellKnownText, EPSG(Param_Crs))
 
-			# Grid_Ag = AG.readraster(Path)
-			# 	Bands = AG.nraster(Grid_Ag)
-
 			if Verbose
-				# println(Path)
-				# println("Bands = $Bands")
 				println("Param_Crs = $Param_Crs")
 				println("ΔX = $ΔX")
 				println("ΔY = $ΔY")
@@ -77,7 +62,7 @@ module geoRaster
 			@assert(N_Width == Int32((Coord_X_Right - Coord_X_Left) / ΔX +1))
 			@assert(N_Height == Int32((Coord_Y_Top - Coord_Y_Bottom) / -ΔY + 1))
 
-			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Param_Crs, Crs_GeoFormat, Extent)
+			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Param_Crs, Crs_GeoFormat)
 
 		return Metadata
 		end # function RASTER_METADATA
@@ -108,17 +93,17 @@ module geoRaster
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#		FUNCTION : LAT_LONG_2_iCOORD
+	#		FUNCTION : LAT_LONG_2_INDEX
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function LAT_LONG_2_iCOORD(;Map, Param_GaugeCoordinate)
+		function LAT_LONG_2_INDEX(;Map, Param_GaugeCoordinate)
          Longitude_X = Param_GaugeCoordinate[1]
          Latitude_Y  = Param_GaugeCoordinate[2]
 
-         Longitude  = Rasters.lookup(Map, X)
-         Latitude   = Rasters.lookup(Map, Y)
+         Longitude   = Rasters.lookup(Map, X)
+         Latitude    = Rasters.lookup(Map, Y)
 
-         Nlongitude = length(Longitude)
-         Nlatitude  = length(Latitude)
+         Nlongitude  = length(Longitude)
+         Nlatitude   = length(Latitude)
 
 			# Longitude
 				ΔX = Longitude[2] - Longitude[1]
@@ -142,9 +127,8 @@ module geoRaster
 					end # if Latitude_Sort[iY] ≥ Lat_Y
 				end # i=1:Nlatitude
 
-				println( "LAT_LONG_2_iCOORD: [$iX ; $iY]" )
-
-		return iY, iX
+				println( "LAT_LONG_2_INDEX: [$iX ; $iY]" )
+		return iX, iY
 		end
 	# ----------------------------------------------------------------
 
