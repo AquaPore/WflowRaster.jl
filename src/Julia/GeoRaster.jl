@@ -107,10 +107,12 @@ module geoRaster
 
 			# Longitude
 				ΔX = Longitude[2] - Longitude[1]
-				@assert(Longitude[1] - ΔX / 2.0 ≤ Longitude_X ≤ Longitude[Nlongitude] + ΔX / 2.0)
-				iX = 1
+
+				@assert(Longitude[1] ≤ Longitude_X ≤ Longitude[Nlongitude])
+				iX = Nlongitude
 				for i=1:Nlongitude
 					if Longitude[i] - ΔX / 2.0 ≤ Longitude_X < Longitude[i] + ΔX / 2.0
+					# if Longitude[i] - ΔX ≤ Longitude_X < Longitude[i]
 						iX = i
 						break
 					end
@@ -119,9 +121,10 @@ module geoRaster
 			# Latitude
 			 	ΔY = Latitude[2] - Latitude[1]
 				@assert( Latitude[Nlatitude] + ΔY / 2.0  ≤ Latitude_Y ≤ Latitude[1] - ΔY / 2.0)
-				iY = Nlatitude
+				iY = 1
 				for i=Nlatitude:-1:1
-					if Latitude[i] + ΔY / 2.0  ≤ Latitude_Y < Latitude[i] - ΔY / 2.0
+				if Latitude[i] + ΔY / 2.0  ≤ Latitude_Y < Latitude[i] - ΔY / 2.0
+					# if Latitude[i]  < Latitude_Y ≤ Latitude[i] - ΔY
 						iY = i
 						break
 					end # if Latitude_Sort[iY] ≥ Lat_Y
@@ -131,6 +134,72 @@ module geoRaster
 		return iX, iY
 		end
 	# ----------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : GAUGE
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function GAUGE(;🎏_Method_Index = "Rasters", Latitude=Latitude, Longitude=Longitude, Metadatas=Metadatas, Param_GaugeCoordinate, Path_OutputGauge)
+
+			Gauge₀ = Rasters.Raster((Longitude, Latitude), crs=Metadatas.Crs_GeoFormat)
+			Gauge₀ .= 0
+
+			Gauge = Rasters.set(Gauge₀, Rasters.Center)
+
+			iX_Gauge = 1
+			iY_Gauge = 1
+			if 🎏_Method_Index == "Joseph"
+				iX_Gauge, iY_Gauge = geoRaster.LAT_LONG_2_INDEX(;Map=Gauge, Param_GaugeCoordinate)
+
+				println([iX_Gauge, iY_Gauge])
+
+			elseif 🎏_Method_Index == "Rasters"
+				iX_Gauge, iY_Gauge = Rasters.dims2indices(Gauge, (X(Rasters.Near(Param_GaugeCoordinate[1])), Y(Rasters.Near(Param_GaugeCoordinate[2]))))
+			end
+			println([iX_Gauge, iY_Gauge])
+
+			# Inverse
+			# 	DimPoints(Gauge)[X(iX_Gauge), Y(iY_Gauge)]
+
+			# Selection of the Gauge
+			Gauge[iX_Gauge, iY_Gauge] = 1
+
+			Rasters.write(Path_OutputGauge, Gauge; ext=".tiff", force=true, verbose=true, missingval=0)
+
+		return Gauge, [iX_Gauge, iY_Gauge]
+		end  # function: GAUGE
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : CORRECT_BOARDERS
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function DEM_CORRECT_BOARDERS!(;Dem, DemMultiply =1.2, Latitude, Longitude, Crs)
+
+			N_Width, N_Height  = size(Dem)
+
+			Dem_Corrected = Rasters.Raster((Longitude, Latitude), crs=Crs)
+
+			for iX=1:N_Width
+				for iY=1:N_Height
+					if (iX == 1) ||  (iY == 1) || (iY == N_Width)
+						Dem_Corrected[iX,iY] = Dem[iX,iY] * 1.2
+
+					elseif (iX == 2) || (iY == 2) || (iY == N_Width-1)
+						Dem_Corrected[iX,iY] = Dem[iX,iY] * 1.5
+
+					elseif (iX == 3) || (iY == 3) || (iY == N_Width-2)
+						Dem_Corrected[iX,iY] = Dem[iX,iY] * 1.2
+
+					else
+						Dem_Corrected[iX,iY] = Dem[iX,iY]
+					end
+				end # for iY=1:Metadatas.N_Height
+			end # for iX=1:Metadatas.N_Width
+
+		return Dem_Corrected
+		end  # function: CORRECT_BOARDERS
+	# ------------------------------------------------------------------
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

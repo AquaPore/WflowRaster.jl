@@ -4,7 +4,7 @@
 # =========================================
 
 # FLAGS
-   🎏_Plots                 = false
+   🎏_Plots                 = true
    🎏_Plot_TimeSeries       = false
    🎏_Plot_FlowAccumulation = false
    🎏_Plot_NetCDF           = true
@@ -90,19 +90,15 @@
 		ResampleMethod₁ = :min
 		ΔX₁             = 10 # [m] Gridded spatial resolution
 		ResampleMethod₂ = :cubicspline
-		ΔX₂             = 10; # [m] Gridded spatial resolution should be a multiple of ΔX₁
+		ΔX₂             = 10 # [m] Gridded spatial resolution should be a multiple of ΔX₁
 
 	# RIVER PARAMETERS
 		P_RiverWidth = 5.0::Float64 # [m]
 		P_RiverDepth = 10.0::Float64;  # must be an integer [m]
 
 	# GaugeS COORDINATES
-		# Param_GaugeCoordinate = [146707.700, 42167.995]
-		# Param_GaugeCoordinate = [146709.504,42170.157]
-
-		# Param_GaugeCoordinate = [146708.9364,42168.9515]
-      # Param_GaugeCoordinate = [146701.859, 42133.637]
-      Param_GaugeCoordinate =[146705.520,42165.261]
+      Param_GaugeCoordinate =  [146700.2167,42159.7300]
+      Dem_PitGaugeReduced = 10.00
 
 	# DATES
 	Base.@kwdef mutable struct DATES
@@ -112,7 +108,7 @@
       Start_Hour  = 0 :: Int64
 
       End_Year    = 2010 :: Int64
-      End_Month   = 2 :: Int64
+      End_Month   = 3 :: Int64
       End_Day     = 1 :: Int64
       End_Hour    = 0 :: Int64
    end # struct METADATA
