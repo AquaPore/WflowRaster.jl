@@ -51,7 +51,8 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		function TIFF_2_NETCDF(Gauge, Impermable_Wflow, Impermeable_Mask, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, River_Wflow, RiverDepth, RiverDepth_Wflow, RiverLength_Mask, RiverSlope, RiverSlope_Wflow, RiverWidth, RiverWidth_Wflow, Slope_Mask, Soil_Header, Soil_Maps, Subcatch_Wflow, Subcatchment, Vegetation_Header, Vegetation_Maps)
 
-			Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, NetCDF_Instates)
+			# Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, NetCDF_Instates)
+			Path_NetCDF_Full  = joinpath(Path_Root, Path_NetCDF, NetCDF_Instates)
 
 			isfile(Path_NetCDF_Full) && rm(Path_NetCDF_Full, force=true)
 			println(Path_NetCDF_Full)
@@ -248,6 +249,11 @@ module geoNetcdf
 					end # for iiHeader in Soil_Header
 				end
 
+			# == COPY OUTPUT =====
+			# To avoid blockage
+			Path_Copy =  joinpath(Path_Root, Path_NetCDF, NetCDF_Instates)
+			Path_Paste  = joinpath(Path_Root_NetCDF, NetCDF_Instates)
+			Base.Filesystem.cptree(Path_Copy, Path_Paste, force=true)
 		close(NetCDF)
 		return NetCDF, Path_NetCDF_Full
 		end  # function: TIFF_2_NETCDF

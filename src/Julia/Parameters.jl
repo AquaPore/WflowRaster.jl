@@ -39,7 +39,7 @@
       VegetationMap_Shp = "Landuse.shp"
 
 	# === Raster file ===
-      Dem_Input_Qgis = "Timoleague_DTM_5m.tif"
+      Dem_Input_Qgis = "Timoleague_DTM_5m_Clipped.tif"
       SoilMap_Raster = "SoilMap_Raster.tif"
       Temporary_Dem  = "Temporary_DEM.tif"
 
@@ -97,7 +97,8 @@
 		P_RiverDepth = 10.0::Float64;  # must be an integer [m]
 
 	# GaugeS COORDINATES
-      Param_GaugeCoordinate =  [146700.2167,42159.7300]
+      # Param_GaugeCoordinate =  [146700.2167,42159.7300]
+      Param_GaugeCoordinate = [146690.673,42139.540]
       Dem_PitGaugeReduced = 10.00
 
 	# DATES

@@ -174,30 +174,49 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : CORRECT_BOARDERS
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function DEM_CORRECT_BOARDERS!(;Dem, DemMultiply =1.2, Latitude, Longitude, Crs)
+		function DEM_CORRECT_BOARDERS!(;Dem, Latitude, Longitude, Crs)
 
 			N_Width, N_Height  = size(Dem)
 
-			Dem_Corrected = Rasters.Raster((Longitude, Latitude), crs=Crs)
+			Dem_Boarder = Rasters.Raster((Longitude, Latitude), crs=Crs)
 
 			for iX=1:N_Width
 				for iY=1:N_Height
-					if (iX == 1) ||  (iY == 1) || (iY == N_Width)
-						Dem_Corrected[iX,iY] = Dem[iX,iY] * 1.2
-
-					elseif (iX == 2) || (iY == 2) || (iY == N_Width-1)
-						Dem_Corrected[iX,iY] = Dem[iX,iY] * 1.5
-
-					elseif (iX == 3) || (iY == 3) || (iY == N_Width-2)
-						Dem_Corrected[iX,iY] = Dem[iX,iY] * 1.2
-
+					if Dem[iX, iY] > 0
+						if iY ≠ 1
+							if isnan(Dem[iX, iY-1]) || isnan(Dem[iX, min(iY+1,N_Height)])
+								Dem_Boarder[iX,iY] = 1
+							else
+								Dem_Boarder[iX,iY] = NaN
+							end
+						else
+							Dem_Boarder[iX,iY] = 1
+						end
 					else
-						Dem_Corrected[iX,iY] = Dem[iX,iY]
+						Dem_Boarder[iX,iY] = NaN
 					end
 				end # for iY=1:Metadatas.N_Height
 			end # for iX=1:Metadatas.N_Width
 
-		return Dem_Corrected
+			for iY=1:N_Height
+				for iX=1:N_Width
+					if Dem[iX, iY] > 0
+						if iX ≠ 1
+							if isnan(Dem[iX-1, iY]) || isnan(Dem[min(iX+1, N_Width), iY])
+								Dem_Boarder[iX,iY] = 1
+							else
+								Dem_Boarder[iX,iY] = NaN
+							end
+						else
+							Dem_Boarder[iX,iY] = 1
+						end
+					else
+						Dem_Boarder[iX,iY] = NaN
+					end
+				end # for iY=1:Metadatas.N_Height
+			end # for iX=1:Metadatas.N_Width
+
+		return Dem_Boarder
 		end  # function: CORRECT_BOARDERS
 	# ------------------------------------------------------------------
 
