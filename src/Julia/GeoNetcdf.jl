@@ -249,11 +249,6 @@ module geoNetcdf
 					end # for iiHeader in Soil_Header
 				end
 
-			# == COPY OUTPUT =====
-			# To avoid blockage
-			Path_Copy =  joinpath(Path_Root, Path_NetCDF, NetCDF_Instates)
-			Path_Paste  = joinpath(Path_Root_NetCDF, NetCDF_Instates)
-			Base.Filesystem.cptree(Path_Copy, Path_Paste, force=true)
 		close(NetCDF)
 		return NetCDF, Path_NetCDF_Full
 		end  # function: TIFF_2_NETCDF
@@ -338,7 +333,7 @@ module geoNetcdf
 				end # for iX=1:Metadatas.N_Width
 
 			# NETCDF
-				Path_NetCDFmeteo_Output  = joinpath(Path_Root_NetCDF, NetCDF_Forcing)
+				Path_NetCDFmeteo_Output  = joinpath(Path_Root, Path_NetCDF, NetCDF_Forcing)
 				isfile(Path_NetCDFmeteo_Output) && rm(Path_NetCDFmeteo_Output, force=true)
 				println(Path_NetCDFmeteo_Output)
 
@@ -435,7 +430,8 @@ module geoNetcdf
 				Temp_NetCDF.attrib["unit"] = " degree C."
 				Temp_NetCDF.attrib["comments"] = "Temperature"
 
-		close(NetCDFmeteo)
+			close(NetCDFmeteo)
+
 		return NetCDFmeteo, Path_NetCDFmeteo_Output
 		end  # function: TIMESERIES_2_NETCDF
 	# ------------------------------------------------------------------

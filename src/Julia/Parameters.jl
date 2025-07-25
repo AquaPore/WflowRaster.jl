@@ -7,13 +7,17 @@
    🎏_Plots                 = true
    🎏_Plot_TimeSeries       = false
    🎏_Plot_FlowAccumulation = false
-   🎏_Plot_NetCDF           = true
+   🎏_Plot_NetCDF           = false
 
-   🎏_TimeSeries            = true
+   🎏_Fix_Cyclic            = true
+
+   🎏_Forcing_2_NetCDF      = false
    🎏_NetCDF                = true
    🎏_SoilMap               = false
    🎏_VegetationMap         = false
    🎏_ImpermeableMap        = false
+
+
 
 # ======= PATHS =======
    Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
@@ -52,6 +56,7 @@
    RiverLength_Python = "RiverLength.tiff"
    Slope_Python       = "Slope.tiff"
    Subcatch_Python    = "Subcatchment.tiff"
+   # Subcatch_Python    = "Basins.tiff"
 
 # === Output Julia ===
    Dem_Julia           = "Timoleague_DEM.tiff"
@@ -90,7 +95,7 @@
 		ResampleMethod₁ = :min
 		ΔX₁             = 10 # [m] Gridded spatial resolution
 		ResampleMethod₂ = :cubicspline
-		ΔX₂             = 10 # [m] Gridded spatial resolution should be a multiple of ΔX₁
+		ΔX₂             = 20 # [m] Gridded spatial resolution should be a multiple of ΔX₁
 
 	# RIVER PARAMETERS
 		P_RiverWidth = 5.0::Float64 # [m]
@@ -98,7 +103,8 @@
 
 	# GaugeS COORDINATES
       # Param_GaugeCoordinate =  [146700.2167,42159.7300]
-      Param_GaugeCoordinate = [146690.673,42139.540]
+      # Param_GaugeCoordinate = [146690.673,42139.540]
+      Param_GaugeCoordinate =[146681.976,42127.854]
       Dem_PitGaugeReduced = 10.00
 
 	# DATES

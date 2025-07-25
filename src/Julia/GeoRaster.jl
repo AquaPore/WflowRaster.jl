@@ -72,7 +72,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : MASK
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function MASK(; Input, Latitude, Longitude, Mask, Missing=NaN, Param_Crs)
+		function MASK(; Input, Latitude, Longitude, Mask, Missing=NaN, Param_Crs, MissingData=0.001)
 
 			N_Width, N_Height  = size(Input)
 
@@ -81,6 +81,10 @@ module geoRaster
 				for iY=1:N_Height
 					# if Mask[iX,iY] > 0.0001 || !(isnan(Mask[iX,iY]))
 					if Mask[iX,iY] > 0
+						# This is not normal
+						if isnan(Input[iX, iY])
+							Input[iX, iY] = MissingData
+						end
 						Output_Mask[iX,iY] = Input[iX,iY]
 					else
 						Output_Mask[iX,iY] = Missing
@@ -174,17 +178,19 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : CORRECT_BOARDERS
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function DEM_CORRECT_BOARDERS!(;Dem, Latitude, Longitude, Crs)
+		function DEM_CORRECT_BOARDERS!(;Dem, Latitude, Longitude, Crs, ΔZadjust=10.0, iiParam_GaugeCoordinate)
 
 			N_Width, N_Height  = size(Dem)
 
-			Dem_Boarder = Rasters.Raster((Longitude, Latitude), crs=Crs)
+			iiX = iiParam_GaugeCoordinate[1]
+			iiY = iiParam_GaugeCoordinate[2]
 
+			Dem_Boarder = Rasters.Raster((Longitude, Latitude), crs=Crs)
 			for iX=1:N_Width
 				for iY=1:N_Height
 					if Dem[iX, iY] > 0
-						if iY ≠ 1
-							if isnan(Dem[iX, iY-1]) || isnan(Dem[iX, min(iY+1,N_Height)])
+						if (iX ≠ 1 && iX ≠ N_Width && iY ≠ 1 && iY ≠ N_Height)
+							if isnan(Dem[iX-1, iY]) || isnan(Dem[min(iX+1, N_Width), iY]) || isnan(Dem[iX, iY-1]) || isnan(Dem[iX, iY+1])
 								Dem_Boarder[iX,iY] = 1
 							else
 								Dem_Boarder[iX,iY] = NaN
@@ -194,29 +200,22 @@ module geoRaster
 						end
 					else
 						Dem_Boarder[iX,iY] = NaN
-					end
-				end # for iY=1:Metadatas.N_Height
-			end # for iX=1:Metadatas.N_Width
+					end # Dem[iX, iY] > 0
+				end # iY=1:N_Height
+			end # for iiX=1:N_Width
 
-			for iY=1:N_Height
-				for iX=1:N_Width
-					if Dem[iX, iY] > 0
-						if iX ≠ 1
-							if isnan(Dem[iX-1, iY]) || isnan(Dem[min(iX+1, N_Width), iY])
-								Dem_Boarder[iX,iY] = 1
-							else
-								Dem_Boarder[iX,iY] = NaN
-							end
-						else
-							Dem_Boarder[iX,iY] = 1
+			for iX=1:N_Width
+				for iY=1:N_Height
+					if Dem_Boarder[iX,iY] > 0
+						if !(iX == iiX && iY== iiY && iX == min(iiX + 1, N_Width) && iY== min(iiY + 1, N_Height) && iX == max(iiX - 1, 1) && iY== max(iiY - 1,1))
+
+							Dem[iX,iY] = Dem[iX,iY] + ΔZadjust
 						end
-					else
-						Dem_Boarder[iX,iY] = NaN
-					end
-				end # for iY=1:Metadatas.N_Height
-			end # for iX=1:Metadatas.N_Width
+					end # Dem[iX, iY] > 0
+				end # iY=1:N_Height
+			end # for iiX=1:N_Width
 
-		return Dem_Boarder
+		return Dem, Dem_Boarder
 		end  # function: CORRECT_BOARDERS
 	# ------------------------------------------------------------------
 
