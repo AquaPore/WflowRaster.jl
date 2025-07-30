@@ -11,7 +11,7 @@ module geoRaster
 
 
 	include("Parameters.jl")
-	# include("GeoPlot.jl")
+	include("GeoPlot.jl")
 	include("PlotParameter.jl")
 
 	 Base.@kwdef mutable struct METADATA
@@ -228,7 +228,8 @@ module geoRaster
 			# READING THE LOOKUP TABLE
 				Path_Home = @__DIR__
 				cd(Path_Home)
-				Path = abspath(joinpath(Path_Home, ".."))
+				Path₀ = abspath(joinpath(Path_Home, ".."))
+				Path = abspath(joinpath(Path₀, ".."))
  				Path_Lookup= joinpath(Path, Path_Root_LookupTable, LookupTable)
 				println(Path_Lookup)
 

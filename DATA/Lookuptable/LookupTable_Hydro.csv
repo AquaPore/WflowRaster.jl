@@ -1,6 +1,6 @@
-﻿CODE_CLASS,CLASS,hb,C,theta_r,theta_s,kv_0,kv
-5,Well,5.1,6.1,0.1,0.6,9.1,10.1
-4,Poorly,5.2,6.2,0.1,0.5,9.2,10.2
-3,Moderately,5.3,6.3,0.1,0.4,9.3,10.3
-4,Imperfectly,5.4,6.4,0.1,0.3,9.4,10.4
-1,missing,5.5,6.5,0.1,0.2,9.5,10.5
+﻿CODE_CLASS,CLASS,KsatVer
+5,Well,1.0
+4,Poorly,1.0
+4,Imperfectly,1.0
+3,Moderately,1.0
+1,missing,1.0

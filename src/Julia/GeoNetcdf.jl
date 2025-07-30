@@ -64,6 +64,9 @@ module geoNetcdf
 				NCDatasets.defDim(NetCDF,"x", Metadatas.N_Width)
 				NCDatasets.defDim(NetCDF,"y", Metadatas.N_Height)
 
+				N_soil_layer__thickness = length(soil_layer__thickness)
+				NCDatasets.defDim(NetCDF,"layer", N_soil_layer__thickness + 1)
+
 			# Define a global attribute
 				NetCDF.attrib["title"]   = "Timoleague instates dataset"
 				NetCDF.attrib["creator"] = "Joseph A.P. POLLACCO"
@@ -102,6 +105,18 @@ module geoNetcdf
 
 				Latitude_NetCDF.attrib["units"] = "m"
 				Latitude_NetCDF.attrib["comments"] = "lat"
+				println(Keys)
+
+			# == LAYER input ==========================================
+				Keys = "layer"
+				Layers = []
+				for i=1:N_soil_layer__thickness + 1
+					append!(Layers, i-1)
+				end
+				Layers = Int64.(Layers)
+				Layer = NCDatasets.defVar(NetCDF, Keys, Layers, ("layer",), fillvalue=-1)
+
+				Layer.attrib["units"] = "-"
 				println(Keys)
 
 			# == LDD input ==========================================

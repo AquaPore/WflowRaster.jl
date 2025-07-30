@@ -5,19 +5,17 @@
 
 # FLAGS
    🎏_Plots                 = true
-   🎏_Plot_TimeSeries       = false
+   🎏_Plot_TimeSeries       = true
    🎏_Plot_FlowAccumulation = false
    🎏_Plot_NetCDF           = false
 
-   🎏_Fix_Cyclic            = true
+   🎏_Fix_Cyclic            = false
 
-   🎏_Forcing_2_NetCDF      = false
+   🎏_Forcing_2_NetCDF      = true
    🎏_NetCDF                = true
-   🎏_SoilMap               = false
-   🎏_VegetationMap         = false
+   🎏_SoilMap               = true
+   🎏_VegetationMap         = true
    🎏_ImpermeableMap        = false
-
-
 
 # ======= PATHS =======
    Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
@@ -101,11 +99,14 @@
 		P_RiverWidth = 5.0::Float64 # [m]
 		P_RiverDepth = 10.0::Float64;  # must be an integer [m]
 
-	# GaugeS COORDINATES
+	# GAUGE COORDINATES
       # Param_GaugeCoordinate =  [146700.2167,42159.7300]
       # Param_GaugeCoordinate = [146690.673,42139.540]
       Param_GaugeCoordinate =[146681.976,42127.854]
       Dem_PitGaugeReduced = 10.00
+
+   # LAYERS
+      soil_layer__thickness = [100, 300, 800]
 
 	# DATES
 	Base.@kwdef mutable struct DATES
