@@ -70,29 +70,94 @@ module geoRaster
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#		FUNCTION : MASK
+	#		FUNCTION : CORRECT_BOARDERS
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function MASK(; Input, Latitude, Longitude, Mask, Missing=NaN, Param_Crs, MissingData=0.001)
+		function DEM_CORRECT_BOARDERS!(;Dem, Latitude, Longitude, Crs, ΔZadjust=10.0, iiParam_GaugeCoordinate)
 
-			N_Width, N_Height  = size(Input)
+		ϵ = 0.1
 
-			Output_Mask = Rasters.Raster((Longitude, Latitude), crs=Param_Crs)
+			N_Width, N_Height  = size(Dem)
+
+			iiX = iiParam_GaugeCoordinate[1]
+			iiY = iiParam_GaugeCoordinate[2]
+
+			Dem_Boarder = Rasters.Raster((Longitude, Latitude), crs=Crs)
 			for iX=1:N_Width
 				for iY=1:N_Height
-					# if Mask[iX,iY] > 0.0001 || !(isnan(Mask[iX,iY]))
-					if Mask[iX,iY] > 0
-						# This is not normal
-						if isnan(Input[iX, iY])
-							Input[iX, iY] = MissingData
+					if Dem[iX, iY] > 0
+						if (iX ≠ 1 && iX ≠ N_Width && iY ≠ 1 && iY ≠ N_Height)
+							if Dem[iX-1, iY] < ϵ || (Dem[min(iX+1, N_Width), iY]) < ϵ || (Dem[iX, iY-1]) < ϵ|| (Dem[iX, iY+1]) < ϵ
+								Dem_Boarder[iX,iY] = 1
+							else
+								Dem_Boarder[iX,iY] = 0
+							end
+						else
+							Dem_Boarder[iX,iY] = 1
 						end
-						Output_Mask[iX,iY] = Input[iX,iY]
 					else
-						Output_Mask[iX,iY] = Missing
-					end
-				end # for iY=1:Metadatas.N_Height
-			end # for iX=1:Metadatas.N_Width
-		return Output_Mask
-		end  # function: mask
+						Dem_Boarder[iX,iY] = 0
+					end # Dem[iX, iY] > 0
+				end # iY=1:N_Height
+			end # for iiX=1:N_Width
+
+			for iX=1:N_Width
+				for iY=1:N_Height
+					if Dem_Boarder[iX,iY] > 0
+						if !(iX == iiX && iY== iiY && iX == min(iiX + 1, N_Width) && iY== min(iiY + 1, N_Height) && iX == max(iiX - 1, 1) && iY== max(iiY - 1,1))
+
+							Dem[iX,iY] = Dem[iX,iY] + ΔZadjust
+						end
+					end # Dem[iX, iY] > 0
+				end # iY=1:N_Height
+			end # for iiX=1:N_Width
+
+		return Dem, Dem_Boarder
+		end  # function: CORRECT_BOARDERS
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : DEM_CORRECT_BOARDERS_1!
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function DEM_CORRECT_BOARDERS_1!(;Dem, Latitude, Longitude, Crs, ΔZadjust=10.0, iiParam_GaugeCoordinate)
+
+			N_Width, N_Height  = size(Dem)
+
+			iiX = iiParam_GaugeCoordinate[1]
+			iiY = iiParam_GaugeCoordinate[2]
+
+			Dem_Boarder = Rasters.Raster((Longitude, Latitude), crs=Crs)
+			for iX=1:N_Width
+				for iY=1:N_Height
+					if Dem[iX, iY] > 0
+						if (iX ≠ 1 && iX ≠ N_Width && iY ≠ 1 && iY ≠ N_Height)
+							if isnan(Dem[iX-1, iY]) || isnan(Dem[min(iX+1, N_Width), iY]) || isnan(Dem[iX, iY-1]) || isnan(Dem[iX, iY+1])
+								Dem_Boarder[iX,iY] = 1
+							else
+								Dem_Boarder[iX,iY] = NaN
+							end
+						else
+							Dem_Boarder[iX,iY] = 1
+						end
+					else
+						Dem_Boarder[iX,iY] = NaN
+					end # Dem[iX, iY] > 0
+				end # iY=1:N_Height
+			end # for iiX=1:N_Width
+
+			for iX=1:N_Width
+				for iY=1:N_Height
+					if Dem_Boarder[iX,iY] > 0
+						if !(iX == iiX && iY== iiY && iX == min(iiX + 1, N_Width) && iY== min(iiY + 1, N_Height) && iX == max(iiX - 1, 1) && iY== max(iiY - 1,1))
+
+							Dem[iX,iY] = Dem[iX,iY] + ΔZadjust
+						end
+					end # Dem[iX, iY] > 0
+				end # iY=1:N_Height
+			end # for iiX=1:N_Width
+
+		return Dem, Dem_Boarder
+		end  # function: CORRECT_BOARDERS
 	# ------------------------------------------------------------------
 
 
@@ -141,6 +206,57 @@ module geoRaster
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : MOSAIC
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function MOSAIC(;Path_Root_Mosaic, Path_Output_Mosaic, Missing=NaN)
+
+			FilesList = readdir(Path_Root_Mosaic,)
+
+			# Combining maps
+			Maps = []
+			for iiFile in FilesList
+				Dem_Map₀ = Rasters.Raster(joinpath(Path_Root_Mosaic, iiFile))
+				Dem_Map  = Rasters.replace_missing(Dem_Map₀, missingval=NaN)
+				Maps     = push!(Maps, Dem_Map)
+			end
+
+			Mosaic = Rasters.mosaic(first, Maps; missingval=Missing, progress=true)
+
+			Rasters.write(Path_Output_Mosaic, Mosaic; ext=".tiff", missingval=Missing, force=true, verbose=true)
+
+		return Mosaic
+		end  # function: MOSAIC
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : MASK
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function MASK(; Input, Latitude, Longitude, Mask, Missing=NaN, Param_Crs, MissingData=0.001)
+
+			N_Width, N_Height  = size(Input)
+
+			Output_Mask = Rasters.Raster((Longitude, Latitude), crs=Param_Crs)
+			for iX=1:N_Width
+				for iY=1:N_Height
+					# if Mask[iX,iY] > 0.0001 || !(isnan(Mask[iX,iY]))
+					if Mask[iX,iY] > 0
+						# This is not normal
+						if isnan(Input[iX, iY])
+							Input[iX, iY] = MissingData
+						end
+						Output_Mask[iX,iY] = Input[iX,iY]
+					else
+						Output_Mask[iX,iY] = Missing
+					end
+				end # for iY=1:Metadatas.N_Height
+			end # for iX=1:Metadatas.N_Width
+		return Output_Mask
+		end  # function: mask
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : GAUGE
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		function GAUGE(;🎏_Method_Index = "Rasters", Latitude=Latitude, Longitude=Longitude, Metadatas=Metadatas, Param_GaugeCoordinate, Path_OutputGauge)
@@ -172,51 +288,6 @@ module geoRaster
 
 		return Gauge, [iX_Gauge, iY_Gauge]
 		end  # function: GAUGE
-	# ------------------------------------------------------------------
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#		FUNCTION : CORRECT_BOARDERS
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function DEM_CORRECT_BOARDERS!(;Dem, Latitude, Longitude, Crs, ΔZadjust=10.0, iiParam_GaugeCoordinate)
-
-			N_Width, N_Height  = size(Dem)
-
-			iiX = iiParam_GaugeCoordinate[1]
-			iiY = iiParam_GaugeCoordinate[2]
-
-			Dem_Boarder = Rasters.Raster((Longitude, Latitude), crs=Crs)
-			for iX=1:N_Width
-				for iY=1:N_Height
-					if Dem[iX, iY] > 0
-						if (iX ≠ 1 && iX ≠ N_Width && iY ≠ 1 && iY ≠ N_Height)
-							if isnan(Dem[iX-1, iY]) || isnan(Dem[min(iX+1, N_Width), iY]) || isnan(Dem[iX, iY-1]) || isnan(Dem[iX, iY+1])
-								Dem_Boarder[iX,iY] = 1
-							else
-								Dem_Boarder[iX,iY] = NaN
-							end
-						else
-							Dem_Boarder[iX,iY] = 1
-						end
-					else
-						Dem_Boarder[iX,iY] = NaN
-					end # Dem[iX, iY] > 0
-				end # iY=1:N_Height
-			end # for iiX=1:N_Width
-
-			for iX=1:N_Width
-				for iY=1:N_Height
-					if Dem_Boarder[iX,iY] > 0
-						if !(iX == iiX && iY== iiY && iX == min(iiX + 1, N_Width) && iY== min(iiY + 1, N_Height) && iX == max(iiX - 1, 1) && iY== max(iiY - 1,1))
-
-							Dem[iX,iY] = Dem[iX,iY] + ΔZadjust
-						end
-					end # Dem[iX, iY] > 0
-				end # iY=1:N_Height
-			end # for iiX=1:N_Width
-
-		return Dem, Dem_Boarder
-		end  # function: CORRECT_BOARDERS
 	# ------------------------------------------------------------------
 
 

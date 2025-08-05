@@ -4,11 +4,6 @@
 # =========================================
 
 # FLAGS
-   🎏_Plots                 = true
-   🎏_Plot_TimeSeries       = true
-   🎏_Plot_FlowAccumulation = false
-   🎏_Plot_NetCDF           = false
-
    🎏_Fix_Cyclic            = false
 
    🎏_Forcing_2_NetCDF      = true
@@ -17,8 +12,16 @@
    🎏_VegetationMap         = true
    🎏_ImpermeableMap        = false
 
+
+   🎏_Plots                 = true
+   🎏_Plot_TimeSeries       = true
+   🎏_Plot_FlowAccumulation = false
+   🎏_Plot_NetCDF           = false
+
+
 # ======= PATHS =======
    Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
+   Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\FABDEM\IRELAND_MOSAIC"
    Path_Root_NetCDF      = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input\Timoleague"
    Path_Root_LookupTable = "DATA//Lookuptable"
 
