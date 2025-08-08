@@ -4,14 +4,17 @@
 # =========================================
 
 # FLAGS
-   🎏_Fix_Cyclic            = false
 
-   🎏_Forcing_2_NetCDF      = true
-   🎏_NetCDF                = true
-   🎏_SoilMap               = true
-   🎏_VegetationMap         = true
-   🎏_ImpermeableMap        = false
+   🎏_Mosaic     = true
+   🎏_Coastline  = true
+   🎏_Fix_Cyclic = false
 
+
+   🎏_Forcing_2_NetCDF = true
+   🎏_ImpermeableMap   = false
+   🎏_NetCDF           = true
+   🎏_SoilMap          = true
+   🎏_VegetationMap    = true
 
    🎏_Plots                 = true
    🎏_Plot_TimeSeries       = true
@@ -20,7 +23,7 @@
 
 
 # ======= PATHS =======
-   Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague"
+   Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\TimoleagueCrop"
    Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\FABDEM\IRELAND_MOSAIC"
    Path_Root_NetCDF      = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input\Timoleague"
    Path_Root_LookupTable = "DATA//Lookuptable"
@@ -42,9 +45,13 @@
       Roads_Shp         = "Roads2.shp"
       SoilMap_Shp       = "SoilMap.shp"
       VegetationMap_Shp = "Landuse.shp"
+      # Mask_Shp          = "Ireland_Coastline.shp"
+      Mask_Shp          = "Crop_Timoleague.shp"
+
 
 	# === Raster file ===
-      Dem_Input_Qgis = "Timoleague_DTM_5m_Clipped.tif"
+      # Dem_Input_Qgis = "Timoleague_DTM_5m_Clipped.tif"
+      Dem_Input_Qgis = "Ireland_FABDEM.tif"
       SoilMap_Raster = "SoilMap_Raster.tif"
       Temporary_Dem  = "Temporary_DEM.tif"
 
@@ -60,7 +67,7 @@
    # Subcatch_Python    = "Basins.tiff"
 
 # === Output Julia ===
-   Dem_Julia           = "Timoleague_DEM.tiff"
+   Dem_Julia           = "Ireland_DEM_Croped.tiff"
    Dem_Julia_Corrected = "Timoleague_DEM_Corrected.tiff"
    Dem_Julia_Mask      = "Timoleague_DEM_Mask.tiff"
    Gauge_Julia         = "Timololeague_Gauge.tiff"

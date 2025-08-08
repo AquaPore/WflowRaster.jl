@@ -70,49 +70,49 @@ module geoRaster
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#		FUNCTION : CORRECT_BOARDERS
+	#		FUNCTION : DEM_DERIVE_COASTLINES
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function DEM_CORRECT_BOARDERS!(;Dem, Latitude, Longitude, Crs, ΔZadjust=10.0, iiParam_GaugeCoordinate)
+		function DEM_DERIVE_COASTLINES(;Dem,  Longitude, Latitude, Crs, Missing=NaN, ϵ=0.001, DemMin=0.5)
 
-		ϵ = 0.1
+			Dem_Coastline = Rasters.Raster((Longitude, Latitude), crs=Crs)
 
-			N_Width, N_Height  = size(Dem)
+			N_Width, N_Height = size(Dem_Coastline)
 
-			iiX = iiParam_GaugeCoordinate[1]
-			iiY = iiParam_GaugeCoordinate[2]
+			Dem_Corrected = deepcopy(Dem)
 
-			Dem_Boarder = Rasters.Raster((Longitude, Latitude), crs=Crs)
-			for iX=1:N_Width
-				for iY=1:N_Height
+			# Removing small islands
+				Threads.@threads for iX=1:N_Width
+					Threads.@threads for iY=1:N_Height
+						if Dem[iX, iY] < DemMin
+                     Dem[iX,iY]           = Missing
+                     Dem_Corrected[iX,iY] = Missing
+						end # Dem[iX, iY] > 0
+					end # iY=1:N_Height
+				end # for iiX=1:N_Width
+
+			Threads.@threads for iX=1:N_Width
+				Threads.@threads for iY=1:N_Height
 					if Dem[iX, iY] > 0
 						if (iX ≠ 1 && iX ≠ N_Width && iY ≠ 1 && iY ≠ N_Height)
-							if Dem[iX-1, iY] < ϵ || (Dem[min(iX+1, N_Width), iY]) < ϵ || (Dem[iX, iY-1]) < ϵ|| (Dem[iX, iY+1]) < ϵ
-								Dem_Boarder[iX,iY] = 1
+							# if Dem[iX-1, iY] ≤ ZseaMeanLevel || (Dem[min(iX+1, N_Width), iY]) ≤ ZseaMeanLevel || (Dem[iX, iY-1]) ≤ ZseaMeanLevel || (Dem[iX, iY+1]) ≤ ZseaMeanLevel
+							if isnan(Dem[iX-1, iY]) || isnan(Dem[min(iX+1, N_Width), iY]) || isnan(Dem[iX, iY-1]) || isnan(Dem[iX, iY+1])
+								Dem_Coastline[iX,iY] = 1
+								Dem_Corrected[iX,iY] = 0.0
 							else
-								Dem_Boarder[iX,iY] = 0
+								Dem_Coastline[iX,iY] = Missing
 							end
 						else
-							Dem_Boarder[iX,iY] = 1
+							Dem_Coastline[iX,iY] = 1
+							Dem_Corrected[iX,iY] = 0.0
 						end
 					else
-						Dem_Boarder[iX,iY] = 0
+						Dem_Coastline[iX,iY] = Missing
 					end # Dem[iX, iY] > 0
 				end # iY=1:N_Height
 			end # for iiX=1:N_Width
 
-			for iX=1:N_Width
-				for iY=1:N_Height
-					if Dem_Boarder[iX,iY] > 0
-						if !(iX == iiX && iY== iiY && iX == min(iiX + 1, N_Width) && iY== min(iiY + 1, N_Height) && iX == max(iiX - 1, 1) && iY== max(iiY - 1,1))
-
-							Dem[iX,iY] = Dem[iX,iY] + ΔZadjust
-						end
-					end # Dem[iX, iY] > 0
-				end # iY=1:N_Height
-			end # for iiX=1:N_Width
-
-		return Dem, Dem_Boarder
-		end  # function: CORRECT_BOARDERS
+		return Dem_Coastline, Dem_Corrected
+		end  # function: DEM_DERIVE_COASTLINES
 	# ------------------------------------------------------------------
 
 
@@ -208,7 +208,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : MOSAIC
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function MOSAIC(;Path_Root_Mosaic, Path_Output_Mosaic, Missing=NaN)
+		function MOSAIC(;Path_Root_Mosaic, Missing=NaN, ZseaMeanLevel=0.001, 🎏_CleanData=true)
 
 			FilesList = readdir(Path_Root_Mosaic,)
 
@@ -222,8 +222,21 @@ module geoRaster
 
 			Mosaic = Rasters.mosaic(first, Maps; missingval=Missing, progress=true)
 
-			Rasters.write(Path_Output_Mosaic, Mosaic; ext=".tiff", missingval=Missing, force=true, verbose=true)
+			if 🎏_CleanData
+				N_Width, N_Height  = size(Mosaic)
 
+				for iX=1:N_Width
+					for iY=1:N_Height
+						if Mosaic[iX,iY] < ZseaMeanLevel || !(Mosaic[iX,iY]>0)
+							Mosaic[iX,iY] = Missing
+						end
+					end # for iY=1:Metadatas.N_Height
+				end # for iX=1:Metadatas.N_Width
+			end
+
+			Mosaic     = Rasters.replace_missing(Mosaic, missingval=NaN)
+
+			printstyled("					==== MOSAIC READY ===", color=:cyan)
 		return Mosaic
 		end  # function: MOSAIC
 	# ------------------------------------------------------------------
