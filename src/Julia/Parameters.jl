@@ -5,7 +5,7 @@
 
 # FLAGS
 
-   🎏_Mosaic     = false
+   🎏_Mosaic     = true
    🎏_Coastline  = true
    🎏_Fix_Cyclic = false
 
