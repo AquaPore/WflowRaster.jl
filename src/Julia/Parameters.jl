@@ -5,20 +5,21 @@
 
 # FLAGS
 
-   🎏_Mosaic     = true
-   🎏_Coastline  = true
-   🎏_Fix_Cyclic = false
+   🎏_Mosaic                = false
+   🎏_Coastline             = true
+   🎏_Fix_Cyclic            = false
+   🎏_MaskFromDem           = true
+   🎏_RiverFromDem           = true
 
-
-   🎏_Forcing_2_NetCDF = true
-   🎏_ImpermeableMap   = false
-   🎏_NetCDF           = true
-   🎏_SoilMap          = true
-   🎏_VegetationMap    = true
+   🎏_Forcing_2_NetCDF      = true
+   🎏_ImpermeableMap        = false
+   🎏_NetCDF                = true
+   🎏_SoilMap               = true
+   🎏_VegetationMap         = true
 
    🎏_Plots                 = true
    🎏_Plot_TimeSeries       = true
-   🎏_Plot_FlowAccumulation = false
+   🎏_Plot_FlowAccumulation = true
    🎏_Plot_NetCDF           = false
 
 
@@ -54,6 +55,7 @@
       Dem_Input_Qgis = "Ireland_FABDEM.tif"
       SoilMap_Raster = "SoilMap_Raster.tif"
       Temporary_Dem  = "Temporary_DEM.tif"
+      Filename_Dem2Rivers = "Dem2Rivers.tiff"
 
 # === Input  Forcing ===
 	Forcing_Input = "forcing.Timoleague.csv"
@@ -112,7 +114,7 @@
 	# GAUGE COORDINATES
       # Param_GaugeCoordinate =  [146700.2167,42159.7300]
       # Param_GaugeCoordinate = [146690.673,42139.540]
-      Param_GaugeCoordinate =[146681.976,42127.854]
+      Param_GaugeCoordinate =[146661.436,42179.926]
       Dem_PitGaugeReduced = 10.00
 
    # LAYERS
