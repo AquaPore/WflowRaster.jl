@@ -72,7 +72,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : DEM_DERIVE_COASTLINES
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function DEM_DERIVE_COASTLINES(;Dem,  Longitude, Latitude, Crs, Missing=NaN, ϵ=0.001, DemMin=0.5)
+		function DEM_DERIVE_COASTLINES(;Dem,  Longitude, Latitude, Crs, Missing=NaN, ϵ=0.001, DemMin=0.001)
 
 			Dem_Coastline = Rasters.Raster((Longitude, Latitude), crs=Crs)
 
@@ -208,7 +208,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : MOSAIC
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function MOSAIC(;Path_Root_Mosaic, Missing=NaN, ZseaMeanLevel=0.001, 🎏_CleanData=true)
+		function MOSAIC(;Path_Root_Mosaic, Missing=NaN, ZseaMeanLevel=5.0, 🎏_CleanData=true)
 
 			FilesList = readdir(Path_Root_Mosaic,)
 
@@ -307,7 +307,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : LOOKUPTABLE_2_MAPS
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Param_Crs, Dem_Resample_Mask, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Missingval=NaN, Path_InputGis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
+		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Param_Crs, Dem_Resample_Mask, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Missingval=NaN, Path_Gis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
 
 			# READING THE LOOKUP TABLE
 				Path_Home = @__DIR__
@@ -333,7 +333,7 @@ module geoRaster
 					println(Lookup[!,:CLASS])
 
 			# READING THE SHAPEFILE
-				Path_Input = joinpath(Path_Root, Path_InputGis, Map_Shp)
+				Path_Input = joinpath(Path_Root, Path_Gis, Map_Shp)
 				println(Path_Input)
 
 				Map_Shapefile= GeoDataFrames.read(Path_Input)
@@ -361,7 +361,7 @@ module geoRaster
 
 						Maps_Output = push!(Maps_Output, Map)
 
-					Path_Output = joinpath(Path_Root, Path_OutputWflow, iiHeader * ".tiff")
+					Path_Output = joinpath(Path_Root, Path_Wflow, iiHeader * ".tiff")
 						Rasters.write(Path_Output, Map; ext=".tiff", force=true, verbose=true)
 						println(Path_Output)
 

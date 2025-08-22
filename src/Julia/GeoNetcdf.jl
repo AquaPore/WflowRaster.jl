@@ -49,10 +49,10 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : CONVERT_2_NETCDF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIFF_2_NETCDF(Gauge, Impermable_Wflow, Impermeable_Mask, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, River_Wflow, RiverDepth, RiverDepth_Wflow, RiverLength_Mask, RiverSlope, RiverSlope_Wflow, RiverWidth, RiverWidth_Wflow, Slope_Mask, Soil_Header, Soil_Maps, Subcatch_Wflow, Subcatchment, Vegetation_Header, Vegetation_Maps)
+		function TIFF_2_NETCDF(Gauge, Filename_Wflow_Impermable, Impermeable_Mask, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, Filename_Wflow_Rivers, RiverDepth, Filename_Wflow_RiverDepth, RiverLength_Mask, RiverSlope, Filename_Wflow_RiverSlope, RiverWidth, Filename_Wflow_RiverWidth, Slope_Mask, Soil_Header, Soil_Maps, Filename_Wflow_Subcatchment, Subcatchment, Vegetation_Header, Vegetation_Maps)
 
-			# Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, NetCDF_Instates)
-			Path_NetCDF_Full  = joinpath(Path_Root, Path_NetCDF, NetCDF_Instates)
+			# Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
+			Path_NetCDF_Full  = joinpath(Path_Root, Path_NetCDF, Filename_NetCDF_Instates)
 
 			isfile(Path_NetCDF_Full) && rm(Path_NetCDF_Full, force=true)
 			println(Path_NetCDF_Full)
@@ -120,7 +120,7 @@ module geoNetcdf
 				println(Keys)
 
 			# == LDD input ==========================================
-				Keys = splitext(Ldd_Wflow)[1]
+				Keys = splitext(Filename_Wflow_Ldd)[1]
 				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, UInt8, ("x","y"), fillvalue=0)
 
 				Ldd_NetCDF .= Array(Ldd_Mask)
@@ -131,7 +131,7 @@ module geoNetcdf
 				println(Keys)
 
 			# == SUBCATCHMENT input ==========================================
-				Keys = splitext(Subcatch_Wflow)[1]
+				Keys = splitext(Filename_Wflow_Subcatchment)[1]
 				Subcatchment_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0)
 
 				Subcatchment_NetCDF .= Array(Subcatchment)
@@ -141,7 +141,7 @@ module geoNetcdf
 				println(Keys)
 
 			# == GAUGES input ==========================================
-				Keys = splitext(Gauge_Wflow)[1]
+				Keys = splitext(Filename_Wflow_Gauge)[1]
 				Gauge_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0)
 
 				Gauge_NetCDF .= Array(Gauge)
@@ -152,7 +152,7 @@ module geoNetcdf
 
 
 			# == SLOPE input ==========================================
-				Keys = splitext(Slope_Wflow)[1]
+				Keys = splitext(Filename_Wflow_Slope)[1]
 				Slope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
 				Slope_NetCDF .= Array(Slope_Mask)
@@ -163,7 +163,7 @@ module geoNetcdf
 
 
 			# == RIVER input ==========================================
-				Keys = splitext(River_Wflow)[1]
+				Keys = splitext(Filename_Wflow_Rivers)[1]
 				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0)
 
 				River_NetCDF .= Array(River_Mask)
@@ -174,7 +174,7 @@ module geoNetcdf
 
 
 			# == RIVER-SLOPE input ==========================================
-				Keys = splitext(RiverSlope_Wflow)[1]
+				Keys = splitext(Filename_Wflow_RiverSlope)[1]
 
 				RiverSlope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
@@ -186,7 +186,7 @@ module geoNetcdf
 
 
 			# == RIVER-LENGTH input ==========================================
-				Keys = splitext(RiverLength_Wflow)[1]
+				Keys = splitext(Filename_Wflow_RiverLength)[1]
 
 				RiverLength_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
@@ -198,7 +198,7 @@ module geoNetcdf
 
 
 			# == RIVER-WIDTH input ==========================================
-				Keys = splitext(RiverWidth_Wflow)[1]
+				Keys = splitext(Filename_Wflow_RiverWidth)[1]
 
 				RiverWidth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
@@ -210,7 +210,7 @@ module geoNetcdf
 
 
 			# == RIVER-DEPTH input ==========================================
-				Keys = splitext(RiverDepth_Wflow)[1]
+				Keys = splitext(Filename_Wflow_RiverDepth)[1]
 
 				RiverDepth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
@@ -223,7 +223,7 @@ module geoNetcdf
 
 			# == IMPERMEABLE input ==========================================
 				if 🎏_ImpermeableMap
-					Keys = splitext(Impermable_Wflow)[1]
+					Keys = splitext(Filename_Wflow_Impermable)[1]
 					Impermeable_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
 					Impermeable_NetCDF .= Array(Impermeable_Mask)
@@ -283,7 +283,7 @@ module geoNetcdf
 				printstyled("Ending Dates = $End_DateTime \n"; color =:green)
 
 			# Read the CSV file
-				Path_Input = joinpath(Path_Root, Path_InputForcing, Forcing_Input)
+				Path_Input = joinpath(Path_Root, Path_Forcing, Filename_Input_Forcing)
 				println(Path_Input)
 
 				Data₀      = CSV.File(Path_Input, header=true)
@@ -348,7 +348,7 @@ module geoNetcdf
 				end # for iX=1:Metadatas.N_Width
 
 			# NETCDF
-				Path_NetCDFmeteo_Output  = joinpath(Path_Root, Path_NetCDF, NetCDF_Forcing)
+				Path_NetCDFmeteo_Output  = joinpath(Path_Root, Path_NetCDF, Filename_NetCDF_Forcing)
 				isfile(Path_NetCDFmeteo_Output) && rm(Path_NetCDFmeteo_Output, force=true)
 				println(Path_NetCDFmeteo_Output)
 
@@ -466,7 +466,7 @@ module geoNetcdf
 				printstyled("Ending Dates = $End_DateTime \n"; color =:green)
 
 			# Read the CSV file
-				Path_Input = joinpath(Path_Root, Path_InputForcing, Forcing_Input)
+				Path_Input = joinpath(Path_Root, Path_Forcing, Filename_Input_Forcing)
 				println(Path_Input)
 
 				Data₀      = CSV.File(Path_Input, header=true)
@@ -511,7 +511,7 @@ module geoNetcdf
 				Temp_Array_iT   = fill(NaN::Float64, Metadatas.N_Width, Metadatas.N_Height)
 
 			# Netcdf
-				Path_NetCDFmeteo_Output  = joinpath(Path_Root, Path_OutputTimeSeriesWflow, NetCDF_Forcing)
+				Path_NetCDFmeteo_Output  = joinpath(Path_Root, Path_TimeSeriesWflow, Filename_NetCDF_Forcing)
 				isfile(Path_NetCDFmeteo_Output) && rm(Path_NetCDFmeteo_Output, force=true)
 				println(Path_NetCDFmeteo_Output)
 
