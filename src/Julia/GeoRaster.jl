@@ -307,7 +307,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : LOOKUPTABLE_2_MAPS
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Param_Crs, Dem_Resample_Mask, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Missingval=NaN, Path_Gis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
+		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Param_Crs, Dem_Resample, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Missingval=NaN, Path_Gis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
 
 			# READING THE LOOKUP TABLE
 				Path_Home = @__DIR__

@@ -4,8 +4,8 @@
 # =========================================
 
 # FLAGS
-   🎏_Mosaic                = true
-   🎏_DemFromMosaic         = false # Gis
+   🎏_Mosaic                = false
+   🎏_DemFromMosaic         = true # Gis
    🎏_Coastline             = false
    🎏_Fix_Cyclic            = false
    🎏_MaskFromDem           = true
@@ -51,7 +51,7 @@
 
 	# === Raster input file ===
       Filename_Input_Dem        = "Ireland_FABDEM.tif"
-      Filename_Input_SoilMap    = "Filename_Input_SoilMap.tif"
+      Filename_Input_SoilMap    = "SoilMap.tiff"
 
 # === Input  Forcing ===
 	Filename_Input_Forcing = "forcing.Timoleague.csv"
