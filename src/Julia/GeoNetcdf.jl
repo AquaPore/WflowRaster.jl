@@ -150,7 +150,6 @@ module geoNetcdf
 				Gauge_NetCDF.attrib["comments"] = "Derived from hydromt"
 				println(Keys)
 
-
 			# == SLOPE input ==========================================
 				Keys = splitext(Filename_Wflow_Slope)[1]
 				Slope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
@@ -160,7 +159,6 @@ module geoNetcdf
 				Slope_NetCDF.attrib["units"] = "deg"
 				Slope_NetCDF.attrib["comments"] = "Derived from hydromt"
 				println(Keys)
-
 
 			# == RIVER input ==========================================
 				Keys = splitext(Filename_Wflow_Rivers)[1]

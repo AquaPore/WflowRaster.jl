@@ -1,6 +1,9 @@
 ﻿CODE_CLASS,CLASS,KsatVer
-5,Well,1.0
-4,Poorly,1.0
-4,Imperfectly,1.0
-3,Moderately,1.0
-1,missing,1.0
+1,Excessively,3000
+2,imperfectly,3000
+3,Other,3000
+4,moderately,3000
+5,Other,3000
+6,Poor,3000
+7,Well,3000
+8,missing,3000

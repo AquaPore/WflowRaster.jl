@@ -3,24 +3,32 @@
 # 					PARAMETERS
 # =========================================
 
-# FLAGS
-   🎏_Mosaic                = false
-   🎏_DemFromMosaic         = true # Gis
-   🎏_Coastline             = false
-   🎏_Fix_Cyclic            = false
-   🎏_MaskFromDem           = true
-   🎏_RiverFromDem          = true
+# Flags: processing inputs
+   🎏_Coastline      = false
+   🎏_DemFromMosaic  = false # Gis stored
+   🎏_Fix_Cyclic     = false # obsolete
+   🎏_MaskFromDem    = true
+   🎏_Mosaic         = true
+   🎏_RiverFromDem   = true
 
-   🎏_Forcing_2_NetCDF      = true
-   🎏_ImpermeableMap        = false
-   🎏_NetCDF                = true
-   🎏_SoilMap               = true
-   🎏_VegetationMap         = true
+   # Flags: outputs of interest
+      🎏_ImpermeableMap = false
 
-   🎏_Plots                 = true
-   🎏_Plot_TimeSeries       = true
-   🎏_Plot_FlowAccumulation = true
-   🎏_Plot_NetCDF           = false
+   # Flags: LookupTables
+      🎏_SoilMap               = true
+      🎏_VegetationMap         = true
+      🎏_LookupTable_Shp_SoilMap = false # <true> If soilmap is shp; <false> if soilmap is tiff
+      🎏_LookupTable_Shp_Vegetation = false # <true> If soilmap is shp; <false> if soilmap is tiff
+
+   # Flags: plots
+      🎏_Plots                 = true
+      🎏_Plot_TimeSeries       = true
+      🎏_Plot_FlowAccumulation = false
+      🎏_Plot_NetCDF           = false
+
+   # Flags: NetCDF
+      🎏_NetCDF                = true
+      🎏_Forcing_2_NetCDF      = true
 
 @assert(!(🎏_Mosaic && 🎏_DemFromMosaic))
 
@@ -28,7 +36,7 @@
    Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\TimoleagueCrop"
    Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\FABDEM\IRELAND_MOSAIC"
    Path_Root_NetCDF      = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input\Timoleague"
-   Path_Root_LookupTable = "DATA//Lookuptable"
+   Path_Root_LookupTable = raw"DATA\Lookuptable"
 
    Path_Forcing         = "InputTimeSeries/TimeSeries_Process"
    Path_Gis             = "InputGis"
@@ -47,7 +55,7 @@
       Filename_River_Shp         = "Timoleague_River3.shp"
       Filename_Roads_Shp         = "Roads2.shp"
       Filename_SoilMap_Shp       = "SoilMap.shp"
-      Filename_VegetationMap_Shp = "Landuse.shp"
+      Filename_VegetationMap_Shp = "VegetationMap.shp"
 
 	# === Raster input file ===
       Filename_Input_Dem        = "Ireland_FABDEM.tif"

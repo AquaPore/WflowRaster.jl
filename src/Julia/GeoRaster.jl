@@ -28,47 +28,6 @@ module geoRaster
 	 end # struct METADATA
 
 
-	 """
-		  Deriving metadata from the GeoTiff file
-	 """
-	 # ================================================================
-	 #		FUNCTION : RASTER_METADATA
-	 # ================================================================
-		function RASTER_METADATA(Map; Verbose=true)
-			# Grid = Rasters.Raster(Path, lazy=true)
-			N_Width, N_Height  = size(Map)
-			ΔX       = step(dims(Map, X))
-			ΔY       = step(dims(Map, Y))
-
-			# Crs_Rasters = Rasters.crs(Map)
-
-			Coord_X_Left   = first(dims(Map, X))
-			Coord_X_Right  = last(dims(Map, X))
-			Coord_Y_Top    = first(dims(Map ,Y))
-			Coord_Y_Bottom = last(dims(Map,Y))
-
-			Crs_GeoFormat = GeoFormatTypes.convert(WellKnownText, EPSG(Param_Crs))
-
-			if Verbose
-				println("Param_Crs = $Param_Crs")
-				println("ΔX = $ΔX")
-				println("ΔY = $ΔY")
-				println("N_Width  = $N_Width")
-				println("N_Height = $N_Height")
-				println("Coord_X_Left = $Coord_X_Left, Coord_X_Right = $Coord_X_Right")
-				println("Coord_Y_Top = $Coord_Y_Top, Coord_Y_Bottom = $Coord_Y_Bottom")
-			end
-
-			@assert(N_Width == Int32((Coord_X_Right - Coord_X_Left) / ΔX +1))
-			@assert(N_Height == Int32((Coord_Y_Top - Coord_Y_Bottom) / -ΔY + 1))
-
-			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Param_Crs, Crs_GeoFormat)
-
-		return Metadata
-		end # function RASTER_METADATA
-	# ----------------------------------------------------------------
-
-
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : DEM_DERIVE_COASTLINES
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,6 +73,48 @@ module geoRaster
 		return Dem_Coastline, Dem_Corrected
 		end  # function: DEM_DERIVE_COASTLINES
 	# ------------------------------------------------------------------
+
+
+	 """
+		  Deriving metadata from the GeoTiff file
+	 """
+	 # ================================================================
+	 #		FUNCTION : RASTER_METADATA
+	 # ================================================================
+		function RASTER_METADATA(Map; Verbose=true)
+			# Grid = Rasters.Raster(Path, lazy=true)
+			N_Width, N_Height  = size(Map)
+			ΔX       = step(dims(Map, X))
+			ΔY       = step(dims(Map, Y))
+
+			# Crs_Rasters = Rasters.crs(Map)
+
+			Coord_X_Left   = first(dims(Map, X))
+			Coord_X_Right  = last(dims(Map, X))
+			Coord_Y_Top    = first(dims(Map ,Y))
+			Coord_Y_Bottom = last(dims(Map,Y))
+
+			Crs_GeoFormat = GeoFormatTypes.convert(WellKnownText, EPSG(Param_Crs))
+
+			if Verbose
+				println("Param_Crs = $Param_Crs")
+				println("ΔX = $ΔX")
+				println("ΔY = $ΔY")
+				println("N_Width  = $N_Width")
+				println("N_Height = $N_Height")
+				println("Coord_X_Left = $Coord_X_Left, Coord_X_Right = $Coord_X_Right")
+				println("Coord_Y_Top = $Coord_Y_Top, Coord_Y_Bottom = $Coord_Y_Bottom")
+			end
+
+			@assert(N_Width == Int32((Coord_X_Right - Coord_X_Left) / ΔX +1))
+			@assert(N_Height == Int32((Coord_Y_Top - Coord_Y_Bottom) / -ΔY + 1))
+
+			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Param_Crs, Crs_GeoFormat)
+
+		return Metadata
+		end # function RASTER_METADATA
+	# ----------------------------------------------------------------
+
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -307,7 +308,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : LOOKUPTABLE_2_MAPS
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Param_Crs, Dem_Resample, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Missingval=NaN, Path_Gis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
+		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Param_Crs, Dem_Resample, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Path_Gis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX, Missingval=NaN)
 
 			# READING THE LOOKUP TABLE
 				Path_Home = @__DIR__
@@ -355,7 +356,7 @@ module geoRaster
 			# SAVING MAPS
 				Maps_Output = []
 				for iiHeader in Header
-					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill =Symbol(iiHeader), res=ΔX, to=Dem_Resample_Mask, missingval=Missingval, crs=Param_Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
+					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill =Symbol(iiHeader), res=ΔX, to=Dem_Resample, missingval=Missingval, crs=Param_Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
 
 						Map = geoRaster.MASK(;Param_Crs=Metadatas.Crs_GeoFormat, Input=Map₁, Latitude, Longitude, Mask=Subcatchment)
 
