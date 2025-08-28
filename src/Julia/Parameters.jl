@@ -34,7 +34,7 @@
 
 # ======= PATHS =======
    Path_Root             = raw"d:\JOE\MAIN\MODELS\WFLOW\DATA\TimoleagueCrop"
-   Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\FABDEM\IRELAND_MOSAIC"
+   Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
    Path_Root_NetCDF      = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input\Timoleague"
    Path_Root_LookupTable = raw"DATA\Lookuptable"
 
