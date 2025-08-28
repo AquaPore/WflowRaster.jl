@@ -22,13 +22,13 @@
 
    # Flags: plots
       🎏_Plots                 = true
-      🎏_Plot_TimeSeries       = true
+      🎏_Plot_TimeSeries       = false
       🎏_Plot_FlowAccumulation = false
       🎏_Plot_NetCDF           = false
 
    # Flags: NetCDF
       🎏_NetCDF                = true
-      🎏_Forcing_2_NetCDF      = true
+      🎏_Forcing_2_NetCDF      = false
 
 @assert(!(🎏_Mosaic && 🎏_DemFromMosaic))
 
