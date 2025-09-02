@@ -42,7 +42,7 @@ module geoRaster
 			# Removing small islands
 				Threads.@threads for iX=1:N_Width
 					Threads.@threads for iY=1:N_Height
-						if Dem[iX, iY] < DemMin
+						if Dem[iX, iY] < 0.001
                      Dem[iX,iY]           = Missing
                      Dem_Corrected[iX,iY] = Missing
 						end # Dem[iX, iY] > 0
@@ -56,13 +56,13 @@ module geoRaster
 							# if Dem[iX-1, iY] ≤ ZseaMeanLevel || (Dem[min(iX+1, N_Width), iY]) ≤ ZseaMeanLevel || (Dem[iX, iY-1]) ≤ ZseaMeanLevel || (Dem[iX, iY+1]) ≤ ZseaMeanLevel
 							if isnan(Dem[iX-1, iY]) || isnan(Dem[min(iX+1, N_Width), iY]) || isnan(Dem[iX, iY-1]) || isnan(Dem[iX, iY+1])
 								Dem_Coastline[iX,iY] = 1
-								Dem_Corrected[iX,iY] = 0.0
+								Dem_Corrected[iX,iY] = Dem_Corrected[iX,iY] + DemMin
 							else
 								Dem_Coastline[iX,iY] = Missing
 							end
 						else
 							Dem_Coastline[iX,iY] = 1
-							Dem_Corrected[iX,iY] = 0.0
+							Dem_Corrected[iX,iY] = Dem_Corrected[iX,iY] + DemMin
 						end
 					else
 						Dem_Coastline[iX,iY] = Missing
