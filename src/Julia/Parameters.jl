@@ -18,6 +18,12 @@
       End_Hour    = 0 :: Int64
    end # struct METADATA
 
+   # Flags: plots
+      🎏_Plots                 = true
+      🎏_Plot_TimeSeries       = false
+      🎏_Plot_FlowAccumulation = false
+      🎏_Plot_NetCDF           = false
+
    # ======= PATHS =======
       Path_Root             = joinpath(raw"d:\JOE\MAIN\MODELS\WFLOW\DATA", "$🎏_CatchmentName")
       Path_Root_NetCDF      = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
@@ -106,11 +112,6 @@ if 🎏_CatchmentName == "Timoleague"
          🎏_SoilMap               = true
          🎏_VegetationMap         = false
 
-      # Flags: plots
-         🎏_Plots                 = true
-         🎏_Plot_TimeSeries       = false
-         🎏_Plot_FlowAccumulation = false
-         🎏_Plot_NetCDF           = false
 
       # Flags: NetCDF
          🎏_NetCDF                = true
@@ -141,7 +142,7 @@ if 🎏_CatchmentName == "Timoleague"
       # GAUGE COORDINATES
          # Param_GaugeCoordinate =  [146700.2167,42159.7300]
          # Param_GaugeCoordinate = [146690.673,42139.540]
-         Param_GaugeCoordinate =[146701.41,42082.39]
+         Param_GaugeCoordinate =[146702.538,42182.544]
 
       # SOILS PARAMETERS
          Layer_Soil = :DRAINAGE
@@ -171,12 +172,6 @@ if 🎏_CatchmentName == "Timoleague"
          # Flags: LookupTables
          🎏_SoilMap               = true
          🎏_VegetationMap         = true
-
-         # Flags: plots
-         🎏_Plots                 = true
-         🎏_Plot_TimeSeries       = false
-         🎏_Plot_FlowAccumulation = false
-         🎏_Plot_NetCDF           = false
 
          # Flags: NetCDF
          🎏_NetCDF                = true
