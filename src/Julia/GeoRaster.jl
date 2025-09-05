@@ -341,6 +341,7 @@ module geoRaster
 
 				# Creating new columns from the Lookup table
 					for iiHeader in Header
+					println(iiHeader)
 						# Initializing a new column
 						Map_Shapefile[!, Symbol(iiHeader)] .= 1.0
 
@@ -356,7 +357,7 @@ module geoRaster
 			# SAVING MAPS
 				Maps_Output = []
 				for iiHeader in Header
-					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill =Symbol(iiHeader), res=ΔX, to=Dem_Resample, missingval=Missingval, crs=Param_Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
+					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill=Symbol(iiHeader), res=ΔX, to=Dem_Resample, missingval=Missingval, crs=Param_Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
 
 						Map = geoRaster.MASK(;Param_Crs=Metadatas.Crs_GeoFormat, Input=Map₁, Latitude, Longitude, Mask=Subcatchment)
 
