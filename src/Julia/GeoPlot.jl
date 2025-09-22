@@ -33,7 +33,7 @@ module geoPlot
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : HEATMAP_TIME
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function HEATMAP_TIME(;Path=Path, NameOutput="temp", Layer=1)
+		function HEATMAP_TIME(;Path=Path, NameOutput="temp", Layer=1, 🎏_Reverse=false)
 			Output_NCDatasets = NCDatasets.NCDataset(Path)
 
 			# using GLMakie
@@ -48,7 +48,15 @@ module geoPlot
 			N_Time  = size(Data)[3]
 
 			Pmin, Pmax = extrema(x for x ∈ skipmissing(Data) if !isnan(x))
-			@show Pmin Pmax
+			@show Pmin, Pmax
+
+			if Pmax < Pmin + 0.0001
+				Pmax = Pmax * 1.1 + 0.0001
+				println(" max == Pmin")
+			end
+
+			# # # Pmin = minimum(skipmissing(Data))
+			# # # Pmax = maximum(skipmissing(Data))
 
 			function DATA_3D_2_2D(Data; iTime=iTime, Layer=Layer)
 				return Data[:,:, iTime]
@@ -58,7 +66,7 @@ module geoPlot
 
 			Ax_1 = GLMakie.Axis(Fig[1, 1], title=NameOutput, xlabelsize=xlabelSize, ylabelsize=xlabelSize, xticksize=xticksize, xgridvisible=xgridvisible, ygridvisible=xgridvisible)
 
-			Ax_1.yreversed = true
+			Ax_1.yreversed = 🎏_Reverse
 
 			sg = GLMakie.SliderGrid(Fig[2, 1],
 			(label="iTime", range=1:1:N_Time, startvalue=1),

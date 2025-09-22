@@ -3,7 +3,7 @@
 # 					PARAMETERS
 # =========================================
 
-   🎏_CatchmentName = "Cregduff" # <"Timoleague">; <"Ballycanew">; <"Castledockerell">; <"Corduff">; <"Dunleer">; <"Cregduff">
+   🎏_CatchmentName = "Timoleague" # <"Timoleague">; <"Ballycanew">; <"Castledockerell">; <"Corduff">; <"Dunleer">; <"Cregduff">
 
    # DATES
    Base.@kwdef mutable struct DATES
