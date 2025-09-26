@@ -12,7 +12,7 @@
       Start_Day   = 10 :: Int64
       Start_Hour  = 0 :: Int64
 
-      End_Year    = 2011 :: Int64
+      End_Year    = 2024 :: Int64
       End_Month   = 12 :: Int64
       End_Day     = 30 :: Int64
       End_Hour    = 23 :: Int64
@@ -83,7 +83,7 @@
 
       # === Output netCDF ===
          Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
-         Filename_NetCDF_Forcing  = "forcing-" * 🎏_CatchmentName * ".nc"
+         Filename_NetCDF_Forcing  = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
 
    # === Lookup tables ===
       Filename_Lookuptable_Hydro      = "LookupTable_Hydro.csv"
@@ -417,5 +417,4 @@ elseif 🎏_CatchmentName == "Timoleague"
 
       # VEGETATION MAPS
          Layer_Vegetation = :CROP
-
    end

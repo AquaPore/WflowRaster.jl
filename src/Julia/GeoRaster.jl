@@ -307,7 +307,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : LOOKUPTABLE_2_MAPS
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Param_Crs, Dem_Resample, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Path_Gis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX, Missingval=NaN)
+		function LOOKUPTABLE_2_MAPS(;🎏_Plots, Colormap=:viridis, Param_Crs, Dem_Resample, Latitude, Longitude, LookupTable, Map_Shp, Map_Value, Metadatas, Path_Gis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX, Missingval=NaN, 🎏_Progress=false)
 
 			# READING THE LOOKUP TABLE
 				Path_Home = @__DIR__
@@ -356,7 +356,7 @@ module geoRaster
 			# SAVING MAPS
 				Maps_Output = []
 				for iiHeader in Header
-					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill=Symbol(iiHeader), res=ΔX, to=Dem_Resample, missingval=Missingval, crs=Param_Crs, boundary=:center, shape=:polygon, progress=true, verbose=false)
+					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill=Symbol(iiHeader), res=ΔX, to=Dem_Resample, missingval=Missingval, crs=Param_Crs, boundary=:center, shape=:polygon, progress=🎏_Progress, verbose=false)
 
 						Map = geoRaster.MASK(;Param_Crs=Metadatas.Crs_GeoFormat, Input=Map₁, Latitude, Longitude, Mask=Subcatchment)
 
