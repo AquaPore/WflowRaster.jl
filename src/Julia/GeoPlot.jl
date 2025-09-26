@@ -42,10 +42,18 @@ module geoPlot
 
 			Data = Output_NCDatasets[NameOutput]
 			Data = Array(Data)
+			Dimensions = length(size(Data))
 
-			N_Lon = size(Data)[1]
-			N_Lat  = size(Data)[2]
-			N_Time  = size(Data)[3]
+			if Dimensions == 3
+				N_Lon  = size(Data)[1]
+				N_Lat  = size(Data)[2]
+				N_Time = size(Data)[3]
+
+			elseif Dimensions == 4
+				N_Lon  = size(Data)[1]
+				N_Lat  = size(Data)[2]
+				N_Time = size(Data)[4]
+			end
 
 			Pmin, Pmax = extrema(x for x ∈ skipmissing(Data) if !isnan(x))
 			@show Pmin, Pmax
@@ -59,12 +67,17 @@ module geoPlot
 			# # # Pmax = maximum(skipmissing(Data))
 
 			function DATA_3D_2_2D(Data; iTime=iTime, Layer=Layer)
-				return Data[:,:, iTime]
+				if Dimensions == 4
+					return Data[:,:, Layer, iTime]
+				elseif Dimensions == 3
+					return Data[:,:, iTime]
+				end
 			end
 
-			Fig = GLMakie.Figure(Width=800, Height=600)
+			# Fig = GLMakie.Figure(Width=800, Height=600)
+			Fig = GLMakie.Figure()
 
-			Ax_1 = GLMakie.Axis(Fig[1, 1], title=NameOutput, xlabelsize=xlabelSize, ylabelsize=xlabelSize, xticksize=xticksize, xgridvisible=xgridvisible, ygridvisible=xgridvisible)
+			Ax_1 = GLMakie.Axis(Fig[1, 1], title=NameOutput, xlabelsize=xlabelSize, ylabelsize=xlabelSize, xticksize=xticksize, xgridvisible=xgridvisible, ygridvisible=xgridvisible, aspect=1)
 
 			Ax_1.yreversed = 🎏_Reverse
 
@@ -79,6 +92,7 @@ module geoPlot
 			Data_Plot = GLMakie.heatmap!(Ax_1, 1:N_Lon, 1:N_Lat, Data_Time, colorrange=(Pmin, Pmax), colormap =:hawaii50)
 
 			GLMakie.Colorbar(Fig[1, 2], Data_Plot; label=NameOutput, width=20, ticks = Pmin:(Pmax-Pmin)/5:Pmax)
+			GLMakie.colsize!(Fig.layout, 1, GLMakie.Aspect(1, 1.0))
 
 			Fig
 	 	end # HEATMAP_TIME

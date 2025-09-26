@@ -9,20 +9,20 @@
    Base.@kwdef mutable struct DATES
       Start_Year  = 2010 :: Int64
       Start_Month = 1 :: Int64
-      Start_Day   = 1 :: Int64
+      Start_Day   = 10 :: Int64
       Start_Hour  = 0 :: Int64
 
-      End_Year    = 2010 :: Int64
-      End_Month   = 4 :: Int64
-      End_Day     = 1 :: Int64
-      End_Hour    = 0 :: Int64
+      End_Year    = 2011 :: Int64
+      End_Month   = 12 :: Int64
+      End_Day     = 30 :: Int64
+      End_Hour    = 23 :: Int64
    end # struct METADATA
 
    # Flags: plots
-      🎏_Plots                 = true
+      🎏_Plots                 = false
       🎏_Plot_TimeSeries       = false
       🎏_Plot_FlowAccumulation = false
-      🎏_Plot_NetCDF           = true
+      🎏_Plot_NetCDF           = false
 
    # ======= PATHS =======
       Path_Root             = joinpath(raw"d:\JOE\MAIN\MODELS\WFLOW\DATA", "$🎏_CatchmentName")

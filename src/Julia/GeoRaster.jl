@@ -116,7 +116,6 @@ module geoRaster
 	# ----------------------------------------------------------------
 
 
-
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : DEM_CORRECT_BOARDERS_1!
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -357,14 +356,14 @@ module geoRaster
 			# SAVING MAPS
 				Maps_Output = []
 				for iiHeader in Header
-					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill=Symbol(iiHeader), res=ΔX, to=Dem_Resample, missingval=Missingval, crs=Param_Crs, boundary=:center, shape=:polygon, progress=true, verbose=true)
+					Map₁ = Rasters.rasterize(last, Map_Shapefile;  fill=Symbol(iiHeader), res=ΔX, to=Dem_Resample, missingval=Missingval, crs=Param_Crs, boundary=:center, shape=:polygon, progress=true, verbose=false)
 
 						Map = geoRaster.MASK(;Param_Crs=Metadatas.Crs_GeoFormat, Input=Map₁, Latitude, Longitude, Mask=Subcatchment)
 
 						Maps_Output = push!(Maps_Output, Map)
 
 					Path_Output = joinpath(Path_Root, Path_Wflow, iiHeader * ".tiff")
-						Rasters.write(Path_Output, Map; ext=".tiff", force=true, verbose=true)
+						Rasters.write(Path_Output, Map; ext=".tiff", force=true, verbose=false)
 						println(Path_Output)
 
 					# Plotting the maps
