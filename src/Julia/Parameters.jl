@@ -50,6 +50,7 @@
          Filename_Roads_Shp         = "Roads.shp"
          Filename_SoilMap_Shp       = "SoilMap.shp"
          Filename_VegetationMap_Shp = "VegetationMap.shp"
+         Filename_VegetationMap_Shp = "NATIONAL_LAND_COVER_MAP.gdb"
 
          Filename_Input_SoilMap    = "SoilMap.tiff" # Obsolete
 
@@ -87,7 +88,7 @@
 
    # === Lookup tables ===
       Filename_Lookuptable_Hydro      = "LookupTable_Hydro.csv"
-      Filename_Lookuptable_Vegetation = "LookupTable_Veg.csv"
+      Filename_Lookuptable_Vegetation = "LookupTable_Veg_NLCM.csv"
 
    #  ======= PARAMETERS =======
       # Coordinate reference system
@@ -386,11 +387,11 @@ elseif 🎏_CatchmentName == "Timoleague"
 
       # Flags: LookupTables
          🎏_SoilMap               = true
-         🎏_VegetationMap         = true
+         🎏_VegetationMap         = false
 
       # Flags: NetCDF
-         🎏_NetCDF                = true
-         🎏_Forcing_2_NetCDF      = true
+         🎏_NetCDF                = false
+         🎏_Forcing_2_NetCDF      = false
 
    # ======= PATHS =======
       Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
@@ -416,5 +417,5 @@ elseif 🎏_CatchmentName == "Timoleague"
          soil_layer__thickness = [100, 300, 800]
 
       # VEGETATION MAPS
-         Layer_Vegetation = :CROP
+         Layer_Vegetation = :LEVEL_2_ID
    end
