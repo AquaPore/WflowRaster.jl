@@ -1,8 +1,8 @@
 ﻿NO,DESCRIPTION,CLASS,vegetation_kext,land_manning_n,soil_compacted_fraction,vegetation_root_depth,vegetation_leaf_storage,vegetation_wood_storage,land_water_fraction,vegetation_crop_factor,vegetation_feddes_alpha_h1,vegetation_feddes_h1,vegetation_feddes_h2,vegetation_feddes_h3_high,vegetation_feddes_h3_low,vegetation_feddes_h4,erosion_usle_c,Cov_River
-1,Buildings,110,0.6,0.011,0,0,0,0,0,1,1,0,-100,-400,-1000,-15849,0,1
-2,Ways,120,0.6,0.011,0,0,0,0,0,1,1,0,-100,-400,-1000,-15849,0,1
+1,Buildings,110,0.6,0.011,0.9,0,0,0,0,1,1,0,-100,-400,-1000,-15849,0,1
+2,Ways,120,0.6,0.011,0.9,0,0,0,0,1,1,0,-100,-400,-1000,-15849,0,1
 3,Other Artificial Surfaces,130,0.6,0.011,0.9,0,0.04,0,0,1,1,0,-100,-400,-1000,-15849,0,1
-4,Exposed Rock and Sediments,210,0.6,0.01,1,0,0,0.01,0,1,1,0,-100,-400,-1000,-15849,0,1
+4,Exposed Rock and Sediments,210,0.6,0.01,0.8,0,0,0.01,0,1,1,0,-100,-400,-1000,-15849,0,1
 5,Coastal Sediments,220,0.7,0.15,0,106.8,0.127,0.01,0.5,1,1,0,-100,-400,-1000,-15849,0,1
 6,Mudflats,230,0.6,0.01,0,0,0.04,0.01,0,1,1,0,-100,-400,-1000,-15849,0,1
 7,Bare Soil and Disturbed Ground,240,0.6,0.02,0,10.7,0.04,0.04,0,1,1,0,-100,-400,-1000,-15849,0.25,1.97

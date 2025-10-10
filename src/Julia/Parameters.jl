@@ -19,7 +19,7 @@
    end # struct METADATA
 
    # Flags: plots
-      🎏_Plots                 = false
+      🎏_Plots                 = true
       🎏_Plot_TimeSeries       = false
       🎏_Plot_FlowAccumulation = false
       🎏_Plot_NetCDF           = false
@@ -50,7 +50,7 @@
          Filename_Roads_Shp         = "Roads.shp"
          Filename_SoilMap_Shp       = "SoilMap.shp"
          Filename_VegetationMap_Shp = "VegetationMap.shp"
-         Filename_VegetationMap_Shp = "NATIONAL_LAND_COVER_MAP.gdb"
+         Filename_VegetationMap_Shp = "NationalLandCoverMap.gdb"
 
          Filename_Input_SoilMap    = "SoilMap.tiff" # Obsolete
 
@@ -93,7 +93,6 @@
    #  ======= PARAMETERS =======
       # Coordinate reference system
          Param_Crs             = 29902    # [-] This is the default projection TM65 / Irish Grid
-
 
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    #                 Ballycanew
@@ -387,10 +386,10 @@ elseif 🎏_CatchmentName == "Timoleague"
 
       # Flags: LookupTables
          🎏_SoilMap               = true
-         🎏_VegetationMap         = false
+         🎏_VegetationMap         = true
 
       # Flags: NetCDF
-         🎏_NetCDF                = false
+         🎏_NetCDF                = true
          🎏_Forcing_2_NetCDF      = false
 
    # ======= PATHS =======

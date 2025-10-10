@@ -80,7 +80,7 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : TIFF_2_NETCDF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIFF_2_NETCDF(Gauge, Filename_Wflow_Impermable, Impermeable_Mask, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, Filename_Wflow_Rivers, RiverDepth, Filename_Wflow_RiverDepth, RiverLength_Mask, RiverSlope, Filename_Wflow_RiverSlope, RiverWidth, Filename_Wflow_RiverWidth, Slope_Mask, Soil_Header, Soil_Maps, Filename_Wflow_Subcatchment, Subcatchment, Vegetation_Header, Vegetation_Maps; Deflatelevel=0)
+		function TIFF_2_NETCDF(Filename_Wflow_RiverDepth, Filename_Wflow_Rivers, Filename_Wflow_RiverSlope, Filename_Wflow_RiverWidth, Filename_Wflow_Subcatchment, Gauge, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, RiverDepth, RiverLength_Mask, RiverSlope, RiverWidth, Slope_Mask, Soil_Header, Soil_Maps, Subcatchment, Vegetation_Header, Vegetation_Maps; Deflatelevel=0)
 
 			# Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
 			Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
@@ -228,7 +228,7 @@ module geoNetcdf
 			# == RIVER-DEPTH input ==========================================
 				Keys = splitext(Filename_Wflow_RiverDepth)[1]
 
-				RiverDepth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel = Deflatelevel, )
+				RiverDepth_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
 
 				RiverDepth_NetCDF .= Array(RiverDepth)
 
@@ -237,23 +237,23 @@ module geoNetcdf
 				println(Keys)
 
 			# == IMPERMEABLE input ==========================================
-				if 🎏_ImpermeableMap
-					Keys = splitext(Filename_Wflow_Impermable)[1]
-					Impermeable_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel = Deflatelevel, )
+				# if 🎏_ImpermeableMap
+				# 	Keys = splitext(Filename_Wflow_Impermable)[1]
+				# 	Impermeable_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel = Deflatelevel, )
 
-					Impermeable_NetCDF .= Array(Impermeable_Mask)
+				# 	Impermeable_NetCDF .= Array(Impermeable_Mask)
 
-					Impermeable_NetCDF.attrib["units"] = "Bool"
-					Impermeable_NetCDF.attrib["comments"] = "Derived from roads"
-					println(Keys)
-				end
+				# 	Impermeable_NetCDF.attrib["units"] = "Bool"
+				# 	Impermeable_NetCDF.attrib["comments"] = "Derived from roads"
+				# 	println(Keys)
+				# end
 
 			# == SOIL MAPS input ==========================================
 				if 🎏_SoilMap
 				printstyled("==== SOIL MAPS ====\n"; color=:green)
 					for (i, Keys) in enumerate(Soil_Header)
 
-						Soil_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel = Deflatelevel, )
+						Soil_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
 
 						Soil_NetCDF .= Array(Soil_Maps[i])
 
@@ -268,7 +268,7 @@ module geoNetcdf
 				printstyled("==== VEGETATION MAPS ====\n"; color=:green)
 					for (i, Keys) in enumerate(Vegetation_Header)
 
-						Vegetation_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel = Deflatelevel, )
+						Vegetation_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
 
 						Vegetation_NetCDF .= Array(Vegetation_Maps[i])
 

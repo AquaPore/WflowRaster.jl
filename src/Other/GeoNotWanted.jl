@@ -512,4 +512,24 @@ ng the size of the time series
 		println("========== FINISHED ======================")
 		return NetCDFmeteo, Path_NetCDFmeteo_Output
 		end  # function: TIMESERIES_2_NETCDF
-	# ------------------------------------------------------------------
+## ==**Vegetation & manning & impermeable:** *LookupTable*==
+
+if 🎏_VegetationMap
+    include("Julia//geoRaster.jl")
+    include("Julia//Parameters.jl")
+
+    # LIST OF NAMES
+    Path_Input = joinpath(Path_Root, Path_Gis, Filename_VegetationMap_Shp)
+    Map_Shapefile= GeoDataFrames.read(Path_Input)
+    Map_Shapefile2 = Map_Shapefile[!, :CROP]
+
+    Names = []
+    for (i, iiDrainage) in enumerate(Map_Shapefile[!, :CROP])
+        if ismissing(iiDrainage)
+            iiDrainage = "missing"
+        end
+        Names     = push!(Names, iiDrainage)
+    end
+    Names = unique(Names)
+    println(Names)
+end
