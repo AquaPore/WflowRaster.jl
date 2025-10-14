@@ -25,8 +25,9 @@
       🎏_Plot_NetCDF           = false
 
    # ======= PATHS =======
-      Path_Root             = joinpath(raw"d:\JOE\MAIN\MODELS\WFLOW\DATA", "$🎏_CatchmentName")
-      Path_Root_NetCDF      = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
+      Path_Root_Data   = "D:\\JOE\\MAIN\\MODELS\\WFLOW\\DATA"
+      Path_Root        = joinpath(Path_Root_Data, "$🎏_CatchmentName")
+      Path_Root_NetCDF = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
       Path_Root_LookupTable = raw"DATA\Lookuptable"
 
       Path_Forcing         = "InputTimeSeries/TimeSeries_Process"
@@ -37,6 +38,7 @@
       Path_Python          = "OutputPython"
       Path_TimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
       Path_Wflow           = "OutputWflow"
+      Path_River = "RIVERS\\SHAPEFILE"
 
    # ======= INPUT =======
       # === Input  Forcing ===
@@ -46,7 +48,7 @@
          Filename_Gauge_Shp         = "Gauge_Hydro.shp"
          Filename_Landuse_Shp       = "Landuse.shp"
          Filename_Mask_Shp          = "Crop.shp"
-         Filename_River_Shp         = "Rivers.shp"
+         Filename_River_Shp         = "RiversIreland.shp"
          Filename_Roads_Shp         = "Roads.shp"
          Filename_SoilMap_Shp       = "SoilMap.shp"
          Filename_VegetationMap_Shp = "VegetationMap.shp"
@@ -379,7 +381,7 @@ elseif 🎏_CatchmentName == "Timoleague"
 
       # Flags: Options
          🎏_Fix_Cyclic            = false # obsolete
-         🎏_RiverFromDem          = true
+         🎏_RiverFromDem          = false
 
       # Flags: outputs of interest
          🎏_ImpermeableMap        = false
@@ -409,7 +411,8 @@ elseif 🎏_CatchmentName == "Timoleague"
          Param_RiverDepth = 10.0::Float64;  # must be an integer [m]
 
       # GAUGE COORDINATES
-         Param_GaugeCoordinate =[146702.538,42182.544]
+         # Param_GaugeCoordinate =[146702.538,42182.544]
+         Param_GaugeCoordinate = [146697.99,42140.78]
 
       # SOILS PARAMETERS
          Layer_Soil = :DRAINAGE
