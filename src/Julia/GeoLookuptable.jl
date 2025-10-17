@@ -13,15 +13,17 @@ module geoLookuptable
 
 	`""" boundary: for polygons, include pixels; <:center>: inside the polygon;
 			polygon <:touches> the pixel, completely <:inside> the polygon"""`
-		function LOOKUPTABLE_2_MAPS(;🎏_Plots, 🎏_Progress=false, Boundary=:touches, Colormap=:viridis, Dem_Resample, Filename_Map, Latitude, Longitude, LookupTable, Map_Value, Metadatas, Missingval=NaN, Param_Crs, Path_Gis, Path_Root, Path_Root_LookupTable, Subcatchment, TitleMap, ΔX)
+		function LOOKUPTABLE_2_MAPS(;Dem_Resample, Latitude, Longitude, ShpLayer, Metadatas, Param_Crs, Path_Input_Map, Path_Lookup, Path_Root, Subcatchment, TitleMap, ΔX, 🎏_Plots, 🎏_Progress=false, Boundary=:touches, Colormap=:plasma, Missingval=NaN)
+
+			# Is the map a shapefile?
+				if split(Path_Input_Map, ".")[end] == "shp" || split(Path_Input_Map, ".")[end] == "gdb"
+					🎏_MapShapefile = true
+				else
+					🎏_MapShapefile = false
+				end
+				@info "🎏_MapShapefile = $🎏_MapShapefile"
 
 			# === READING LOOKUP TABLE ===
-				Path_Home = @__DIR__
-				cd(Path_Home)
-				Path₀ = abspath(joinpath(Path_Home, ".."))
-				Path = abspath(joinpath(Path₀, ".."))
- 				Path_Lookup = joinpath(Path, Path_Root_LookupTable, LookupTable)
-
 				Lookup = DataFrames.DataFrame(CSV.File(Path_Lookup, header=true))
 				println(Path_Lookup)
 
@@ -35,37 +37,54 @@ module geoLookuptable
 					Header  =  Header₂[Remove]
 
 				# Creating dictionary
-					N_Class = length(Lookup[!,:CLASS])
-					Class_Vector = 1:1:N_Class
-					Dict_Class_2_Index = Dict(Lookup[!,:CLASS] .=> Class_Vector)
+               N_Class            = length(Lookup[!,:CLASS])
+               Class_Vector       = 1:1:N_Class
+               Dict_Class_2_Index = Dict(Lookup[!,:CLASS] .=> Class_Vector)
 					println(Lookup[!,:CLASS])
 
 			# === VECTOR FILE ===
-				Path_Input = joinpath(Path_Root, Path_Gis, Filename_Map)
-				MapGeoDataFrames = GeoDataFrames.read(Path_Input)
-				println(Path_Input)
+			Maps_Output = []
 
-				# Creating new columns of the lookup table
-					Maps_Output = []
-					MapGeoDataFrames[!, :Output] .= 1.0 # Initializing a new column
-					for iiHeader in Header
-						println(iiHeader)
+			if 🎏_MapShapefile
+				MapGeoDataFrames = GeoDataFrames.read(Path_Input_Map)
+				println(Path_Input_Map)
+				MapGeoDataFrames[!,:Output] .= 1.0 # Initializing a new column
+			else
+				MapInput = Rasters.Raster(Path_Input_Map)
+				Map = Rasters.Raster((Longitude, Latitude), crs=Metadatas.Crs_GeoFormat)
+			end
 
-						for (i, iiClass) in enumerate(MapGeoDataFrames[!, Map_Value])
-							if ismissing(iiClass)
-								iiClass = "missing"
-							end
-							iClass = Dict_Class_2_Index[iiClass]
-							MapGeoDataFrames[!,:Output][i] = Lookup[!,iiHeader][iClass]
+			for iiHeader in Header
+				println(iiHeader)
+
+				if 🎏_MapShapefile
+					for (i, iiClass) in enumerate(MapGeoDataFrames[!, ShpLayer])
+						if ismissing(iiClass)
+							iiClass = "missing"
 						end
+						iClass = Dict_Class_2_Index[iiClass]
+						MapGeoDataFrames[!,:Output][i] = Lookup[!,iiHeader][iClass]
+					end
 
-				# Rasterizing
-					Map = Rasters.rasterize(last, MapGeoDataFrames; fill=:Output, res=ΔX, to=Dem_Resample, missingval=Missingval, crs=Param_Crs, boundary=Boundary, shape=:polygon, progress=🎏_Progress, verbose=false);
+					# Rasterizing
+						Map = Rasters.rasterize(last, MapGeoDataFrames; fill=:Output, res=ΔX, to=Dem_Resample, missingval=Missingval, crs=Param_Crs, boundary=Boundary, shape=:polygon, progress=🎏_Progress, verbose=false)
 
-				# Masking
-					Map = geoRaster.MASK(;Param_Crs=Metadatas.Crs_GeoFormat, Input=Map, Latitude, Longitude, Mask=Subcatchment, Missing=NaN);
+					# Masking
+						Map = geoRaster.MASK(;Param_Crs=Metadatas.Crs_GeoFormat, Input=Map, Latitude, Longitude, Mask=Subcatchment, Missing=NaN)
+				else
+					for iX=1:Metadatas.N_Width
+						for iY=1:Metadatas.N_Height
+							if MapInput[iX,iY] > 0
+								iClass = Dict_Class_2_Index[Int64.(MapInput[iX,iY])]
+								Map[iX,iY]  = Lookup[!,iiHeader][iClass]
+							else
+								Map[iX,iY] = NaN
+							end
+						end # for iY=1:Metadatas.N_Height
+					end # for iX=1:Metadatas.N_Width
+				end # if 🎏_MapShapefile
 
-						Maps_Output = push!(Maps_Output, Map);
+				Maps_Output = push!(Maps_Output, Map);
 
 				# SAVING MAPS
 					Path_Output = joinpath(Path_Root, Path_Wflow, iiHeader * ".tiff")
@@ -76,7 +95,7 @@ module geoLookuptable
 					if 🎏_Plots
 						geoPlot.HEATMAP(;🎏_Colorbar=true, Input=Map, Label="$iiHeader", Title="$TitleMap : $iiHeader", titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=Colormap)
 					end
-				end # for iiHeader in Header
+			end # for iiHeader in Header
 
 			# CLEANING
 				Dict_Class_2_Index = Lookup = Map = MapGeoDataFrames = empty

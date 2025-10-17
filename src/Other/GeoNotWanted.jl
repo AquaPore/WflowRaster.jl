@@ -223,17 +223,17 @@
 					end # for iiHeader in Soil_Header
 				end
 
-			# == VEGETATION MAPS input ==========================================
-				if 🎏_VegetationMap
-				printstyled("==== VEGETATION MAPS ====\n"; color=:green)
-					for (i, Keys) in enumerate(Vegetation_Header)
+			# == LANDUSE MAPS input ==========================================
+				if 🎏_LandUseMap
+				printstyled("==== LANDUSE MAPS ====\n"; color=:green)
+					for (i, Keys) in enumerate(LandUse_Header)
 
-						Vegetation_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
+						LandUse_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
-						Vegetation_NetCDF .= Array(Vegetation_Maps[i])
+						LandUse_NetCDF .= Array(LandUse_Maps[i])
 
-						Vegetation_NetCDF.attrib["units"] = "$Keys"
-						Vegetation_NetCDF.attrib["comments"] = "Derived from vegetation classification"
+						LandUse_NetCDF.attrib["units"] = "$Keys"
+						LandUse_NetCDF.attrib["comments"] = "Derived from landuse classification"
 						println(Keys)
 					end # for iiHeader in Soil_Header
 				end
@@ -512,14 +512,14 @@ ng the size of the time series
 		println("========== FINISHED ======================")
 		return NetCDFmeteo, Path_NetCDFmeteo_Output
 		end  # function: TIMESERIES_2_NETCDF
-## ==**Vegetation & manning & impermeable:** *LookupTable*==
+## ==**LandUse & manning & impermeable:** *LookupTable*==
 
-if 🎏_VegetationMap
+if 🎏_LandUseMap
     include("Julia//geoRaster.jl")
     include("Julia//Parameters.jl")
 
     # LIST OF NAMES
-    Path_Input = joinpath(Path_Root, Path_Gis, Filename_VegetationMap_Shp)
+    Path_Input = joinpath(Path_Root, Path_Gis, Filename_LandUseMap_Shp)
     Map_Shapefile= GeoDataFrames.read(Path_Input)
     Map_Shapefile2 = Map_Shapefile[!, :CROP]
 
