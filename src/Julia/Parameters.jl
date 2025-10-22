@@ -30,29 +30,31 @@
       Path_Root_NetCDF = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
       Path_Root_LookupTable = raw"DATA\Lookuptable"
 
-      Path_Forcing         = "InputTimeSeries/TimeSeries_Process"
-      Path_Gis             = "InputGis"
-      Path_Julia           = "OutputJulia"
-      Path_Lookuptable     = "LookupTable_Regional"
-      Path_NetCDF          = "OutputNetCDF"
-      Path_Python          = "OutputPython"
-      Path_River           = "RIVERS\\SHAPEFILE"
-      Path_TimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
-      Path_Wflow           = "OutputWflow"
+      Path_Forcing          = "InputTimeSeries/TimeSeries_Process"
+      Path_Gis              = "InputGis"
+      Path_Julia            = "OutputJulia"
+      Path_Lookuptable      = "LookupTable_Regional"
+      Path_NetCDF           = "OutputNetCDF"
+      Path_ObservationPoint = "InputObservationPoint"
+      Path_Python           = "OutputPython"
+      Path_River            = "RIVERS\\SHAPEFILE"
+      Path_TimeSeriesWflow  = "InputTimeSeries/TimeSeries_Wflow"
+      Path_Wflow            = "OutputWflow"
 
    # ======= INPUT =======
       # === Input  Forcing ===
          Filename_Input_Forcing = "forcing." * "$🎏_CatchmentName" * ".csv"
 
       # === Shape file ===
-         Filename_Gauge_Shp      = "Gauge_Hydro.shp"
-         Filename_Input_SoilMap  = "SoilMap.tiff" # Obsolete
-         Filename_LandUseMap_Shp = "NationalLandCoverMap.gdb"
-         Filename_Landuse_Shp    = "Landuse.shp"
-         Filename_Mask_Shp       = "Crop.shp"
-         Filename_River_Shp      = "RiversIreland.shp"
-         Filename_Roads_Shp      = "Roads.shp"
-         Filename_SoilMap_Shp    = "SoilMap.shp"
+         Filename_Gauge_Shp                          = "Gauge_Hydro.shp"
+         Filename_Input_SoilMap                      = "SoilMap.tiff" # Obsolete
+         Filename_LandUseMap_Shp                     = "NationalLandCoverMap.gdb"
+         Filename_Landuse_Shp                        = "Landuse.shp"
+         Filename_Mask_Shp                           = "Crop.shp"
+         Filename_Output_ObservationEcologyPoint_Shp = "ObservationEcologyPoint.shp"
+         Filename_River_Shp                          = "RiversIreland.shp"
+         Filename_Roads_Shp                          = "Roads.shp"
+         Filename_SoilMap_Shp                        = "SoilMap.shp"
 
       # === Input from Python ===
          Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tiff"
@@ -62,6 +64,14 @@
          Filename_Python_RiverLength           = "RiverLength.tiff"
          Filename_Python_RiverOrder            = "RiverOrder.tiff"
          Filename_Python_Slope                 = "Slope.tiff"
+
+      # === Input csv ===
+         Filename_ObservationPoint = "ObservationPoint.csv"
+
+      # === Lookup tables ===
+         Filename_Lookuptable_Hydro   = "LookupTable_Hydro.csv"
+         Filename_Lookuptable_LandUse = "LookupTable_Veg_NLCM.csv"
+         Filename_Lookuptable_River   = "LookupTable_River.csv"
 
    # ======= OUTPUT =======
       # === Output Julia ===
@@ -73,22 +83,19 @@
          Filename_Julia_RiverOrder   = "RiverOrder.tiff"
 
       # === Output wflow ===
-         Filename_Gauge        = "Gauges_grdc.tiff"
-         Filename_Ldd          = "Ldd.tiff"
-         Filename_RiverLength  = "RiverLength.tiff"
-         Filename_RiverSlope   = "RiverSlope.tiff"
-         Filename_Rivers       = "River.tiff"
-         Filename_Slope        = "Slope.tiff"
-         Filename_Subcatchment = "Subcatchment.tiff"
+         Filename_Gauge                   = "Gauges_grdc.tiff"
+         Filename_Ldd                     = "Ldd.tiff"
+         Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
+         Filename_RiverLength             = "RiverLength.tiff"
+         Filename_RiverSlope              = "RiverSlope.tiff"
+         Filename_Rivers                  = "River.tiff"
+         Filename_Slope                   = "Slope.tiff"
+         Filename_Subcatchment            = "Subcatchment.tiff"
 
       # === Output netCDF ===
-         Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
          Filename_NetCDF_Forcing  = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
+         Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
 
-   # === Lookup tables ===
-      Filename_Lookuptable_Hydro      = "LookupTable_Hydro.csv"
-      Filename_Lookuptable_River      = "LookupTable_River.csv"
-      Filename_Lookuptable_LandUse = "LookupTable_Veg_NLCM.csv"
 
    #  ======= PARAMETERS =======
       # Coordinate reference system

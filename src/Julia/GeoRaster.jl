@@ -1,7 +1,7 @@
 
 module geoRaster
 	using Revise
-	using Rasters, GeoFormatTypes, GeoTIFF, ArchGDAL, GeoDataFrames
+	using Rasters, GeoFormatTypes, GeoTIFF, ArchGDAL, GeoDataFrames, DataFrames, Shapefile, CSV
 	using NCDatasets
 
 
@@ -32,7 +32,6 @@ module geoRaster
 	#		FUNCTION : DEM_DERIVE_COASTLINES
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		function DEM_DERIVE_COASTLINES(;Dem,  Longitude, Latitude, Crs, Missing=NaN, ϵ=0.001, DemMin=0.001)
-
 			Dem_Coastline = Rasters.Raster((Longitude, Latitude), crs=Crs)
 
 			N_Width, N_Height = size(Dem_Coastline)
@@ -73,47 +72,6 @@ module geoRaster
 		return Dem_Coastline, Dem_Corrected
 		end  # function: DEM_DERIVE_COASTLINES
 	# ------------------------------------------------------------------
-
-
-	 """
-		  Deriving metadata from the GeoTiff file
-	 """
-	 # ================================================================
-	 #		FUNCTION : RASTER_METADATA
-	 # ================================================================
-		function RASTER_METADATA(Map; Verbose=true)
-			# Grid = Rasters.Raster(Path, lazy=true)
-			N_Width, N_Height  = size(Map)
-			ΔX       = step(dims(Map, X))
-			ΔY       = step(dims(Map, Y))
-
-			# Crs_Rasters = Rasters.crs(Map)
-
-			Coord_X_Left   = first(dims(Map, X))
-			Coord_X_Right  = last(dims(Map, X))
-			Coord_Y_Top    = first(dims(Map ,Y))
-			Coord_Y_Bottom = last(dims(Map,Y))
-
-			Crs_GeoFormat = GeoFormatTypes.convert(WellKnownText, EPSG(Param_Crs))
-
-			if Verbose
-				println("Param_Crs = $Param_Crs")
-				println("ΔX = $ΔX")
-				println("ΔY = $ΔY")
-				println("N_Width  = $N_Width")
-				println("N_Height = $N_Height")
-				println("Coord_X_Left = $Coord_X_Left, Coord_X_Right = $Coord_X_Right")
-				println("Coord_Y_Top = $Coord_Y_Top, Coord_Y_Bottom = $Coord_Y_Bottom")
-			end
-
-			@assert(N_Width == Int32((Coord_X_Right - Coord_X_Left) / ΔX +1))
-			@assert(N_Height == Int32((Coord_Y_Top - Coord_Y_Bottom) / -ΔY + 1))
-
-			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Param_Crs, Crs_GeoFormat)
-
-		return Metadata
-		end # function RASTER_METADATA
-	# ----------------------------------------------------------------
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -206,6 +164,138 @@ module geoRaster
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : POINT_2_RASTER
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Dem_Resample, Metadatas, Param_ΔX, Longitude, Latitude, 🎏_Method_Index ="Rasters")
+
+		   # READ DATA
+            Data = CSV.File(PathInput, header=true)
+            Header = string.(Tables.columnnames(Data))
+				Longitude_X = convert(Vector{Float64}, Tables.getcolumn(Data, :X))
+				Latitude_Y = convert(Vector{Float64}, Tables.getcolumn(Data, :Y))
+				Site = convert(Vector{String}, Tables.getcolumn(Data, :SITE))
+				Epsg = convert(Vector{Int64}, Tables.getcolumn(Data, :EPSG))
+
+				if length(unique!(Epsg)) ≥ 2
+					@error("EPSGmust be all unique")
+				end
+
+				N = length(Longitude_X)
+
+			# CONVERT TO SHAPEFILE
+				Points = GeoDataFrames.GeoInterface.Point.(Longitude_X, Latitude_Y; crs=GeoDataFrames.EPSG(Epsg[1]))
+				Df = DataFrames.DataFrame(Coordinates=Points, Site=Site)
+				Df = GeoDataFrames.metadata!(Df, "GEOINTERFACE:geometrycolumns", (:Coordinates,); style=:note) # required because of the custom geometry column nam
+				Df = GeometryOps.reproject(Df, GeoDataFrames.EPSG(Epsg[1]), GeoDataFrames.EPSG(EPSG_Output);  always_xy=false) # this set the crs metadata
+				GeoDataFrames.write(PathOutputShp, Df; force=true,)
+				println(PathOutputShp)
+
+			# CONVERT TO RASTER
+				Points_Raster = Rasters.Raster((Longitude, Latitude), crs=Metadatas.Crs_GeoFormat)
+				Points_Raster = Rasters.set(Points_Raster, Rasters.Center)
+				Points_Raster .= 0
+
+				iX_Gauge = 1
+				iY_Gauge = 1
+				for i = 1:N
+					if 🎏_Method_Index == "Joseph"
+						iX_Gauge, iY_Gauge = geoRaster.LAT_LONG_2_INDEX(;Map=Points_Raster, Param_GaugeCoordinate=[Longitude_X[i], Latitude_Y[i]])
+
+					elseif 🎏_Method_Index == "Rasters"
+						iX_Gauge, iY_Gauge = Rasters.dims2indices(Points_Raster, (X(Rasters.Near(Longitude_X[i])), Y(Rasters.Near(Latitude_Y[i]))))
+						println([iX_Gauge, iY_Gauge])
+					else
+						@error("🎏_Method_Index == $🎏_Method_Index not available")
+					end
+
+					Points_Raster[iX_Gauge, iY_Gauge] = 1
+				end # for i = 1:N
+
+				Rasters.write(PathOutputRaster, Points_Raster; ext=".tiff", force=true, verbose=false, missingval=0)
+				println(PathOutputRaster)
+
+			# CONVERT TO RASTER (not accurate)
+			   # Points_Shp = Shapefile.Handle(PathOutputShp)
+
+				# Dem_Resample = DimensionalData.shiftlocus(DimensionalData.Center(), Dem_Resample)
+				# Dem_Resample = Rasters.set(Dem_Resample, Rasters.Center)
+
+				# Points_Raster = Rasters.rasterize(last, Points_Shp; shape=:point, fill=1, missingval=0, to=Dem_Resample, threaded=false, boundary=:touches, progress=false)
+
+				# Rasters.write(PathOutputRaster, Points_Raster; ext=".tiff", force=true, verbose=false, missingval=0)
+				# println(PathOutputRaster)
+		return Points_Raster
+		end  # function: POINT_2_RASTER
+	# ------------------------------------------------------------------
+
+	 """
+		  Deriving metadata from the GeoTiff file
+	 """
+	 # ================================================================
+	 #		FUNCTION : RASTER_METADATA
+	 # ================================================================
+		function RASTER_METADATA(Map; Verbose=true)
+			# Grid = Rasters.Raster(Path, lazy=true)
+			N_Width, N_Height  = size(Map)
+			ΔX       = step(dims(Map, X))
+			ΔY       = step(dims(Map, Y))
+
+			# Crs_Rasters = Rasters.crs(Map)
+
+			Coord_X_Left   = first(dims(Map, X))
+			Coord_X_Right  = last(dims(Map, X))
+			Coord_Y_Top    = first(dims(Map ,Y))
+			Coord_Y_Bottom = last(dims(Map,Y))
+
+			Crs_GeoFormat = GeoFormatTypes.convert(WellKnownText, EPSG(Param_Crs))
+
+			if Verbose
+				println("Param_Crs = $Param_Crs")
+				println("ΔX = $ΔX")
+				println("ΔY = $ΔY")
+				println("N_Width  = $N_Width")
+				println("N_Height = $N_Height")
+				println("Coord_X_Left = $Coord_X_Left, Coord_X_Right = $Coord_X_Right")
+				println("Coord_Y_Top = $Coord_Y_Top, Coord_Y_Bottom = $Coord_Y_Bottom")
+			end
+
+			@assert(N_Width == Int32((Coord_X_Right - Coord_X_Left) / ΔX +1))
+			@assert(N_Height == Int32((Coord_Y_Top - Coord_Y_Bottom) / -ΔY + 1))
+
+			Metadata = METADATA(N_Width, N_Height, ΔX, ΔY, Coord_X_Left, Coord_X_Right,Coord_Y_Top, Coord_Y_Bottom, Param_Crs, Crs_GeoFormat)
+		return Metadata
+		end # function RASTER_METADATA
+	# ----------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : MASK
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function MASK(; Input, Latitude, Longitude, Mask, Missing=NaN, Param_Crs, MissingData=0.001)
+
+			N_Width, N_Height  = size(Input)
+
+			Output_Mask = Rasters.Raster((Longitude, Latitude), crs=Param_Crs)
+			for iX=1:N_Width
+				for iY=1:N_Height
+					# if Mask[iX,iY] > 0.0001 || !(isnan(Mask[iX,iY]))
+					if Mask[iX,iY] > 0
+						# This is not normal
+						if isnan(Input[iX, iY])
+							Input[iX, iY] = MissingData
+						end
+						Output_Mask[iX,iY] = Input[iX,iY]
+					else
+						Output_Mask[iX,iY] = Missing
+					end
+				end # for iY=1:Metadatas.N_Height
+			end # for iX=1:Metadatas.N_Width
+		return Output_Mask
+		end  # function: mask
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : MOSAIC
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		function MOSAIC(;Path_Root_Mosaic, Missing=NaN, ZseaMeanLevel=5.0, 🎏_CleanData=true)
@@ -239,33 +329,6 @@ module geoRaster
 			printstyled("					==== MOSAIC READY ===", color=:cyan)
 		return Mosaic
 		end  # function: MOSAIC
-	# ------------------------------------------------------------------
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#		FUNCTION : MASK
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function MASK(; Input, Latitude, Longitude, Mask, Missing=NaN, Param_Crs, MissingData=0.001)
-
-			N_Width, N_Height  = size(Input)
-
-			Output_Mask = Rasters.Raster((Longitude, Latitude), crs=Param_Crs)
-			for iX=1:N_Width
-				for iY=1:N_Height
-					# if Mask[iX,iY] > 0.0001 || !(isnan(Mask[iX,iY]))
-					if Mask[iX,iY] > 0
-						# This is not normal
-						if isnan(Input[iX, iY])
-							Input[iX, iY] = MissingData
-						end
-						Output_Mask[iX,iY] = Input[iX,iY]
-					else
-						Output_Mask[iX,iY] = Missing
-					end
-				end # for iY=1:Metadatas.N_Height
-			end # for iX=1:Metadatas.N_Width
-		return Output_Mask
-		end  # function: mask
 	# ------------------------------------------------------------------
 
 
@@ -307,20 +370,17 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : REPROJECTION
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-		function REPROJECTION(;PathOutputShp, Latitude_Y, Longitude_X, Site, EPSG_Input=4326, EPSG_Output=29902)
-
+		function REPROJECTION(;PathOutputShp, PathOutputCsv, Longitude_X, Latitude_Y, Site, EPSG_Input=4326, EPSG_Output=29902)
 			Points = GeoDataFrames.GeoInterface.Point.(Latitude_Y, Longitude_X)
 
 			Df = GeoDataFrames.DataFrame(Coordinates=Points, Site=Site)
 			Df = GeoDataFrames.metadata!(Df, "GEOINTERFACE:geometrycolumns", (:Coordinates,); style=:note) # required because of the custom geometry column name
-			Df = GeometryOps.reproject(Df, GeoDataFrames.EPSG(EPSG_Input), GeoDataFrames.EPSG(EPSG_Output)) # this set the crs metadata
+			Df = GeometryOps.reproject(Df, GeoDataFrames.EPSG(EPSG_Input), GeoDataFrames.EPSG(EPSG_Output);  always_xy=false) # this set the crs metadata
 			GeoDataFrames.write(PathOutputShp, Df)
-
+			CSV.write(PathOutputCsv, Df)
 		return Df
 		end  # function: REPROJECTION
 	# ------------------------------------------------------------------
-
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
