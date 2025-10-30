@@ -80,7 +80,7 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : TIFF_2_NETCDF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIFF_2_NETCDF(Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, RiverLength_Mask, RiverSlope,  Slope_Mask, Soil_Header, Soil_Maps, Subcatchment, LandUse_Header, LandUse_Maps, River_Header, River_Maps; Deflatelevel=0)
+		function TIFF_2_NETCDF(Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, Latitude, Ldd_Mask, Longitude, Metadatas, River, RiverLength_Mask, RiverSlope,  Slope_Mask, Soil_Header, Soil_Maps, Subcatchment, LandUse_Header, LandUse_Maps, River_Header, River_Maps; Deflatelevel=0)
 
 			# Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
 			Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
@@ -187,7 +187,7 @@ module geoNetcdf
 				Keys = splitext(Filename_Rivers)[1]
 				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0; deflatelevel = Deflatelevel, )
 
-				River_NetCDF .= Array(River_Mask)
+				River_NetCDF .= Array(River)
 
 				River_NetCDF.attrib["units"] = "0/1"
 				River_NetCDF.attrib["comments"] = "Derived from hydromt"
@@ -456,7 +456,7 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : TIFF_2_NETCDF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIFF_2_NETCDF_C(Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, Latitude, Ldd_Mask, Longitude, Metadatas, River_Mask, RiverLength_Mask, RiverManning, RiverSlope, RiverWidth, Slope_Mask, Soil_Header, Soil_Maps, Subcatchment, LandUse_Header, LandUse_Maps, River_Header, River_Maps; Deflatelevel=0)
+		function TIFF_2_NETCDF_C(Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, Latitude, Ldd_Mask, Longitude, Metadatas, River, RiverLength_Mask, RiverManning, RiverSlope, RiverWidth, Slope_Mask, Soil_Header, Soil_Maps, Subcatchment, LandUse_Header, LandUse_Maps, River_Header, River_Maps; Deflatelevel=0)
 
 			# Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
 			Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
@@ -562,7 +562,7 @@ module geoNetcdf
 				Keys = splitext(Filename_Rivers)[1]
 				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0; deflatelevel = Deflatelevel, )
 
-				River_NetCDF .= Array(River_Mask)
+				River_NetCDF .= Array(River)
 
 				River_NetCDF.attrib["units"] = "0/1"
 				River_NetCDF.attrib["comments"] = "Derived from hydromt"

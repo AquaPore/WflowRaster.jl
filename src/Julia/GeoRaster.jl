@@ -166,7 +166,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : POINT_2_RASTER
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Dem_Resample, Metadatas, Param_ΔX, Longitude, Latitude, 🎏_Method_Index ="Rasters")
+		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Dem_Resample, Metadatas, Param_ΔX, Longitude, Latitude, River=[], 🎏_Method_Index ="Rasters", 🎏_PointOnRiver =false)
 
 		   # READ DATA
             Data = CSV.File(PathInput, header=true)
@@ -209,6 +209,14 @@ module geoRaster
 					end
 
 					Points_Raster[iX_Gauge, iY_Gauge] = 1
+
+					# Assuring that the observation point is on a river
+					if 🎏_PointOnRiver
+
+							if River[iX_Gauge, iY_Gauge] ≠ 1
+								@error "Site = $(Site[i]) not on river network River[iX_Gauge, iY_Gauge] ≠ 1"
+							end
+					end
 				end # for i = 1:N
 
 				Rasters.write(PathOutputRaster, Points_Raster; ext=".tiff", force=true, verbose=false, missingval=0)
@@ -326,44 +334,9 @@ module geoRaster
 
 			Mosaic     = Rasters.replace_missing(Mosaic, missingval=NaN)
 
-			printstyled("					==== MOSAIC READY ===", color=:cyan)
+		printstyled("					==== MOSAIC READY ===", color=:cyan)
 		return Mosaic
 		end  # function: MOSAIC
-	# ------------------------------------------------------------------
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#		FUNCTION : GAUGE
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function GAUGE(;🎏_Method_Index = "Rasters", Latitude=Latitude, Longitude=Longitude, Metadatas=Metadatas, Param_GaugeCoordinate, Path_OutputGauge)
-
-			Gauge₀ = Rasters.Raster((Longitude, Latitude), crs=Metadatas.Crs_GeoFormat)
-			Gauge₀ .= 0
-
-			Gauge = Rasters.set(Gauge₀, Rasters.Center)
-
-			iX_Gauge = 1
-			iY_Gauge = 1
-			if 🎏_Method_Index == "Joseph"
-				iX_Gauge, iY_Gauge = geoRaster.LAT_LONG_2_INDEX(;Map=Gauge, Param_GaugeCoordinate)
-
-				println([iX_Gauge, iY_Gauge])
-
-			elseif 🎏_Method_Index == "Rasters"
-				iX_Gauge, iY_Gauge = Rasters.dims2indices(Gauge, (X(Rasters.Near(Param_GaugeCoordinate[1])), Y(Rasters.Near(Param_GaugeCoordinate[2]))))
-			end
-			println([iX_Gauge, iY_Gauge])
-
-			# Inverse
-			# 	DimPoints(Gauge)[X(iX_Gauge), Y(iY_Gauge)]
-
-			# Selection of the Gauge
-			Gauge[iX_Gauge, iY_Gauge] = 1
-
-			Rasters.write(Path_OutputGauge, Gauge; ext=".tiff", force=true, verbose=true, missingval=0)
-
-		return Gauge, [iX_Gauge, iY_Gauge]
-		end  # function: GAUGE
 	# ------------------------------------------------------------------
 
 

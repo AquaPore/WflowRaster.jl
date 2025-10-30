@@ -142,7 +142,7 @@
 				Keys = splitext(Filename_Wflow_Rivers)[1]
 				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0)
 
-				River_NetCDF .= Array(River_Mask)
+				River_NetCDF .= Array(River)
 
 				River_NetCDF.attrib["units"] = "0/1"
 				River_NetCDF.attrib["comments"] = "Derived from hydromt"

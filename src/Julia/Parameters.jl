@@ -66,7 +66,8 @@
          Filename_Python_Slope                 = "Slope.tiff"
 
       # === Input csv ===
-         Filename_ObservationPoint = "ObservationPoint.csv"
+         Filename_Csv_ObservationPoint = "ObservationPoint.csv"
+         Filename_Csv_GaugePoint = "Gauges_grdc.csv"
 
       # === Lookup tables ===
          Filename_Lookuptable_Hydro   = "LookupTable_Hydro.csv"
