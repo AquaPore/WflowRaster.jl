@@ -32,7 +32,7 @@ module geoRaster
 	#		FUNCTION : DEM_DERIVE_COASTLINES
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		function DEM_DERIVE_COASTLINES(;Dem,  Longitude, Latitude, Crs, Missing=NaN, ϵ=0.001, DemMin=0.001)
-			Dem_Coastline = Rasters.Raster((Longitude, Latitude), crs=Crs)
+			Dem_Coastline = Rasters.Raster((Longitude, Latitude); crs=Crs)
 
 			N_Width, N_Height = size(Dem_Coastline)
 
@@ -84,7 +84,7 @@ module geoRaster
 			iiX = iiParam_GaugeCoordinate[1]
 			iiY = iiParam_GaugeCoordinate[2]
 
-			Dem_Boarder = Rasters.Raster((Longitude, Latitude), crs=Crs)
+			Dem_Boarder = Rasters.Raster((Longitude, Latitude); crs=Crs)
 			for iX=1:N_Width
 				for iY=1:N_Height
 					if Dem[iX, iY] > 0
@@ -191,7 +191,7 @@ module geoRaster
 				println(PathOutputShp)
 
 			# CONVERT TO RASTER
-				Points_Raster = Rasters.Raster((Longitude, Latitude), crs=Metadatas.Crs_GeoFormat)
+				Points_Raster = Rasters.Raster((Longitude, Latitude); crs=Metadatas.Crs_GeoFormat)
 				Points_Raster = Rasters.set(Points_Raster, Rasters.Center)
 				Points_Raster .= 0
 
@@ -283,7 +283,7 @@ module geoRaster
 
 			N_Width, N_Height  = size(Input)
 
-			Output_Mask = Rasters.Raster((Longitude, Latitude), crs=Param_Crs)
+			Output_Mask = Rasters.Raster((Longitude, Latitude); crs=Param_Crs)
 			for iX=1:N_Width
 				for iY=1:N_Height
 					# if Mask[iX,iY] > 0.0001 || !(isnan(Mask[iX,iY]))
