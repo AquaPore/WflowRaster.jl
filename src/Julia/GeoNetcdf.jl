@@ -78,12 +78,44 @@ module geoNetcdf
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : LOOKUPTABLE_2_NETCDF
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function LOOKUPTABLE_2_NETCDF(;Header, NetCDF, MapLookup, Deflatelevel, Fillvalue=NaN, Attribute="", Type=Float64)
+			for (i, Keys) in enumerate(Header)
+
+				Dimension = length(size(MapLookup[i]))
+
+				if Dimension == 2
+					Soil_NetCDF_2D = NCDatasets.defVar(NetCDF, Keys, Type, ("x","y"), fillvalue=Fillvalue; deflatelevel=Deflatelevel, )
+					Soil_NetCDF_2D .= Array(MapLookup[i])
+
+					Soil_NetCDF_2D.attrib["units"] = "$Keys"
+					Soil_NetCDF_2D.attrib["comments"] = Attribute
+
+				elseif Dimension == 3
+					Soil_NetCDF_3D = NCDatasets.defVar(NetCDF, Keys, Type, ("x","y","layer"), fillvalue=Fillvalue; deflatelevel=Deflatelevel, )
+					Soil_NetCDF_3D .= Array(MapLookup[i])
+
+					Soil_NetCDF_3D.attrib["units"] = "$Keys"
+					Soil_NetCDF_3D.attrib["comments"] = Attribute
+
+				else
+					error("Dimensions of $Keys ≠ 2 or 3")
+				end
+					println("$Keys : $(Dimension)D")
+			end # for (i, Keys) in enumerate(Header)
+		return NetCDF
+		end  # function: LOOKUPTABLE_2_NETCDF
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : TIFF_2_NETCDF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIFF_2_NETCDF(Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, Latitude, Ldd_Mask, Longitude, Metadatas, River, RiverLength_Mask, RiverSlope,  Slope_Mask, Soil_Header, Soil_Maps, Subcatchment, LandUse_Header, LandUse_Maps, River_Header, River_Maps, Deflatelevel=0)
+		function TIFF_2_NETCDF(;Dem, Filename_Dem, Filename_ObservationEcologyPoint, Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, LandUse_Header, LandUse_Maps, Latitude, Ldd_Mask, Longitude, Metadatas, ObservationPoint, River, River_Header, River_Maps, RiverLength_Mask, RiverSlope, Slope_Mask, Soil_Header, Soil_Maps, Subcatchment, Deflatelevel=0)
 
-			# Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
-			Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
+		# Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
+			Path_NetCDF_Full = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
 
 			isfile(Path_NetCDF_Full) && rm(Path_NetCDF_Full, force=true)
 			@assert(!(isfile(Path_NetCDF_Full)))
@@ -108,16 +140,18 @@ module geoNetcdf
             Longitude₁ = Vector(Float64.(Longitude))
             Latitude₁  = Vector(Float64.(Latitude))
 
+
 			printstyled("==== GENERAL MAPS ====\n"; color=:green)
 			# == LATITUDE_X input ==========================================
 				Keys = "x"
 				NCDatasets.defVar(NetCDF, "x", Longitude₁, ("x",); attrib = [
                 "long_name" => "x coordinate of projection",
                 "standard_name" => "projection_x_coordinate",
-                "axis" => "X",
+                "axis" => "x",
                 "units" => "m",],
             deflatelevel = Deflatelevel, )
 				println(Keys)
+
 
 			# == lONGITUDE_Y input ==========================================
 				Keys = "y"
@@ -125,10 +159,11 @@ module geoNetcdf
             attrib = [
                 "long_name" => "y coordinate of projection",
                 "standard_name" => "projection_y_coordinate",
-                "axis" => "Y",
+                "axis" => "y",
                 "units" => "m",],
             deflatelevel = Deflatelevel, )
 				println(Keys)
+
 
 			# == LAYER input ==========================================
 				Keys = "layer"
@@ -138,20 +173,18 @@ module geoNetcdf
 				end
 				Layers = Int64.(Layers)
 				Layer = NCDatasets.defVar(NetCDF, Keys, Layers, ("layer",), fillvalue=-1; deflatelevel = Deflatelevel, )
-
 				Layer.attrib["units"] = "-"
 				println(Keys)
+
 
 			# == LDD input ==========================================
 				Keys = splitext(Filename_Ldd)[1]
 				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, UInt8, ("x","y"), fillvalue=0; deflatelevel = Deflatelevel, )
-
 				Ldd_NetCDF .= Array(Ldd_Mask)
-
 				Ldd_NetCDF.attrib["units"] = "1-9"
-				Ldd_NetCDF.attrib["comments"] = "Derived from hydromt.flw.d8_from_dem"
 				Ldd_NetCDF.attrib["long_name"] = "ldd flow direction"
 				println(Keys)
+
 
 			# == SUBCATCHMENT input ==========================================
 				Keys = splitext(Filename_Subcatchment)[1]
@@ -163,141 +196,100 @@ module geoNetcdf
 				Subcatchment_NetCDF.attrib["comments"] = "Derived from hydromt"
 				println(Keys)
 
+
+			# == DEM input ==========================================
+				Keys=splitext(Filename_Dem)[1]
+				Dem_NetCDF=NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
+				Dem_NetCDF .= Array(Dem)
+				Dem_NetCDF.attrib["units"] = "[m]"
+				Dem_NetCDF.attrib["comments"] = "Z"
+				println(Keys)
+
+
 			# == GAUGES input ==========================================
 				Keys = splitext(Filename_Gauge)[1]
 				Gauge_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0; deflatelevel = Deflatelevel, )
-
 				Gauge_NetCDF .= Array(Gauge)
-
-				Gauge_NetCDF.attrib["units"] = "1/0"
-				Gauge_NetCDF.attrib["comments"] = "Derived from hydromt"
+				Gauge_NetCDF.attrib["units"] = "[0 or 1]"
+				Gauge_NetCDF.attrib["comments"] = "points"
 				println(Keys)
+
+
+			# == OBSERVED POINTS input ==========================================
+				Keys = splitext(Filename_ObservationEcologyPoint)[1]
+				ObservationPoint_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0; deflatelevel = Deflatelevel, )
+				ObservationPoint_NetCDF .= Array(ObservationPoint)
+				ObservationPoint_NetCDF.attrib["units"] =  "[0 or 1]"
+				ObservationPoint_NetCDF.attrib["comments"] = "points"
+				println(Keys)
+
 
 			# == SLOPE input ==========================================
 				Keys = splitext(Filename_Slope)[1]
 				Slope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel = Deflatelevel, )
-
 				Slope_NetCDF .= Array(Slope_Mask)
-
 				Slope_NetCDF.attrib["units"] = "deg"
 				Slope_NetCDF.attrib["comments"] = "Derived from hydromt"
 				println(Keys)
 
+
 			# == RIVER CELLS input ==========================================
 				Keys = splitext(Filename_Rivers)[1]
 				River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Int32, ("x","y"), fillvalue=0; deflatelevel = Deflatelevel, )
-
 				River_NetCDF .= Array(River)
-
 				River_NetCDF.attrib["units"] = "0/1"
 				River_NetCDF.attrib["comments"] = "Derived from hydromt"
 				println(Keys)
 
+
 			# == RIVER-SLOPE input ==========================================
 				Keys = splitext(Filename_RiverSlope)[1]
-
 				RiverSlope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel = Deflatelevel, )
-
 				RiverSlope_NetCDF.= Array(RiverSlope)
-
 				RiverSlope_NetCDF.attrib["units"] = "Slope"
 				RiverSlope_NetCDF.attrib["comments"] = "Derived from hydromt"
 				println(Keys)
 
+
 			# == RIVER-LENGTH input ==========================================
 				Keys = splitext(Filename_RiverLength)[1]
-
 				RiverLength_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel = Deflatelevel, )
-
 				RiverLength_NetCDF .= Array(RiverLength_Mask)
-
 				RiverLength_NetCDF.attrib["units"] = "m"
 				RiverLength_NetCDF.attrib["comments"] = "Derived from hydromt"
 				println(Keys)
 
 
-			# == SOIL MAPS input ==========================================
-				if 🎏_SoilMap
-				printstyled("==== SOIL MAPS 2D or 3D ====\n"; color=:green)
-					for (i, Keys) in enumerate(Soil_Header)
-
-						Dimension = length(size(Soil_Maps[i]))
-
-						if Dimension == 2
-							Soil_NetCDF_2D = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
-							Soil_NetCDF_2D .= Array(Soil_Maps[i])
-
-							Soil_NetCDF_2D.attrib["units"] = "$Keys"
-							Soil_NetCDF_2D.attrib["comments"] = "Derived from soil classification"
-
-						elseif Dimension == 3
-							Soil_NetCDF_3D = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y","layer"), fillvalue=NaN; deflatelevel=Deflatelevel, )
-							Soil_NetCDF_3D .= Array(Soil_Maps[i])
-
-							Soil_NetCDF_3D.attrib["units"] = "$Keys"
-							Soil_NetCDF_3D.attrib["comments"] = "Derived from soil classification"
-
-						else
-							error("Dimensions of $Keys ≠ 2 or 3")
-						end
-
-						println("$Keys : $(Dimension)D")
-					end # for (i, Keys) in enumerate(Soil_Header)
-				end
-
-
 			# # == RIVER MAPS input ==========================================
 				if 🎏_RiverMap
 				printstyled("==== RIVER MAPS ====\n"; color=:green)
-					for (i, Keys) in enumerate(River_Header)
+					# for (i, Keys) in enumerate(River_Header)
 
-						River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
+					# 	River_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
 
-						River_NetCDF .= Array(River_Maps[i])
+					# 	River_NetCDF .= Array(River_Maps[i])
 
-						River_NetCDF.attrib["units"] = "$Keys"
-						River_NetCDF.attrib["comments"] = "Derived from soil classification"
-						println(Keys)
-					end # for iiHeader in Soil_Header
+					# 	River_NetCDF.attrib["units"] = "$Keys"
+					# 	River_NetCDF.attrib["comments"] = "Derived from soil classification"
+					# 	println(Keys)
+					# end # for iiHeader in Soil_Header
+
+					NetCDF = geoNetcdf.LOOKUPTABLE_2_NETCDF(;Header=River_Header, NetCDF, MapLookup=River_Maps, Deflatelevel, Fillvalue=NaN, Attribute="Derived from strahler classes")
 				end
 
+			# == LOOKUPTABLE SOIL MAPS input ==========================================
+				if 🎏_SoilMap
+					printstyled("==== SOIL MAPS 2D or 3D ====\n"; color=:green)
+
+					NetCDF = geoNetcdf.LOOKUPTABLE_2_NETCDF(;Header=Soil_Header, NetCDF, MapLookup=Soil_Maps, Deflatelevel, Fillvalue=NaN, Attribute="Derived from soil classes")
+				end
 
 			# == LANDUSE MAPS input ==========================================
 				if 🎏_LandUseMap
 				printstyled("==== LANDUSE MAPS ====\n"; color=:green)
-					for (i, Keys) in enumerate(LandUse_Header)
 
-						# LandUse_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
+					NetCDF = geoNetcdf.LOOKUPTABLE_2_NETCDF(;Header=LandUse_Header, NetCDF, MapLookup=LandUse_Maps, Deflatelevel, Fillvalue=NaN, Attribute="Derived from soil classification")
 
-						# LandUse_NetCDF .= Array(LandUse_Maps[i])
-
-						# LandUse_NetCDF.attrib["units"] = "$Keys"
-						# LandUse_NetCDF.attrib["comments"] = "Derived from landuse classification"
-						# println(Keys)
-
-						Dimension = length(size(LandUse_Maps[i]))
-
-						if Dimension == 2
-							LandUse_NetCDF_2D = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
-							LandUse_NetCDF_2D .= Array(LandUse_Maps[i])
-
-							LandUse_NetCDF_2D.attrib["units"] = "$Keys"
-							LandUse_NetCDF_2D.attrib["comments"] = "Derived from soil classification"
-
-						elseif Dimension == 3
-							LandUse_NetCDF_3D = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y","layer"), fillvalue=NaN; deflatelevel=Deflatelevel, )
-							LandUse_NetCDF_3D .= Array(LandUse_Maps[i])
-
-							LandUse_NetCDF_3D.attrib["units"] = "$Keys"
-							LandUse_NetCDF_3D.attrib["comments"] = "Derived from soil classification"
-
-						else
-							error("Dimensions of $Keys ≠ 2 or 3")
-						end
-
-						println("$Keys : $(Dimension)D")
-
-					end # for iiHeader in Soil_Header
 				end # if 🎏_LandUseMap
 
 		close(NetCDF)
@@ -421,7 +413,7 @@ module geoNetcdf
 					NCDatasets.defVar(NetCDFmeteo, "x", Longitude₁, ("x",); attrib = [
 						"long_name" => "x coordinate of projection",
 						"standard_name" => "projection_x_coordinate",
-						"axis" => "X",
+						"axis" => "x",
 						"units" => "m",],
 					deflatelevel = Deflatelevel, )
 					println(Keys)
@@ -432,7 +424,7 @@ module geoNetcdf
 					attrib = [
 						"long_name" => "y coordinate of projection",
 						"standard_name" => "projection_y_coordinate",
-						"axis" => "Y",
+						"axis" => "y",
 						"units" => "m",],
 					deflatelevel = Deflatelevel, )
 					println(Keys)

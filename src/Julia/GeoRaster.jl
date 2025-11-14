@@ -166,7 +166,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : POINT_2_RASTER
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Dem_Resample, Metadatas, Param_ΔX, Longitude, Latitude, River=[], 🎏_Method_Index ="Rasters", 🎏_PointOnRiver =false)
+		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Dem, Metadatas, Param_ΔX, Longitude, Latitude, River=[], 🎏_Method_Index ="Rasters", 🎏_PointOnRiver =false)
 
 		   # READ DATA
             Data = CSV.File(PathInput, header=true)
@@ -225,10 +225,10 @@ module geoRaster
 			# CONVERT TO RASTER (not accurate)
 			   # Points_Shp = Shapefile.Handle(PathOutputShp)
 
-				# Dem_Resample = DimensionalData.shiftlocus(DimensionalData.Center(), Dem_Resample)
-				# Dem_Resample = Rasters.set(Dem_Resample, Rasters.Center)
+				# Dem = DimensionalData.shiftlocus(DimensionalData.Center(), Dem)
+				# Dem = Rasters.set(Dem, Rasters.Center)
 
-				# Points_Raster = Rasters.rasterize(last, Points_Shp; shape=:point, fill=1, missingval=0, to=Dem_Resample, threaded=false, boundary=:touches, progress=false)
+				# Points_Raster = Rasters.rasterize(last, Points_Shp; shape=:point, fill=1, missingval=0, to=Dem, threaded=false, boundary=:touches, progress=false)
 
 				# Rasters.write(PathOutputRaster, Points_Raster; ext=".tiff", force=true, verbose=false, missingval=0)
 				# println(PathOutputRaster)

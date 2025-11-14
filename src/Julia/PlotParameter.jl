@@ -13,7 +13,7 @@
 		titlesize          = 20.0
 		width              = height * 1.0
 		xgridstyle         = :dash
-		xgridvisible       = true
+		xgridvisible       = false
 		xlabelSize         = 20
 		xlabelpadding      = 5
 		xminortickalign    = 1.0
@@ -29,7 +29,7 @@
 		ylabelpadding      = xlabelpadding
 		ylabelsize         = xlabelSize
 		yminortickalign    = xminortickalign
-		yminorticksvisible = true
+		yminorticksvisible = false
 		ytickalign         = xtickalign
 		yticksize          = xticksize
 		yticksmirrored     = false

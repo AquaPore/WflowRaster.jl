@@ -12,8 +12,8 @@
       Start_Day   = 10 :: Int64
       Start_Hour  = 0 :: Int64
 
-      End_Year    = 2024 :: Int64
-      End_Month   = 12 :: Int64
+      End_Year    = 2011:: Int64
+      End_Month   = 1 :: Int64
       End_Day     = 30 :: Int64
       End_Hour    = 23 :: Int64
    end # struct METADATA
@@ -21,7 +21,7 @@
    # Flags: plots
       🎏_Plots                 = true
       🎏_Plot_TimeSeries       = false
-      🎏_Plot_FlowAccumulation = false
+      🎏_Plot_FlowAccumulation = true
       🎏_Plot_NetCDF           = false
 
    # ======= PATHS =======
@@ -85,6 +85,7 @@
 
       # === Output wflow ===
          Filename_Gauge                   = "Gauges_grdc.tiff"
+         Filename_Dem                     = "Dem.tiff"
          Filename_Ldd                     = "Ldd.tiff"
          Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
          Filename_RiverLength             = "RiverLength.tiff"
@@ -387,8 +388,8 @@ elseif 🎏_CatchmentName == "Timoleague"
          🎏_ImpermeableMap        = false
 
       # Flags: LookupTables
-         🎏_RiverMap      = true
-         🎏_SoilMap       = true
+         🎏_RiverMap   = true
+         🎏_SoilMap    = true
          🎏_LandUseMap = true
 
       # Flags: NetCDF
