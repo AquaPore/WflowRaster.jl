@@ -22,7 +22,7 @@
       🎏_Plots                 = true
       🎏_Plot_TimeSeries       = false
       🎏_Plot_FlowAccumulation = true
-      🎏_Plot_NetCDF           = false
+      🎏_Plot_NetCDF           = true
 
    # ======= PATHS =======
       Path_Root_Data   = "D:\\JOE\\MAIN\\MODELS\\WFLOW\\DATA"

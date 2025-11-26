@@ -140,7 +140,6 @@ module geoNetcdf
             Longitude₁ = Vector(Float64.(Longitude))
             Latitude₁  = Vector(Float64.(Latitude))
 
-
 			printstyled("==== GENERAL MAPS ====\n"; color=:green)
 			# == LATITUDE_X input ==========================================
 				Keys = "x"

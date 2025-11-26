@@ -175,6 +175,7 @@ module geoRaster
 				Latitude_Y = convert(Vector{Float64}, Tables.getcolumn(Data, :Y))
 				Site = convert(Vector{String}, Tables.getcolumn(Data, :SITE))
 				Epsg = convert(Vector{Int64}, Tables.getcolumn(Data, :EPSG))
+				Id = convert(Vector{Int64}, Tables.getcolumn(Data, :ID))
 
 				if length(unique!(Epsg)) ≥ 2
 					@error("EPSGmust be all unique")
@@ -203,16 +204,19 @@ module geoRaster
 
 					elseif 🎏_Method_Index == "Rasters"
 						iX_Gauge, iY_Gauge = Rasters.dims2indices(Points_Raster, (X(Rasters.Near(Longitude_X[i])), Y(Rasters.Near(Latitude_Y[i]))))
-						println([iX_Gauge, iY_Gauge])
+
 					else
 						@error("🎏_Method_Index == $🎏_Method_Index not available")
 					end
 
-					Points_Raster[iX_Gauge, iY_Gauge] = 1
+					Latitude_Y[i]
+					N_iY = size(Points_Raster)[2]
+					println(  "Id =" , Id[i], " , " , [iX_Gauge, iY_Gauge] , "; Wflow= ", [iX_Gauge, N_iY - iY_Gauge + 1])
+
+
 
 					# Assuring that the observation point is on a river
 					if 🎏_PointOnRiver
-
 							if River[iX_Gauge, iY_Gauge] ≠ 1
 								@error "Site = $(Site[i]) not on river network River[iX_Gauge, iY_Gauge] ≠ 1"
 							end
