@@ -30,7 +30,7 @@
       Path_Root_NetCDF = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
       Path_Root_LookupTable = raw"DATA\Lookuptable"
 
-      Path_Forcing          = "InputTimeSeries/TimeSeries_Process"
+      Path_Forcing          = "InputTimeSeries\\TimeSeries_Process"
       Path_Gis              = "InputGis"
       Path_Julia            = "OutputJulia"
       Path_Lookuptable      = "LookupTable_Regional"

@@ -169,13 +169,13 @@ module geoRaster
 		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Dem, Metadatas, Param_ΔX, Longitude, Latitude, River=[], 🎏_Method_Index ="Rasters", 🎏_PointOnRiver =false)
 
 		   # READ DATA
-            Data = CSV.File(PathInput, header=true)
-            Header = string.(Tables.columnnames(Data))
-				Longitude_X = convert(Vector{Float64}, Tables.getcolumn(Data, :X))
-				Latitude_Y = convert(Vector{Float64}, Tables.getcolumn(Data, :Y))
-				Site = convert(Vector{String}, Tables.getcolumn(Data, :SITE))
-				Epsg = convert(Vector{Int64}, Tables.getcolumn(Data, :EPSG))
-				Id = convert(Vector{Int64}, Tables.getcolumn(Data, :ID))
+            Data        = CSV.File(PathInput, header=true)
+            Header      = string.(Tables.columnnames(Data))
+            Longitude_X = convert(Vector{Float64}, Tables.getcolumn(Data, :X))
+            Latitude_Y  = convert(Vector{Float64}, Tables.getcolumn(Data, :Y))
+            Site        = convert(Vector{String}, Tables.getcolumn(Data, :SITE))
+            Epsg        = convert(Vector{Int64}, Tables.getcolumn(Data, :EPSG))
+            Id          = convert(Vector{Int64}, Tables.getcolumn(Data, :ID))
 
 				if length(unique!(Epsg)) ≥ 2
 					@error("EPSGmust be all unique")
@@ -194,7 +194,7 @@ module geoRaster
 			# CONVERT TO RASTER
 				Points_Raster = Rasters.Raster((Longitude, Latitude); crs=Metadatas.Crs_GeoFormat)
 				Points_Raster = Rasters.set(Points_Raster, Rasters.Center)
-				Points_Raster .= 0
+				Points_Raster .= 0::Int64
 
 				iX_Gauge = 1
 				iY_Gauge = 1
@@ -209,11 +209,10 @@ module geoRaster
 						@error("🎏_Method_Index == $🎏_Method_Index not available")
 					end
 
-					Latitude_Y[i]
+					Points_Raster[iX_Gauge, iY_Gauge] = Id[i]
+
 					N_iY = size(Points_Raster)[2]
 					println(  "Id =" , Id[i], " , " , [iX_Gauge, iY_Gauge] , "; Wflow= ", [iX_Gauge, N_iY - iY_Gauge + 1])
-
-
 
 					# Assuring that the observation point is on a river
 					if 🎏_PointOnRiver
