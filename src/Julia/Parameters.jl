@@ -58,8 +58,8 @@
 
       # === Input from Python ===
          Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tiff"
-         Filename_Python_Dem2Rivers            = "Dem2Rivers.tiff"
-         Filename_Python_DemCorrected          = "DemCorrected.tiff"
+         Filename_Python_Dtm2Rivers            = "Dtm2Rivers.tiff"
+         Filename_Python_DtmCorrected          = "DtmCorrected.tiff"
          Filename_Python_Ldd                   = "Ldd.tiff"
          Filename_Python_RiverLength           = "RiverLength.tiff"
          Filename_Python_RiverOrder            = "RiverOrder.tiff"
@@ -67,7 +67,7 @@
 
       # === Input csv ===
          Filename_Csv_ObservationPoint = "ObservationPoint.csv"
-         Filename_Csv_GaugePoint = "Gauges_grdc.csv"
+         Filename_Csv_GaugePoint       = "Gauges_grdc.csv"
 
       # === Lookup tables ===
          Filename_Lookuptable_Hydro   = "LookupTable_Hydro.csv"
@@ -77,15 +77,15 @@
    # ======= OUTPUT =======
       # === Output Julia ===
          Filename_Coastline          = "Coastline.tiff"
-         Filename_Julia_Dem          = "Ireland_DEM_Croped.tiff"
-         Filename_Julia_DemCorrected = "DEM_Corrected.tiff"
+         Filename_Julia_Dtm          = "Ireland_DEM_Croped.tiff"
+         Filename_Julia_DtmCorrected = "DEM_Corrected.tiff"
          Filename_Julia_Gauge        = "Gauge.tiff"
          Filename_Julia_Pits         = "Pits.tiff"
          Filename_Julia_RiverOrder   = "RiverOrder.tiff"
 
       # === Output wflow ===
          Filename_Gauge                   = "Gauges_grdc.tiff"
-         Filename_Dem                     = "Dem.tiff"
+         Filename_Dtm                     = "Dtm.tiff"
          Filename_Ldd                     = "Ldd.tiff"
          Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
          Filename_RiverLength             = "RiverLength.tiff"
@@ -108,16 +108,16 @@
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    if 🎏_CatchmentName == "Ballycanew"
       # Flags: processing inputs
-         # Dem derived from Mosaic
+         # Dtm derived from Mosaic
          🎏_Mosaic                = false
-         🎏_DemFromMosaic         = false # Gis stored
-         🎏_MaskFromDem           = false
+         🎏_DtmFromMosaic         = false # Gis stored
+         🎏_MaskFromDtm           = false
 
-         @assert(!(🎏_Mosaic && 🎏_DemFromMosaic))
+         @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
 
          # Flags: Options
          🎏_Fix_Cyclic            = false # obsolete
-         🎏_RiverFromDem          = true
+         🎏_RiverFromDtm          = true
 
          # Flags: outputs of interest
          🎏_ImpermeableMap        = false
@@ -134,7 +134,7 @@
          Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
 
          # === Raster input file ===
-            Filename_Input_Dem        = "Ballycanew_DTM_5m.tif"
+            Filename_Input_Dtm        = "Ballycanew_DTM_5m.tif"
 
          # Resampling method of DEM in 2 steps:
             Param_ResampleMethod₁ = :min
@@ -161,16 +161,16 @@
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    elseif 🎏_CatchmentName == "Castledockerell"
       # Flags: processing inputs
-         # Dem derived from Mosaic
+         # Dtm derived from Mosaic
          🎏_Mosaic                = false
-         🎏_DemFromMosaic         = false # Gis stored
-         🎏_MaskFromDem           = false
+         🎏_DtmFromMosaic         = false # Gis stored
+         🎏_MaskFromDtm           = false
 
-         @assert(!(🎏_Mosaic && 🎏_DemFromMosaic))
+         @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
 
          # Flags: Options
          🎏_Fix_Cyclic            = false # obsolete
-         🎏_RiverFromDem          = true
+         🎏_RiverFromDtm          = true
 
          # Flags: outputs of interest
          🎏_ImpermeableMap        = false
@@ -187,7 +187,7 @@
          Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
 
          # === Raster input file ===
-            Filename_Input_Dem        = "Castledockerell_DTM_5m.tif"
+            Filename_Input_Dtm        = "Castledockerell_DTM_5m.tif"
 
          # Resampling method of DEM in 2 steps:
             Param_ResampleMethod₁ = :min
@@ -214,16 +214,16 @@
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    elseif 🎏_CatchmentName == "Corduff"
       # Flags: processing inputs
-         # Dem derived from Mosaic
+         # Dtm derived from Mosaic
          🎏_Mosaic                = false
-         🎏_DemFromMosaic         = false # Gis stored
-         🎏_MaskFromDem           = false
+         🎏_DtmFromMosaic         = false # Gis stored
+         🎏_MaskFromDtm           = false
 
-         @assert(!(🎏_Mosaic && 🎏_DemFromMosaic))
+         @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
 
          # Flags: Options
          🎏_Fix_Cyclic            = false # obsolete
-         🎏_RiverFromDem          = true
+         🎏_RiverFromDtm          = true
 
          # Flags: outputs of interest
          🎏_ImpermeableMap        = false
@@ -240,7 +240,7 @@
          Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
 
          # === Raster input file ===
-            Filename_Input_Dem        = "Corduff_DTM_5m.tif"
+            Filename_Input_Dtm        = "Corduff_DTM_5m.tif"
 
          # Resampling method of DEM in 2 steps:
             Param_ResampleMethod₁ = :min
@@ -267,16 +267,16 @@
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    elseif 🎏_CatchmentName == "Cregduff"
             # Flags: processing inputs
-         # Dem derived from Mosaic
+         # Dtm derived from Mosaic
          🎏_Mosaic                = false
-         🎏_DemFromMosaic         = false # Gis stored
-         🎏_MaskFromDem           = false
+         🎏_DtmFromMosaic         = false # Gis stored
+         🎏_MaskFromDtm           = false
 
-         @assert(!(🎏_Mosaic && 🎏_DemFromMosaic))
+         @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
 
          # Flags: Options
          🎏_Fix_Cyclic            = false # obsolete
-         🎏_RiverFromDem          = true
+         🎏_RiverFromDtm          = true
 
          # Flags: outputs of interest
          🎏_ImpermeableMap        = false
@@ -293,7 +293,7 @@
          Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
 
          # === Raster input file ===
-            Filename_Input_Dem        = "Cregduff_DTM_5m.tif"
+            Filename_Input_Dtm        = "Cregduff_DTM_5m.tif"
 
          # Resampling method of DEM in 2 steps:
             Param_ResampleMethod₁ = :min
@@ -320,16 +320,16 @@
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    elseif 🎏_CatchmentName == "Dunleer"
                # Flags: processing inputs
-         # Dem derived from Mosaic
+         # Dtm derived from Mosaic
          🎏_Mosaic                = false
-         🎏_DemFromMosaic         = false # Gis stored
-         🎏_MaskFromDem           = false
+         🎏_DtmFromMosaic         = false # Gis stored
+         🎏_MaskFromDtm           = false
 
-         @assert(!(🎏_Mosaic && 🎏_DemFromMosaic))
+         @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
 
          # Flags: Options
          🎏_Fix_Cyclic            = false # obsolete
-         🎏_RiverFromDem          = true
+         🎏_RiverFromDtm          = true
 
          # Flags: outputs of interest
          🎏_ImpermeableMap        = false
@@ -346,7 +346,7 @@
          Path_Root_Mosaic      = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
 
          # === Raster input file ===
-            Filename_Input_Dem        = "Dunleer_DTM_5m.tif"
+            Filename_Input_Dtm        = "Dunleer_DTM_5m.tif"
 
          # Resampling method of DEM in 2 steps:
             Param_ResampleMethod₁ = :min
@@ -373,16 +373,16 @@
 # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
 elseif 🎏_CatchmentName == "Timoleague"
    # Flags: processing inputs
-      # Dem derived from Mosaic
+      # Dtm derived from Mosaic
          🎏_Mosaic                = false
-         🎏_DemFromMosaic         = true # Gis stored
-         🎏_MaskFromDem           = true
+         🎏_DtmFromMosaic         = false # Gis stored
+         🎏_MaskFromDtm           = true
 
-         @assert(!(🎏_Mosaic && 🎏_DemFromMosaic))
+         @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
 
       # Flags: Options
          🎏_Fix_Cyclic            = false # obsolete
-         🎏_RiverFromDem          = true
+         🎏_RiverFromDtm          = true
 
       # Flags: outputs of interest
          🎏_ImpermeableMap        = false
@@ -394,23 +394,23 @@ elseif 🎏_CatchmentName == "Timoleague"
 
       # Flags: NetCDF
          🎏_NetCDF                = true
-         🎏_Forcing_2_NetCDF      = false
+         🎏_Forcing_2_NetCDF      = true
 
    # ======= PATHS =======
       Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
 
       # === Raster input file ===
-         Filename_Input_Dem = "Ireland_FABDEM.tif"
+         Filename_Input_Dtm = "Timoleague_DTM_BlueSky_EPSG29902.tif"
 
       # Resampling method of DEM in 2 steps:
-         Param_ResampleMethod₁ = :min
-         Param_ΔX₁             = 20 # [m] Gridded spatial resolution
+         Param_ResampleMethod₁ = :cubicspline
+         Param_ΔX₁      = 5 # [m]  resampling, Gridded spatial resolution
          Param_ResampleMethod₂ = :cubicspline
-         Param_ΔX₂             = 20 # [m] Gridded spatial resolution should be a multiple of Param_ΔX₁
+         Param_ΔX₂      = -1 # [m]  if >0 then resampling, Gridded spatial resolution should be a multiple of Param_ΔX₁
 
       # RIVER PARAMETERS
-         Param_RiverWidth = 1.7::Float64 # [m]
-         Param_RiverDepth = 0.17::Float64;  # must be an integer [m]
+         Param_RiverWidth   = 1.7::Float64 # [m]
+         Param_RiverDepth   = 0.17::Float64;  # must be an integer [m]
          Param_RiverManning = 0.033::Float64
 
       # GAUGE COORDINATES

@@ -6,7 +6,7 @@ module geoNetcdf
 	include("Parameters.jl")
 	include("PlotParameter.jl")
 
-	using Rasters, GeoTIFF
+	using Rasters
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : CREATE_TRACKED_NETCDF
@@ -112,7 +112,7 @@ module geoNetcdf
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : TIFF_2_NETCDF
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function TIFF_2_NETCDF(;Dem, Filename_Dem, Filename_ObservationEcologyPoint, Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, LandUse_Header, LandUse_Maps, Latitude, Ldd_Mask, Longitude, Metadatas, ObservationPoint, River, River_Header, River_Maps, RiverLength_Mask, RiverSlope, Slope_Mask, Soil_Header, Soil_Maps, Subcatchment, Deflatelevel=0)
+		function TIFF_2_NETCDF(;Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, LandUse_Header, LandUse_Maps, Latitude, Ldd_Mask, Longitude, Metadatas, ObservationPoint, River, River_Header, River_Maps, RiverLength_Mask, RiverSlope, Slope_Mask, Soil_Header, Soil_Maps, Subcatchment, Deflatelevel=0)
 
 		# Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
 			Path_NetCDF_Full = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
@@ -197,11 +197,11 @@ module geoNetcdf
 
 
 			# == DEM input ==========================================
-				Keys=splitext(Filename_Dem)[1]
-				Dem_NetCDF=NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
-				Dem_NetCDF .= Array(Dem)
-				Dem_NetCDF.attrib["units"] = "[m]"
-				Dem_NetCDF.attrib["comments"] = "Z"
+				Keys=splitext(Filename_Dtm)[1]
+				Dtm_NetCDF=NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN; deflatelevel=Deflatelevel, )
+				Dtm_NetCDF .= Array(Dtm)
+				Dtm_NetCDF.attrib["units"] = "[m]"
+				Dtm_NetCDF.attrib["comments"] = "Z"
 				println(Keys)
 
 

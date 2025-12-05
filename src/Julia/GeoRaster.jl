@@ -1,14 +1,13 @@
 
 module geoRaster
-	using Revise
-	using Rasters, GeoFormatTypes, GeoTIFF, ArchGDAL, GeoDataFrames, DataFrames, Shapefile, CSV
+	using Revise, Rasters, GeoDataFrames, GeoFormatTypes, DimensionalData, Geomorphometry, CSV
+	# using GeoFormatTypes, GeoTIFF, ArchGDAL, GeoDataFrames, DataFrames, Shapefile, CSV
 	using NCDatasets
 
 
 	# using Base
 	# using CairoMakie, Colors, ColorSchemes
 	# using Geomorphometry
-
 
 	include("Parameters.jl")
 	include("GeoPlot.jl")
@@ -31,45 +30,45 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : DEM_DERIVE_COASTLINES
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function DEM_DERIVE_COASTLINES(;Dem,  Longitude, Latitude, Crs, Missing=NaN, ϵ=0.001, DemMin=0.001)
-			Dem_Coastline = Rasters.Raster((Longitude, Latitude); crs=Crs)
+		function DEM_DERIVE_COASTLINES(;Dtm,  Longitude, Latitude, Crs, Missing=NaN, ϵ=0.001, DtmMin=0.001)
+			Dtm_Coastline = Rasters.Raster((Longitude, Latitude); crs=Crs)
 
-			N_Width, N_Height = size(Dem_Coastline)
+			N_Width, N_Height = size(Dtm_Coastline)
 
-			Dem_Corrected = deepcopy(Dem)
+			Dtm_Corrected = deepcopy(Dtm)
 
 			# Removing small islands
 				Threads.@threads for iX=1:N_Width
 					Threads.@threads for iY=1:N_Height
-						if Dem[iX, iY] < 0.001
-                     Dem[iX,iY]           = Missing
-                     Dem_Corrected[iX,iY] = Missing
-						end # Dem[iX, iY] > 0
+						if Dtm[iX, iY] < 0.001
+                     Dtm[iX,iY]           = Missing
+                     Dtm_Corrected[iX,iY] = Missing
+						end # Dtm[iX, iY] > 0
 					end # iY=1:N_Height
 				end # for iiX=1:N_Width
 
 			Threads.@threads for iX=1:N_Width
 				Threads.@threads for iY=1:N_Height
-					if Dem[iX, iY] > 0
+					if Dtm[iX, iY] > 0
 						if (iX ≠ 1 && iX ≠ N_Width && iY ≠ 1 && iY ≠ N_Height)
-							# if Dem[iX-1, iY] ≤ ZseaMeanLevel || (Dem[min(iX+1, N_Width), iY]) ≤ ZseaMeanLevel || (Dem[iX, iY-1]) ≤ ZseaMeanLevel || (Dem[iX, iY+1]) ≤ ZseaMeanLevel
-							if isnan(Dem[iX-1, iY]) || isnan(Dem[min(iX+1, N_Width), iY]) || isnan(Dem[iX, iY-1]) || isnan(Dem[iX, iY+1])
-								Dem_Coastline[iX,iY] = 1
-								Dem_Corrected[iX,iY] = Dem_Corrected[iX,iY] + DemMin
+							# if Dtm[iX-1, iY] ≤ ZseaMeanLevel || (Dtm[min(iX+1, N_Width), iY]) ≤ ZseaMeanLevel || (Dtm[iX, iY-1]) ≤ ZseaMeanLevel || (Dtm[iX, iY+1]) ≤ ZseaMeanLevel
+							if isnan(Dtm[iX-1, iY]) || isnan(Dtm[min(iX+1, N_Width), iY]) || isnan(Dtm[iX, iY-1]) || isnan(Dtm[iX, iY+1])
+								Dtm_Coastline[iX,iY] = 1
+								Dtm_Corrected[iX,iY] = Dtm_Corrected[iX,iY] + DtmMin
 							else
-								Dem_Coastline[iX,iY] = Missing
+								Dtm_Coastline[iX,iY] = Missing
 							end
 						else
-							Dem_Coastline[iX,iY] = 1
-							Dem_Corrected[iX,iY] = Dem_Corrected[iX,iY] + DemMin
+							Dtm_Coastline[iX,iY] = 1
+							Dtm_Corrected[iX,iY] = Dtm_Corrected[iX,iY] + DtmMin
 						end
 					else
-						Dem_Coastline[iX,iY] = Missing
-					end # Dem[iX, iY] > 0
+						Dtm_Coastline[iX,iY] = Missing
+					end # Dtm[iX, iY] > 0
 				end # iY=1:N_Height
 			end # for iiX=1:N_Width
 
-		return Dem_Coastline, Dem_Corrected
+		return Dtm_Coastline, Dtm_Corrected
 		end  # function: DEM_DERIVE_COASTLINES
 	# ------------------------------------------------------------------
 
@@ -77,44 +76,44 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : DEM_CORRECT_BOARDERS_1!
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function DEM_CORRECT_BOARDERS_1!(;Dem, Latitude, Longitude, Crs, ΔZadjust=10.0, iiParam_GaugeCoordinate)
+		function DEM_CORRECT_BOARDERS_1!(;Dtm, Latitude, Longitude, Crs, ΔZadjust=10.0, iiParam_GaugeCoordinate)
 
-			N_Width, N_Height  = size(Dem)
+			N_Width, N_Height  = size(Dtm)
 
 			iiX = iiParam_GaugeCoordinate[1]
 			iiY = iiParam_GaugeCoordinate[2]
 
-			Dem_Boarder = Rasters.Raster((Longitude, Latitude); crs=Crs)
+			Dtm_Boarder = Rasters.Raster((Longitude, Latitude); crs=Crs)
 			for iX=1:N_Width
 				for iY=1:N_Height
-					if Dem[iX, iY] > 0
+					if Dtm[iX, iY] > 0
 						if (iX ≠ 1 && iX ≠ N_Width && iY ≠ 1 && iY ≠ N_Height)
-							if isnan(Dem[iX-1, iY]) || isnan(Dem[min(iX+1, N_Width), iY]) || isnan(Dem[iX, iY-1]) || isnan(Dem[iX, iY+1])
-								Dem_Boarder[iX,iY] = 1
+							if isnan(Dtm[iX-1, iY]) || isnan(Dtm[min(iX+1, N_Width), iY]) || isnan(Dtm[iX, iY-1]) || isnan(Dtm[iX, iY+1])
+								Dtm_Boarder[iX,iY] = 1
 							else
-								Dem_Boarder[iX,iY] = NaN
+								Dtm_Boarder[iX,iY] = NaN
 							end
 						else
-							Dem_Boarder[iX,iY] = 1
+							Dtm_Boarder[iX,iY] = 1
 						end
 					else
-						Dem_Boarder[iX,iY] = NaN
-					end # Dem[iX, iY] > 0
+						Dtm_Boarder[iX,iY] = NaN
+					end # Dtm[iX, iY] > 0
 				end # iY=1:N_Height
 			end # for iiX=1:N_Width
 
 			for iX=1:N_Width
 				for iY=1:N_Height
-					if Dem_Boarder[iX,iY] > 0
+					if Dtm_Boarder[iX,iY] > 0
 						if !(iX == iiX && iY== iiY && iX == min(iiX + 1, N_Width) && iY== min(iiY + 1, N_Height) && iX == max(iiX - 1, 1) && iY== max(iiY - 1,1))
 
-							Dem[iX,iY] = Dem[iX,iY] + ΔZadjust
+							Dtm[iX,iY] = Dtm[iX,iY] + ΔZadjust
 						end
-					end # Dem[iX, iY] > 0
+					end # Dtm[iX, iY] > 0
 				end # iY=1:N_Height
 			end # for iiX=1:N_Width
 
-		return Dem, Dem_Boarder
+		return Dtm, Dtm_Boarder
 		end  # function: CORRECT_BOARDERS
 	# ------------------------------------------------------------------
 
@@ -163,81 +162,6 @@ module geoRaster
 	# ----------------------------------------------------------------
 
 
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#		FUNCTION : POINT_2_RASTER
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Dem, Metadatas, Param_ΔX, Longitude, Latitude, River=[], 🎏_Method_Index ="Rasters", 🎏_PointOnRiver =false)
-
-		   # READ DATA
-            Data        = CSV.File(PathInput, header=true)
-            Header      = string.(Tables.columnnames(Data))
-            Longitude_X = convert(Vector{Float64}, Tables.getcolumn(Data, :X))
-            Latitude_Y  = convert(Vector{Float64}, Tables.getcolumn(Data, :Y))
-            Site        = convert(Vector{String}, Tables.getcolumn(Data, :SITE))
-            Epsg        = convert(Vector{Int64}, Tables.getcolumn(Data, :EPSG))
-            Id          = convert(Vector{Int64}, Tables.getcolumn(Data, :ID))
-
-				if length(unique!(Epsg)) ≥ 2
-					@error("EPSGmust be all unique")
-				end
-
-				N = length(Longitude_X)
-
-			# CONVERT TO SHAPEFILE
-				Points = GeoDataFrames.GeoInterface.Point.(Longitude_X, Latitude_Y; crs=GeoDataFrames.EPSG(Epsg[1]))
-				Df = DataFrames.DataFrame(Coordinates=Points, Site=Site)
-				Df = GeoDataFrames.metadata!(Df, "GEOINTERFACE:geometrycolumns", (:Coordinates,); style=:note) # required because of the custom geometry column nam
-				Df = GeometryOps.reproject(Df, GeoDataFrames.EPSG(Epsg[1]), GeoDataFrames.EPSG(EPSG_Output);  always_xy=false) # this set the crs metadata
-				GeoDataFrames.write(PathOutputShp, Df; force=true,)
-				println(PathOutputShp)
-
-			# CONVERT TO RASTER
-				Points_Raster = Rasters.Raster((Longitude, Latitude); crs=Metadatas.Crs_GeoFormat)
-				Points_Raster = Rasters.set(Points_Raster, Rasters.Center)
-				Points_Raster .= 0::Int64
-
-				iX_Gauge = 1
-				iY_Gauge = 1
-				for i = 1:N
-					if 🎏_Method_Index == "Joseph"
-						iX_Gauge, iY_Gauge = geoRaster.LAT_LONG_2_INDEX(;Map=Points_Raster, Param_GaugeCoordinate=[Longitude_X[i], Latitude_Y[i]])
-
-					elseif 🎏_Method_Index == "Rasters"
-						iX_Gauge, iY_Gauge = Rasters.dims2indices(Points_Raster, (X(Rasters.Near(Longitude_X[i])), Y(Rasters.Near(Latitude_Y[i]))))
-
-					else
-						@error("🎏_Method_Index == $🎏_Method_Index not available")
-					end
-
-					Points_Raster[iX_Gauge, iY_Gauge] = Id[i]
-
-					N_iY = size(Points_Raster)[2]
-					println(  "Id =" , Id[i], " , " , [iX_Gauge, iY_Gauge] , "; Wflow= ", [iX_Gauge, N_iY - iY_Gauge + 1])
-
-					# Assuring that the observation point is on a river
-					if 🎏_PointOnRiver
-							if River[iX_Gauge, iY_Gauge] ≠ 1
-								@error "Site = $(Site[i]) not on river network River[iX_Gauge, iY_Gauge] ≠ 1"
-							end
-					end
-				end # for i = 1:N
-
-				Rasters.write(PathOutputRaster, Points_Raster; ext=".tiff", force=true, verbose=false, missingval=0)
-				println(PathOutputRaster)
-
-			# CONVERT TO RASTER (not accurate)
-			   # Points_Shp = Shapefile.Handle(PathOutputShp)
-
-				# Dem = DimensionalData.shiftlocus(DimensionalData.Center(), Dem)
-				# Dem = Rasters.set(Dem, Rasters.Center)
-
-				# Points_Raster = Rasters.rasterize(last, Points_Shp; shape=:point, fill=1, missingval=0, to=Dem, threaded=false, boundary=:touches, progress=false)
-
-				# Rasters.write(PathOutputRaster, Points_Raster; ext=".tiff", force=true, verbose=false, missingval=0)
-				# println(PathOutputRaster)
-		return Points_Raster
-		end  # function: POINT_2_RASTER
-	# ------------------------------------------------------------------
 
 	 """
 		  Deriving metadata from the GeoTiff file
@@ -316,9 +240,9 @@ module geoRaster
 			# Combining maps
 			Maps = []
 			for iiFile in FilesList
-				Dem_Map₀ = Rasters.Raster(joinpath(Path_Root_Mosaic, iiFile))
-				Dem_Map  = Rasters.replace_missing(Dem_Map₀, missingval=NaN)
-				Maps     = push!(Maps, Dem_Map)
+				Dtm_Map₀ = Rasters.Raster(joinpath(Path_Root_Mosaic, iiFile))
+				Dtm_Map  = Rasters.replace_missing(Dtm_Map₀, missingval=NaN)
+				Maps     = push!(Maps, Dtm_Map)
 			end
 
 			Mosaic = Rasters.mosaic(first, Maps; missingval=Missing, progress=true)
@@ -340,6 +264,83 @@ module geoRaster
 		printstyled("					==== MOSAIC READY ===", color=:cyan)
 		return Mosaic
 		end  # function: MOSAIC
+	# ------------------------------------------------------------------
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	#		FUNCTION : POINT_2_RASTER
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Dtm, Metadatas, Param_ΔX, Longitude, Latitude, River=[], 🎏_Method_Index ="Rasters", 🎏_PointOnRiver =false)
+
+		   # READ DATA
+            Data        = CSV.File(PathInput, header=true)
+            Header      = string.(Tables.columnnames(Data))
+            Longitude_X = convert(Vector{Float64}, Tables.getcolumn(Data, :X))
+            Latitude_Y  = convert(Vector{Float64}, Tables.getcolumn(Data, :Y))
+            Site        = convert(Vector{String}, Tables.getcolumn(Data, :SITE))
+            Epsg        = convert(Vector{Int64}, Tables.getcolumn(Data, :EPSG))
+            Id          = convert(Vector{Int64}, Tables.getcolumn(Data, :ID))
+
+				if length(unique!(Epsg)) ≥ 2
+					@error("EPSGmust be all unique")
+				end
+
+				N = length(Longitude_X)
+
+			# CONVERT TO SHAPEFILE
+				Points = GeoDataFrames.GeoInterface.Point.(Longitude_X, Latitude_Y; crs=GeoDataFrames.EPSG(Epsg[1]))
+				Df = DataFrames.DataFrame(Coordinates=Points, Site=Site)
+				Df = GeoDataFrames.metadata!(Df, "GEOINTERFACE:geometrycolumns", (:Coordinates,); style=:note) # required because of the custom geometry column nam
+				Df = GeometryOps.reproject(Df, GeoDataFrames.EPSG(Epsg[1]), GeoDataFrames.EPSG(EPSG_Output);  always_xy=false) # this set the crs metadata
+				GeoDataFrames.write(PathOutputShp, Df; force=true,)
+				println(PathOutputShp)
+
+			# CONVERT TO RASTER
+				Points_Raster = Rasters.Raster((Longitude, Latitude); crs=Metadatas.Crs_GeoFormat)
+				Points_Raster = Rasters.set(Points_Raster, Rasters.Center)
+				Points_Raster .= 0::Int64
+
+				iX_Gauge = 1
+				iY_Gauge = 1
+				for i = 1:N
+					if 🎏_Method_Index == "Joseph"
+						iX_Gauge, iY_Gauge = geoRaster.LAT_LONG_2_INDEX(;Map=Points_Raster, Param_GaugeCoordinate=[Longitude_X[i], Latitude_Y[i]])
+
+					elseif 🎏_Method_Index == "Rasters"
+						iX_Gauge, iY_Gauge = Rasters.dims2indices(Points_Raster, (X(Rasters.Near(Longitude_X[i])), Y(Rasters.Near(Latitude_Y[i]))))
+
+					else
+						@error("🎏_Method_Index == $🎏_Method_Index not available")
+					end
+
+					Points_Raster[iX_Gauge, iY_Gauge] = Id[i]
+
+					N_iY = size(Points_Raster)[2]
+					println(  "Id =" , Id[i], " , " , [iX_Gauge, iY_Gauge] , "; Wflow= ", [iX_Gauge, N_iY - iY_Gauge + 1])
+
+					# Assuring that the observation point is on a river
+					if 🎏_PointOnRiver
+							if River[iX_Gauge, iY_Gauge] ≠ 1
+								@error "Site = $(Site[i]) not on river network River[iX_Gauge, iY_Gauge] ≠ 1"
+							end
+					end
+				end # for i = 1:N
+
+				Rasters.write(PathOutputRaster, Points_Raster; ext=".tiff", force=true, verbose=false, missingval=0)
+				println(PathOutputRaster)
+
+			# CONVERT TO RASTER (not accurate)
+			   # Points_Shp = Shapefile.Handle(PathOutputShp)
+
+				# Dtm = DimensionalData.shiftlocus(DimensionalData.Center(), Dtm)
+				# Dtm = Rasters.set(Dtm, Rasters.Center)
+
+				# Points_Raster = Rasters.rasterize(last, Points_Shp; shape=:point, fill=1, missingval=0, to=Dtm, threaded=false, boundary=:touches, progress=false)
+
+				# Rasters.write(PathOutputRaster, Points_Raster; ext=".tiff", force=true, verbose=false, missingval=0)
+				# println(PathOutputRaster)
+		return Points_Raster
+		end  # function: POINT_2_RASTER
 	# ------------------------------------------------------------------
 
 
