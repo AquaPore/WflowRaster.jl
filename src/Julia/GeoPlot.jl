@@ -55,6 +55,9 @@ module geoPlot
 				N_Time = size(Data)[4]
 			end
 
+			println(Dimensions)
+			@show N_Lon N_Lat N_Time Layer
+
 			Pmin, Pmax = extrema(x for x ∈ skipmissing(Data) if !isnan(x))
 			@show Pmin, Pmax
 
@@ -63,8 +66,8 @@ module geoPlot
 				println(" max == Pmin")
 			end
 
-			# # # Pmin = minimum(skipmissing(Data))
-			# # # Pmax = maximum(skipmissing(Data))
+			# # Pmin = minimum(skipmissing(Data))
+			# # Pmax = maximum(skipmissing(Data))
 
 			function DATA_3D_2_2D(Data; iTime=iTime, Layer=Layer)
 				if Dimensions == 4
@@ -77,7 +80,13 @@ module geoPlot
 			# Fig = GLMakie.Figure(Width=800, Height=600)
 			Fig = GLMakie.Figure()
 
-			Ax_1 = GLMakie.Axis(Fig[1, 1], title=NameOutput, xlabelsize=xlabelSize, ylabelsize=xlabelSize, xticksize=xticksize, xgridvisible=xgridvisible, ygridvisible=xgridvisible, aspect=1)
+				if Dimensions == 4
+					Title = "$NameOutput , Layer = $Layer"
+				elseif Dimensions == 3
+					return Data[:,:, iTime]
+				end
+
+			Ax_1 = GLMakie.Axis(Fig[1, 1], title=Title, xlabelsize=xlabelSize, ylabelsize=xlabelSize, xticksize=xticksize, xgridvisible=xgridvisible, ygridvisible=xgridvisible, aspect=1)
 
 			Ax_1.yreversed = 🎏_Reverse
 
@@ -87,7 +96,7 @@ module geoPlot
 
 			iTime = sg.sliders[1].value
 
-			Data_Time = GLMakie.lift((iTime) -> DATA_3D_2_2D(Data; iTime=iTime), iTime)
+			Data_Time = GLMakie.lift((iTime) -> DATA_3D_2_2D(Data; iTime=iTime, Layer=Layer), iTime)
 
 			Data_Plot = GLMakie.heatmap!(Ax_1, 1:N_Lon, 1:N_Lat, Data_Time, colorrange=(Pmin, Pmax), colormap =:hawaii50)
 
