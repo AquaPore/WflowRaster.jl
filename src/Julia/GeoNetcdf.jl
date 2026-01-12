@@ -462,7 +462,8 @@ module geoNetcdf
 			close(NetCDFmeteo)
 			end # for iSplit =1:Nsplit
 		println(Keys_Forcing)
-		println("========== FINISHED ======================")
+		printstyled("========== FINISHED ======================", color=:yellow)
+
 		return NetCDFmeteo, Path_NetCDFmeteo_Output
 		end  # function: TIMESERIES_2_NETCDF
 	# ------------------------------------------------------------------

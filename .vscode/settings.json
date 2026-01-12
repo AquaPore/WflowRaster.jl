@@ -1,7 +1,30 @@
+// {
+// 	"search.useIgnoreFiles": true,
+// 	"search.useParentIgnoreFiles": true,
+// 	"julia.executablePath": "C:\\Users\\jpollacco.local\\.julia\\juliaup\\julia-1.12.3+0.x64.w64.mingw32\\bin\\julia.exe",
+// 	"julia.additionalArgs": [
+// 	]
+// }
+
+
+
 {
 	"search.useIgnoreFiles": true,
 	"search.useParentIgnoreFiles": true,
-	"julia.additionalArgs": [
-		
-	]
+    "[julia]": {
+        "editor.formatOnSave": true
+    },
+    "julia.executablePath": "C:\\Users\\jpollacco.local\\.julia\\juliaup\\julia-1.12.4+0.x64.w64.mingw32\\bin\\julia.exe",
+    "julia.numTestProcesses": 32,
+    "julia.lint.disabledDirs": [
+        ".pixi"
+    ],
+    "julia.lint.run": true,
+    "files.associations": {
+        "*.qmd": "markdown"
+    },
+    "[markdown]": {
+        "rewrap.wordWrapColumn": 92
+    }
+
 }

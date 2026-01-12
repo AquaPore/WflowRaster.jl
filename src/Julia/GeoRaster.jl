@@ -233,7 +233,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : MOSAIC
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function MOSAIC(;Path_Root_Mosaic, Missing=NaN, ZseaMeanLevel=5.0, 🎏_CleanData=true)
+		function MOSAIC(;Path_Root_Mosaic, Missing=NaN, ZseaMeanLevel=0.01, 🎏_CleanData=true)
 
 			FilesList = readdir(Path_Root_Mosaic,)
 
@@ -252,7 +252,7 @@ module geoRaster
 
 				for iX=1:N_Width
 					for iY=1:N_Height
-						if Mosaic[iX,iY] < ZseaMeanLevel || !(Mosaic[iX,iY]>0)
+						if (Mosaic[iX,iY] < ZseaMeanLevel) || (Mosaic[iX,iY] <0.)
 							Mosaic[iX,iY] = Missing
 						end
 					end # for iY=1:Metadatas.N_Height

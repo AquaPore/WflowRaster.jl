@@ -7,16 +7,18 @@
 
    # DATES
    Base.@kwdef mutable struct DATES
-      Start_Year  = 2010 :: Int64
-      Start_Month = 1 :: Int64
-      Start_Day   = 10 :: Int64
+      Start_Year  = 2020 :: Int64
+      Start_Month = 3 :: Int64
+      Start_Day   = 6 :: Int64
       Start_Hour  = 0 :: Int64
 
-      End_Year    = 2011:: Int64
-      End_Month   = 1 :: Int64
-      End_Day     = 30 :: Int64
+      End_Year    = 2024:: Int64
+      End_Month   = 12 :: Int64
+      End_Day     = 31 :: Int64
       End_Hour    = 23 :: Int64
    end # struct METADATA
+
+   Forcing_ΔT = "Daily" # <"Hourly"> or <"Daily">
 
    # Flags: plots
       🎏_Plots                 = true
@@ -30,10 +32,11 @@
       Path_Root_NetCDF = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
       Path_Root_LookupTable = raw"DATA\Lookuptable"
 
-      Path_Forcing          = "InputTimeSeries\\TimeSeries_Process"
+      Path_Forcing₀         = "InputTimeSeries\\TimeSeries_Process"
+      Path_Forcing                  = joinpath(Path_Forcing₀, Forcing_ΔT)
       Path_Gis              = "InputGis"
       Path_Julia            = "OutputJulia"
-      Path_Lookuptable      = "LookupTable_Regional"
+      Path_Lookuptable      = "LookupTable"
       Path_NetCDF           = "OutputNetCDF"
       Path_ObservationPoint = "InputObservationPoint"
       Path_Python           = "OutputPython"
@@ -43,7 +46,7 @@
 
    # ======= INPUT =======
       # === Input  Forcing ===
-         Filename_Input_Forcing = "forcing." * "$🎏_CatchmentName" * ".csv"
+         Filename_Input_Forcing = "Forcing_" * Forcing_ΔT * "_" * "$🎏_CatchmentName" * ".csv"
 
       # === Shape file ===
          Filename_Gauge_Shp                          = "Gauge_Hydro.shp"
@@ -54,7 +57,7 @@
          Filename_Output_ObservationEcologyPoint_Shp = "ObservationEcologyPoint.shp"
          Filename_River_Shp                          = "RiversIreland.shp"
          Filename_Roads_Shp                          = "Roads.shp"
-         Filename_SoilMap_Shp                        = "SoilMap.shp"
+         Filename_SoilMap_Shp                        = "Soils//SoilMap.shp"
 
       # === Input from Python ===
          Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tiff"
@@ -84,8 +87,8 @@
          Filename_Julia_RiverOrder   = "RiverOrder.tiff"
 
       # === Output wflow ===
-         Filename_Gauge                   = "Gauges_grdc.tiff"
          Filename_Dtm                     = "Dtm.tiff"
+         Filename_Gauge                   = "Gauges_grdc.tiff"
          Filename_Ldd                     = "Ldd.tiff"
          Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
          Filename_RiverLength             = "RiverLength.tiff"
@@ -400,11 +403,11 @@ elseif 🎏_CatchmentName == "Timoleague"
       Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
 
       # === Raster input file ===
-         Filename_Input_Dtm = "Timoleague_DTM_BlueSky_EPSG29902.tif"
+         Filename_Input_Dtm = "Timoleague_DTM_Intermap_EPSG29902.tif"
 
       # Resampling method of DEM in 2 steps:
-         Param_ResampleMethod₁ = :cubicspline
-         Param_ΔX₁      = 5 # [m]  resampling, Gridded spatial resolution
+         Param_ResampleMethod₁ = :average
+         Param_ΔX₁      = 4 # [m]  resampling, Gridded spatial resolution
          Param_ResampleMethod₂ = :cubicspline
          Param_ΔX₂      = -1 # [m]  if >0 then resampling, Gridded spatial resolution should be a multiple of Param_ΔX₁
 
@@ -418,7 +421,7 @@ elseif 🎏_CatchmentName == "Timoleague"
          Param_GaugeCoordinate = [146697.99,42140.78]
 
       # SOILS PARAMETERS
-         Layer_Soil = :DRAINAGE
+         Layer_Soil = :DRAINAGEid
          soil_layer__thickness = [100, 300, 800]
 
       # LANDUSE MAPS
