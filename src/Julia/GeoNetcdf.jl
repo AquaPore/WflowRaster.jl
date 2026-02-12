@@ -484,7 +484,5 @@ module geoNetcdf
 		run(`$cmd $Path_Copy $Path_Paste`)
 	end
 
-
-
 end  # module: geoNetcdf
 # ............................................................

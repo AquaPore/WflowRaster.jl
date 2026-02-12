@@ -399,6 +399,8 @@ elseif 🎏_CatchmentName == "Timoleague"
          🎏_NetCDF                = true
          🎏_Forcing_2_NetCDF      = true
 
+      # Flags: Potential Evapotranspiration
+
    # ======= PATHS =======
       Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
 
