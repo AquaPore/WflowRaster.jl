@@ -18,3 +18,16 @@ language.
 It also has tools to Visalise the output data.
 
 The processing of the DEM data is performed in a Python package [WflowRasterPython](https://github.com/AquaPore/WflowRasterPython.py)
+
+
+# SELECTION OF SENTINEL DATA
+
+Thanks to the amazing software of  **SentinelExplorer.jl**
+
+The 'copernicus.SENTINEL_DATA(...)' function derives automatically:
+* For the given period of interest;
+* For the location of interest;
+* For every month or for twice a month (as an option) the day were the satellite passes which has the least cloud cover;
+* Automatically derives the tile of interest
+* Derives a metadata sheet on the acquisition of the data;
+* If there is an issue of the website, rerun the software and it will only download the missing data.

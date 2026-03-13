@@ -43,7 +43,7 @@
       Path_River            = "RIVERS\\SHAPEFILE"
       Path_TimeSeriesWflow  = "InputTimeSeries/TimeSeries_Wflow"
       Path_Wflow            = "OutputWflow"
-      Path_Sentinel         = "Sentinel"
+      Path_Sentinel         = "Sentinel/Download/"
 
    # ======= INPUT =======
       # === Input  Forcing ===
@@ -384,12 +384,18 @@ elseif 🎏_CatchmentName == "Timoleague"
 
          @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
 
-      # Sentinel Data
+      # Collecting Sentinel Data
          🎏_SentinelData       = true
-         Coordinate_UpperLeft  = (51.644007,-8.864387) # EPSG:4326
-         Coordinate_LowerRight = (51.592563,-8.720776)  # EPSG:4326
-         CopernicusDate_Start      = (2024, 01, 1)
-         CopernicusDate_End        = (2026, 12, 31)
+         Coordinate_UpperLeft  = (51.67436, -8.85758) # EPSG:4326
+         Coordinate_LowerRight = (51.57392, -8.70776)  # EPSG:4326
+
+         CopernicusDate_Start  = (2023, 1, 1)
+         CopernicusDate_End    = (2026, 03, 10)
+
+         # T114411_N0511_R123_T29UNT_T151110
+
+      # Deriving LAI from SNAP
+         🎏_Lai = false
 
       # Flags: Options
          🎏_Fix_Cyclic            = false # obsolete
