@@ -27,7 +27,7 @@ Forcing_ΔT = "Daily" # <"Hourly"> or <"Daily">
 🎏_Plot_NetCDF = true
 
 # ======= PATHS =======
-Path_Root_Data = "D:\\JOE\\MAIN\\MODELS\\WFLOW\\DATA"
+Path_Root_Data = raw"D:/JOE/MAIN/MODELS/WFLOW/DATA/"
 Path_Root = joinpath(Path_Root_Data, "$🎏_CatchmentName")
 Path_Root_NetCDF = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
 Path_Root_LookupTable = raw"DATA\Lookuptable"
@@ -106,9 +106,12 @@ Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
    Path_SentinelBoundary =raw"Boundary\TimoleagueBoundaries3.geojson"
 
    # === Output sentinel data ===
-   Path_SentinelDownload = "Sentinel/DownloadSentinel/"
-   Path_SentinelMetadata = "Sentinel/Metadata/"
+   Path_SentinelDownload    = "Sentinel/DownloadSentinel/"
+   Path_SentinelMetadata    = "Sentinel/Metadata/"
    Path_SentinelBiophysical = "Sentinel/Biophysical/"
+   # Path_SentinelXml         = "Sentinel/SnapXml/BatchProcessing/BatchSnap_LAI3.xml"
+   Path_SentinelXml         ="Sentinel/SnapXml/BatchProcessing/BatchSnap_Biophysical.xml"
+   Path_CatchmentBoundary   = "Boundary/CatchmentBoundary3.shp"
 
 
 #  ======= PARAMETERS =======
@@ -403,7 +406,7 @@ elseif 🎏_CatchmentName == "Timoleague"
    # T114411_N0511_R123_T29UNT_T151110
 
    # Deriving LAI from SNAP
-   🎏_Lai = false
+   🎏_Lai = true
 
    # Flags: Options
    🎏_Fix_Cyclic = false # obsolete

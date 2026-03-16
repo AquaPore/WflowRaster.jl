@@ -10,7 +10,7 @@ using ZipFile
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		FUNCTION : SENTINEL_DATA
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function SENTINEL_DATA(; 🎏_DownloadTwiceMonth=false, Authenticate_Password="Joseph.pollacco1", Authenticate_Username="joseph.pollacco@teagasc.ie", CloudMax=50, Coordinate_LowerRight, Coordinate_UpperLeft, CopernicusDate_End, CopernicusDate_Start, Path_SentinelDownload₁, Path_SentinelMetadata₁, Product="L2A", Satelite="SENTINEL-2", Path_SentinelBoundary₁)
+function SENTINEL_DATA(;🎏_DownloadTwiceMonth=false, Authenticate_Password="Joseph.pollacco1", Authenticate_Username="joseph.pollacco@teagasc.ie", CloudMax=50, Coordinate_LowerRight, Coordinate_UpperLeft, CopernicusDate_End, CopernicusDate_Start, Path_SentinelDownload₁, Path_SentinelMetadata₁, Product="L2A", Satelite="SENTINEL-2")
 
    CopernicusDate_StartDate = Dates.Date(CopernicusDate_Start[1], CopernicusDate_Start[2], CopernicusDate_Start[3])
    CopernicusDate_EndDate = Dates.Date(CopernicusDate_End[1], CopernicusDate_End[2], CopernicusDate_End[3])
@@ -115,11 +115,11 @@ function SENTINEL_SEARCH(; 🎏_Sucessfull, Box, CloudCover_Scene, CloudMax, Dat
       Date_Scene₀ = Dates.DateTime(Year_Scene, Month_Scene, Day_Scene, Hour_Scene)
 
       # DOWNLOAD FILE IF DOES NOT EXIST
-      # Path to save removing the ".SAFE"
-      PathFile = joinpath(Path_SentinelDownload₁, Scene.Name)
-      iFind = findfirst(".SAFE", PathFile)
-      PathFile = PathFile[1:(iFind[1]-1)]
-      PathFile = PathFile * ".zip"
+         # Path to save removing the ".SAFE"
+            PathFile = joinpath(Path_SentinelDownload₁, Scene.Name)
+            iFind = findfirst(".SAFE", PathFile)
+            PathFile = PathFile[1:(iFind[1]-1)]
+            PathFile = PathFile * ".zip"
 
       if !(isfile(PathFile))
          try
@@ -191,68 +191,85 @@ end  # function: SENTINEL_SEARCH
 	INPUT:
 		* PathInput: path of all the .zip file of the .SAFE sentinel data
 		* Path_SentinelBiophysical₁: path of the output of Lai, FAPAR, NDVI, FVC
-		* PathShapeFile: path of the shape file were the delimitation of the catchment
+		* Path_CatchmentBoundary: path of the shape file were the delimitation of the catchment
 		* PathXml: path of the .xml file derived from SNAP software
 		* PathProperties: this is a temporary path
 """
-function SNAP_BATCH_LAI_FAPAR_NDVI_FVC(; Path_SentinelDownload, Path_SentinelBiophysical₁, PathShapeFile, PathXml, PathProperties, NameOutput_Lai="LAI", NameOutput_Fapar="FAPAR", NameOutput_Ndvi="NDVI", NameOutput_Fvc="FVC")
+function SNAP_BATCH_LAI_FAPAR_NDVI_FVC(; Path_SentinelDownload₁, Path_SentinelBiophysical₁, Path_CatchmentBoundary₁, Path_SentinelXml₁, PathProperties, Path_SentinelMetadata₁, NameOutput_Lai="LAI", NameOutput_Fapar="FAPAR", NameOutput_Ndvi="NDVI", NameOutput_Fvc="FVC")
 
-   AllSentinelData = readdir(Path_SentinelDownload)
-   AllSentinelData = sort!(AllSentinelData)
+   # AllSentinelData = readdir(Path_SentinelDownload₁)
+   # AllSentinelData = sort!(AllSentinelData)
+
+      MetaData = CSV.read(Path_SentinelMetadata₁, DataFrame; header=true)
+         🎏_Sucessfull = convert(Vector{Bool}, Tables.getcolumn(MetaData, :🎏_Sucessfull))
+         NameSentinel = convert(Vector{String}, Tables.getcolumn(MetaData, :Name))
+         DateSentinel = convert(Vector{DateTime}, Tables.getcolumn(MetaData, :Date))
 
    # For every scene
-   for iiSentinelData ∈ AllSentinelData
+   for (iSentinelData, iiSentinelData) =enumerate(NameSentinel)
+      if 🎏_Sucessfull[iSentinelData]
 
-      # Deriving dates from sentinel file name
-      iFind = findfirst("_", iiSentinelData)
-      DateSentinel = iiSentinelData[iFind[1]+1:end]
-      iFind = findfirst("_", DateSentinel)
-      DateSentinel = DateSentinel[iFind[1]+1:end]
+         # Dates
+            YearSentinel = Dates.year(DateSentinel[iSentinelData])
+            MonthSentinel = Dates.month(DateSentinel[iSentinelData])
+            DaySentinel = Dates.day(DateSentinel[iSentinelData])
+               DateFormat  = YearSentinel * 10000 + MonthSentinel * 100 + DaySentinel
 
-      Year_Scene = parse(Int64, DateSentinel[1:4])
-      Month_Scene = parse(Int64, DateSentinel[5:6])
-      Day_Scene = parse(Int64, DateSentinel[7:8])
-      Hour_Scene = parse(Int64, DateSentinel[10:11])
-      DateFormat = Year_Scene * 10000 + Month_Scene * 100 + Day_Scene
+         # Paths of output
+            NameOutput_Lai₁ = string(DateFormat) * "_" * NameOutput_Lai * ".tif"
+            PathOutput_Lai₁ = joinpath(Path_SentinelBiophysical₁, NameOutput_Lai₁)
+            PathOutput_Lai₁ = "D:/JOE/MAIN/MODELS/WFLOW/DATA/Timoleague/Sentinel/Biophysical/" * NameOutput_Lai₁
 
-      # Paths of output
-      NameOutput_Lai₁ = string(DateFormat) * "_" * NameOutput_Lai * ".tif"
-      PathOutput_Lai₁ = joinpath(Path_SentinelBiophysical₁, NameOutput_Lai₁)
+            NameOutput_Fapar₁ = string(DateFormat) * "_" * NameOutput_Fapar * ".tif"
+            PathOutput_Fapar₁ = joinpath(Path_SentinelBiophysical₁, NameOutput_Fapar₁)
+            PathOutput_Fapar₁ =  "D:/JOE/MAIN/MODELS/WFLOW/DATA/Timoleague/Sentinel/Biophysical/" * NameOutput_Fapar₁
 
-      NameOutput_Fapar₁ = string(DateFormat) * "_" * NameOutput_Fapar * ".tif"
-      PathOutput_Fapar₁ = joinpath(Path_SentinelBiophysical₁, NameOutput_Fapar₁)
+            NameOutput_Ndvi₁ = string(DateFormat) * "_" * NameOutput_Ndvi * ".tif"
+            PathOutput_Ndvi₁ = joinpath(Path_SentinelBiophysical₁, NameOutput_Ndvi₁)
+            PathOutput_Ndvi₁ ="D:/JOE/MAIN/MODELS/WFLOW/DATA/Timoleague/Sentinel/Biophysical/" * NameOutput_Ndvi₁
 
-      NameOutput_Ndvi₁ = string(DateFormat) * "_" * NameOutput_Ndvi * ".tif"
-      PathOutput_Ndvi₁ = joinpath(Path_SentinelBiophysical₁, NameOutput_Ndvi₁)
+            NameOutput_Fvc₁ = string(DateFormat) * "_" * NameOutput_Fvc * ".tif"
+            PathOutput_Fvc₁ = joinpath(Path_SentinelBiophysical₁, NameOutput_Fvc₁)
+            PathOutput_Fvc₁ = "D:/JOE/MAIN/MODELS/WFLOW/DATA/Timoleague/Sentinel/Biophysical/" * NameOutput_Fvc₁
 
-      NameOutput_Fvc₁ = string(DateFormat) * "_" * NameOutput_Fvc * ".tif"
-      PathOutput_Fvc₁ = joinpath(Path_SentinelBiophysical₁, NameOutput_Fvc₁)
+            Path_CatchmentBoundary₁ = "D:/JOE/MAIN/MODELS/WFLOW/DATA/Timoleague/Boundary/CatchmentBoundary3.shp"
 
-      PathInput₁ = joinpath(PathInput, iiSentinelData)
+         # Naming of output in javascript format
+         NameSentinel₁ = NameSentinel[iSentinelData]
+            iFind = findfirst(".SAFE",NameSentinel₁)
+            NameSentinel₁ = NameSentinel₁[1:(iFind[1]-1)]
+            NameSentinel₁ = NameSentinel₁ * ".zip"
+            println(NameSentinel₁)
 
-      PathProperties₁ = joinpath(PathProperties, "Parameters_" * string(DateFormat) * ".properties")
+         PathInput = "D:/JOE/MAIN/MODELS/WFLOW/DATA/Timoleague/Sentinel/DownloadSentinel/" * NameSentinel₁
+         @assert isfile(PathInput)
 
-      # Saving the paths into .properties so gpt software can pick it up
-      open(PathProperties₁, "w") do io
-         println(io, "PathInput =  $Path_SentinelDownload₁")
-         println(io, "PathOutput_Lai =  $PathOutput_Lai₁")
-         println(io, "PathOutput_Ndvi = $PathOutput_Ndvi₁")
-         println(io, "PathOutput_Fvc = $PathOutput_Fvc₁")
-         println(io, "PathOutput_Fapar = $PathOutput_Fapar₁")
-         println(io, "PathShapeFile =  $PathShapeFile")
-      end
+   
+         # D:\JOE\MAIN\MODELS\WFLOW\DATA\Timoleague\Sentinel\DownloadSentinel\S2C_MSIL2A_20251225T114521_N0511_R123_T29UNT_20251225T132609.zip
 
-      # Run the command line
-      try
-         RunSnap = `gpt $PathXml -e -p $PathProperties₁`
-         run(RunSnap)
-         printstyled("	======================= SUCESSFULL= $iiSentinelData =================== \n", color=:green)
-      catch
-         printstyled("	======================= NOT SUCESSFULL= $iiSentinelData =================== \n", color=:red)
-      end
+         # Saving the paths into .properties so gpt software can pick it up
+         open(PathProperties, "w") do io
+            println(io, "PathInput        = $PathInput")
+            println(io, "PathOutput_Lai   = $PathOutput_Lai₁")
+            println(io, "PathOutput_Ndvi  = $PathOutput_Ndvi₁")
+            println(io, "PathOutput_Fvc   = $PathOutput_Fvc₁")
+            println(io, "PathOutput_Fapar = $PathOutput_Fapar₁")
+            println(io, "PathBoundary     = $Path_CatchmentBoundary₁")
+            println(io, "NameBoundary     = $Name_CatchmentBoundary")
+         end
 
-      # The .properties is no longer needed
-      rm(PathProperties₁)
+         # Run the command line
+         # try
+            RunSnap = `gpt $Path_SentinelXml₁ -e -p $PathProperties`
+            run(RunSnap)
+            printstyled("	======================= SUCESSFULL= $iiSentinelData =================== \n", color=:green)
+         # catch
+         #    printstyled("	======================= NOT SUCESSFULL= $iiSentinelData =================== \n", color=:red)
+         # end
+
+         # The .properties is no longer needed
+         # rm(PathProperties)
+      end # if 🎏_Sucessfull[iSentinelData]
    end # for iiSentinelData ∈ AllSentinelData
 end # function RUN_SNAP()
 # ------------------------------------------------------------------
