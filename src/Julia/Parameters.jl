@@ -32,17 +32,17 @@ Path_Root = joinpath(Path_Root_Data, "$🎏_CatchmentName")
 Path_Root_NetCDF = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
 Path_Root_LookupTable = raw"DATA\Lookuptable"
 
-Path_Forcing₀ = "InputTimeSeries\\TimeSeries_Process"
-Path_Forcing = joinpath(Path_Forcing₀, Forcing_ΔT)
-Path_Gis = "InputGis"
-Path_Julia = "OutputJulia"
-Path_Lookuptable = "LookupTable"
-Path_NetCDF = "OutputNetCDF"
+Path_Forcing₀         = "InputTimeSeries\\TimeSeries_Process"
+Path_Forcing          = joinpath(Path_Forcing₀, Forcing_ΔT)
+Path_Gis              = "InputGis"
+Path_Julia            = "OutputJulia"
+Path_Lookuptable      = "LookupTable"
+Path_NetCDF           = "OutputNetCDF"
 Path_ObservationPoint = "InputObservationPoint"
-Path_Python = "OutputPython"
-Path_River = "RIVERS\\SHAPEFILE"
-Path_TimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
-Path_Wflow = "OutputWflow"
+Path_Python           = "OutputPython"
+Path_River            = "RIVERS\\SHAPEFILE"
+Path_TimeSeriesWflow  = "InputTimeSeries/TimeSeries_Wflow"
+Path_Wflow            = "OutputWflow"
 
 # ======= INPUT =======
 # === Input  Forcing ===
@@ -78,40 +78,41 @@ Filename_Lookuptable_LandUse = "LookupTable_Veg_NLCM.csv"
 Filename_Lookuptable_River = "LookupTable_River.csv"
 
 # ======= OUTPUT =======
-# === Output Julia ===
-Filename_Coastline = "Coastline.tiff"
-Filename_Julia_Dtm = "Ireland_DEM_Croped.tiff"
-Filename_Julia_DtmCorrected = "DEM_Corrected.tiff"
-Filename_Julia_Gauge = "Gauge.tiff"
-Filename_Julia_Pits = "Pits.tiff"
-Filename_Julia_RiverOrder = "RiverOrder.tiff"
+   # === Output Julia ===
+      Filename_Coastline = "Coastline.tiff"
+      Filename_Julia_Dtm = "Ireland_DEM_Croped.tiff"
+      Filename_Julia_DtmCorrected = "DEM_Corrected.tiff"
+      Filename_Julia_Gauge = "Gauge.tiff"
+      Filename_Julia_Pits = "Pits.tiff"
+      Filename_Julia_RiverOrder = "RiverOrder.tiff"
 
-# === Output wflow ===
-Filename_Dtm = "Dtm.tiff"
-Filename_Gauge = "Gauges_grdc.tiff"
-Filename_Ldd = "Ldd.tiff"
-Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
-Filename_RiverLength = "RiverLength.tiff"
-Filename_RiverSlope = "RiverSlope.tiff"
-Filename_Rivers = "River.tiff"
-Filename_Slope = "Slope.tiff"
-Filename_Subcatchment = "Subcatchment.tiff"
+   # === Output wflow ===
+      Filename_Dtm = "Dtm.tiff"
+      Filename_Gauge = "Gauges_grdc.tiff"
+      Filename_Ldd = "Ldd.tiff"
+      Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
+      Filename_RiverLength = "RiverLength.tiff"
+      Filename_RiverSlope = "RiverSlope.tiff"
+      Filename_Rivers = "River.tiff"
+      Filename_Slope = "Slope.tiff"
+      Filename_Subcatchment = "Subcatchment.tiff"
 
-# === Output netCDF ===
-Filename_NetCDF_Forcing = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
-Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
+   # === Output netCDF ===
+   Filename_NetCDF_Forcing = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
+   Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
 
 # SENTINEL DATA
    # === Input boundary ===
-   Path_SentinelBoundary =raw"Boundary\TimoleagueBoundaries3.geojson"
+      Path_SentinelBoundary = raw"Boundary\TimoleagueBoundaries3.geojson"
 
    # === Output sentinel data ===
-   Path_SentinelDownload    = "Sentinel/DownloadSentinel/"
-   Path_SentinelMetadata    = "Sentinel/Metadata/"
-   Path_SentinelBiophysical = "Sentinel/Biophysical/"
-   # Path_SentinelXml         = "Sentinel/SnapXml/BatchProcessing/BatchSnap_LAI3.xml"
-   Path_SentinelXml         ="Sentinel/SnapXml/BatchProcessing/BatchSnap_Biophysical.xml"
-   Path_CatchmentBoundary   = "Boundary/CatchmentBoundary3.shp"
+      # Keep the "/"
+      Path_SentinelDownload      = "Sentinel/DownloadSentinel"
+      Path_SentinelMetadata      = "Sentinel/Metadata"
+      Path_SentinelBiophysical   = "Sentinel/Biophysical"
+      Filename_SentinelXml       = "Sentinel/SnapXml/BatchProcessing/BatchSnap_Biophysical.xml"
+      Filename_SentinelMetadata  = "SentinelMetadata.csv"
+      Filename_CatchmentBoundary = "Boundary/CatchmentBoundary3.shp"
 
 
 #  ======= PARAMETERS =======
@@ -396,17 +397,17 @@ elseif 🎏_CatchmentName == "Timoleague"
    @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
 
    # Collecting Sentinel Data
-   🎏_SentinelData = true
    Coordinate_UpperLeft = (51.67436, -8.85758) # EPSG:4326
    Coordinate_LowerRight = (51.57392, -8.70776)  # EPSG:4326
 
    CopernicusDate_Start = (2023, 1, 1)
    CopernicusDate_End = (2026, 03, 10)
 
-   # T114411_N0511_R123_T29UNT_T151110
-
    # Deriving LAI from SNAP
-   🎏_Lai = true
+   🎏_SentinelDataWeb = false
+   🎏_Lai = false
+   🎏_Lai_2_Wflow = true
+
 
    # Flags: Options
    🎏_Fix_Cyclic = false # obsolete
@@ -422,7 +423,7 @@ elseif 🎏_CatchmentName == "Timoleague"
 
    # Flags: NetCDF
    🎏_NetCDF = true
-   🎏_Forcing_2_NetCDF = true
+   🎏_Forcing_2_NetCDF = false
 
    # Flags: Potential Evapotranspiration
 

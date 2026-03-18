@@ -9,7 +9,7 @@ module geoPlot
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : HEATMAP
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function HEATMAP(;🎏_Colorbar=true, Input, Label="", Title, Xlabel= L"$Latitude$", Ylabel=L"$Longitude$", titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=:viridis, Yreversed=false)
+		function HEATMAP(;🎏_Colorbar=true, Input, Label="", Title, Xlabel= L"$Latitude$", Ylabel=L"$Longitude$", titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=:viridis, Yreversed=false, ColorReverse=false)
 
 			CairoMakie.activate!()
 			Fig_100 =  CairoMakie.Figure()
@@ -17,8 +17,12 @@ module geoPlot
 			Axis_100 = CairoMakie.Axis(Fig_100[1, 1], title=Title, xlabel= Xlabel, ylabel=Ylabel,  ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlesize=titlesize, titlecolor=titlecolor)
 
 			Axis_100.yreversed = Yreversed
-
-			Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=colormap)
+# , colorrange=(minimum(Input), maximum(Input))
+			if ColorReverse
+				Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=Reverse(colormap))
+			else
+				Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=colormap)
+			end
 
 			if 🎏_Colorbar
 				CairoMakie.Colorbar(Fig_100[1,2], Map_100, label=Label, width=15, ticksize=15, tickalign=0.5)
