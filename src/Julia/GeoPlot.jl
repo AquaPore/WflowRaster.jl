@@ -9,7 +9,7 @@ module geoPlot
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : HEATMAP
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function HEATMAP(;🎏_Colorbar=true, Input, Label="", Title, Xlabel= L"$Latitude$", Ylabel=L"$Longitude$", titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=:viridis, Yreversed=false, ColorReverse=false)
+		function HEATMAP(;🎏_Colorbar=true, Input, Label="", Title, Xlabel= L"$Latitude$", Ylabel=L"$Longitude$", titlecolor=titlecolor,  titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, ylabelsize=ylabelsize, yticksize=yticksize, colormap=:viridis, Yreversed=false, ColorReverse=false, MinValue =NaN, MaxValue=NaN, Categorical=false)
 
 			CairoMakie.activate!()
 			Fig_100 =  CairoMakie.Figure()
@@ -17,11 +17,19 @@ module geoPlot
 			Axis_100 = CairoMakie.Axis(Fig_100[1, 1], title=Title, xlabel= Xlabel, ylabel=Ylabel,  ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlesize=titlesize, titlecolor=titlecolor)
 
 			Axis_100.yreversed = Yreversed
-# , colorrange=(minimum(Input), maximum(Input))
+
+			if isnan(MinValue)
+				MinValue = minimum(X for X ∈ Input if !isnan(X))
+			end
+			if isnan(MaxValue)
+				MaxValue = maximum(X for X ∈ Input if !isnan(X))
+			end
+			Ncategories =  Int64(floor(MaxValue - MinValue)+1)
+
 			if ColorReverse
-				Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=Reverse(colormap))
+				Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=Reverse(cgrad(colormap, 12, categorical=Categorical)), colorrange=(MinValue, MaxValue))
 			else
-				Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=colormap)
+				Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=cgrad(colormap, Ncategories, categorical=Categorical),  colorrange=(MinValue, MaxValue))
 			end
 
 			if 🎏_Colorbar

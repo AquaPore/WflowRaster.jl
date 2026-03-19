@@ -110,6 +110,7 @@ Filename_Lookuptable_River = "LookupTable_River.csv"
       Path_SentinelDownload      = "Sentinel/DownloadSentinel"
       Path_SentinelMetadata      = "Sentinel/Metadata"
       Path_SentinelBiophysical   = "Sentinel/Biophysical"
+      Path_SentinelBiophysicalCloudRemoval   = "Sentinel/BiophysicalCloud"
       Filename_SentinelXml       = "Sentinel/SnapXml/BatchProcessing/BatchSnap_Biophysical.xml"
       Filename_SentinelMetadata  = "SentinelMetadata.csv"
       Filename_CatchmentBoundary = "Boundary/CatchmentBoundary3.shp"
@@ -404,8 +405,8 @@ elseif 🎏_CatchmentName == "Timoleague"
    CopernicusDate_End = (2026, 03, 10)
 
    # Deriving LAI from SNAP
-   🎏_SentinelDataWeb = false
-   🎏_Lai = false
+   🎏_SentinelDataWeb = true
+   🎏_Lai = true
    🎏_Lai_2_Wflow = true
 
 
