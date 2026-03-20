@@ -405,8 +405,8 @@ elseif 🎏_CatchmentName == "Timoleague"
    CopernicusDate_End = (2026, 03, 10)
 
    # Deriving LAI from SNAP
-   🎏_SentinelDataWeb = true
-   🎏_Lai = true
+   🎏_SentinelDataWeb = false
+   🎏_Lai = false
    🎏_Lai_2_Wflow = true
 
 
