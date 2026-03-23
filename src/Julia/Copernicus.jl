@@ -92,12 +92,12 @@ function SENTINEL_SEARCH(; 🎏_Sucessfull, Box, CloudCover_Scene, CloudMax, Dat
 
    🎏_DataAvailable = true
    SearchMap = []
-   try
+   # try
       SearchMap = SentinelExplorer.search(Satelite, dates=DateSearch, geom=Box, clouds=CloudMax, product=Product)
-   catch
-      🎏_DataAvailable = false
-      printstyled("   ==== DATA NOT AVAILABLE for $DateSearch ==== \n"; color=:red)
-   end
+   # catch
+   #    🎏_DataAvailable = false
+   #    printstyled("   ==== DATA NOT AVAILABLE for $DateSearch ==== \n"; color=:red)
+   # end
 
    Scene = []
    if 🎏_DataAvailable
@@ -296,6 +296,7 @@ function WFLOW_REMOVING_CLOUDS(; ΔLai_CloudTreshold, Path_SentinelMetadata₁, 
    NameOutput_Ndvi₁ = fill("", N)
    NameOutput_Fvc₁ = fill("", N)
    NameOutput_Fapar₁ = fill("", N)
+   NameOutput_Plot₁ = fill("", N)
    YearSentinel = zeros(Int64, N)
    MonthSentinel = zeros(Int64, N)
    DaySentinel = zeros(Int64, N)
@@ -324,6 +325,8 @@ function WFLOW_REMOVING_CLOUDS(; ΔLai_CloudTreshold, Path_SentinelMetadata₁, 
       NameOutput_Fapar₁[i] = string(DateFormat) * "_" * NamePath_Fapar * ".tif"
       Path_Fapar[i] = joinpath(Path_SentinelBiophysical₁, NamePath_Fapar, NameOutput_Fapar₁[i])
       @assert isfile(Path_Fapar[i])
+
+      NameOutput_Plot₁[i] = "PLOT_" * string(DateFormat) * ".pdf"
    end # for i = 1:N
 
    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -346,11 +349,17 @@ function WFLOW_REMOVING_CLOUDS(; ΔLai_CloudTreshold, Path_SentinelMetadata₁, 
    # Lai_Uncorrected, ~ = copernicus.DISCRZETZATION(;Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Lai[2], Subcatchment)
 
    # For every satelite image
-   for i = 2:N-1
+   for i = 2:2
+   # for i = 2:N-1
       Lai_3, LaiCloudTrue_3 = copernicus.DISCRZETZATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Lai[i+1], Subcatchment)
       Fapar_3, ~            = copernicus.DISCRZETZATION(;Dtm, iCount=i+1, Latitude, Longitude, Metadatas, Path=Path_Fapar[i+1], Subcatchment)
       Ndvi_3, ~             = copernicus.DISCRZETZATION(;Dtm, iCount=i+1, Latitude, Longitude, Metadatas, Path=Path_Ndvi[i+1], Subcatchment)
       Fvc_3, ~              = copernicus.DISCRZETZATION(;Dtm, iCount=i+1, Latitude, Longitude, Metadatas, Path=Path_Fvc[i+1], Subcatchment)
+
+      Lai_Raw   = deepcopy(Lai_2)
+      Fapar_Raw = deepcopy(Fapar_2)
+      Ndvi_Raw  = deepcopy(Ndvi_2)
+      Fvc_Raw   = deepcopy(Fvc_2)
 
       # Days between different events
       ΔDays_21 = Dates.days(DateSentinel[i] - DateSentinel[i-1])
@@ -385,9 +394,9 @@ function WFLOW_REMOVING_CLOUDS(; ΔLai_CloudTreshold, Path_SentinelMetadata₁, 
             end # LaiCloudTrue_2[iX,iY] == 1 && ΔLai_21[iX,iY] > ΔLai_CloudTreshold
 
             # Maximum allowed variation of Lai
-               Lai_2[iX, iY] = max(min(max(Lai_1[iX, iY] * (1.0 - ΔMaxIncrease), Lai_2[iX, iY]), Lai_1[iX, iY] * (1.0 + ΔMaxIncrease)), 0.0)
-               Fapar_2[iX,iY]   = min(min(max(Fapar_1[iX,iY] * (1.0 - ΔMaxIncrease), Fapar_2[iX,iY]), Fapar_1[iX,iY] * (1.0 + ΔMaxIncrease)), 1.0)
-               Ndvi_2[iX,iY]   = min(min(max(Ndvi_1[iX,iY] * (1.0 - ΔMaxIncrease), Ndvi_2[iX,iY]), Ndvi_1[iX,iY] * (1.0 + ΔMaxIncrease)) ,1)
+               Lai_2[iX, iY]  = max(min(max(Lai_1[iX, iY] * (1.0 - ΔMaxIncrease), Lai_2[iX, iY]), Lai_1[iX, iY] * (1.0 + ΔMaxIncrease)), 0.0)
+               Fapar_2[iX,iY] = min(min(max(Fapar_1[iX,iY] * (1.0 - ΔMaxIncrease), Fapar_2[iX,iY]), Fapar_1[iX,iY] * (1.0 + ΔMaxIncrease)), 1.0)
+               Ndvi_2[iX,iY]  = min(min(max(Ndvi_1[iX,iY] * (1.0 - ΔMaxIncrease), Ndvi_2[iX,iY]), Ndvi_1[iX,iY] * (1.0 + ΔMaxIncrease)) ,1)
                Fvc_2[iX,iY]   = min( min(max(Fvc_1[iX,iY] * (1.0 - ΔMaxIncrease), Fvc_2[iX,iY]), Fvc_1[iX,iY] * (1.0 + ΔMaxIncrease)), 1.0)
 
          end # for iY=1:Metadatas.N_Height
@@ -404,17 +413,12 @@ function WFLOW_REMOVING_CLOUDS(; ΔLai_CloudTreshold, Path_SentinelMetadata₁, 
       Rasters.write(Path_Julia_Ndvi, Ndvi_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
       Rasters.write(Path_Julia_Fvc, Fvc_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
 
-
       if 🎏_Plots
-         # geoPlot.HEATMAP(;🎏_Colorbar=true, Input=Lai_Uncorrected, Title="LAI-UNCORRECTED Year=$(YearSentinel[i]) Month=$(MonthSentinel[i]),  Day=$(DaySentinel[i]), Cloud=$(CloudCover[i])", Label="Lai", colormap=:avocado, ColorReverse=true, Categorical=false)
+         Path_Plot = joinpath(Path_SentinelBiophysicalRemoveCloud, "PLOTS", NameOutput_Plot₁[i] )
 
-         # geoPlot.HEATMAP(;🎏_Colorbar=true, Input=LaiCloudTrue_2, Title="LaiCloudTrue Year=$(YearSentinel[i]) Month=$(MonthSentinel[i]), Day=$(DaySentinel[i]), Cloud=$(CloudCover[i])", Label="Lai", colormap=:lighttest, ColorReverse=false, MinValue=0, MaxValue=1, Categorical=true)
 
-         # geoPlot.HEATMAP(;🎏_Colorbar=true, Input=ΔLai_21, Title="ΔLai_12 Year=$(YearSentinel[i]) Month=$(MonthSentinel[i]), Cloud=$(CloudCover[i])", Label="ΔLai_21", colormap=:avocado, ColorReverse=true, Categorical=false)
-
-         # geoPlot.HEATMAP(;🎏_Colorbar=true, Input=ΔLai_31, Title="ΔLai_31 Year=$(YearSentinel[i]) Month=$(MonthSentinel[i]), Cloud=$(CloudCover[i])", Label="ΔLai_32", colormap=:avocado, ColorReverse=true, Categorical=false)
-
-         geoPlot.HEATMAP(; 🎏_Colorbar=true, Input=Lai_2, Title="LAI CORRECTED Year=$(YearSentinel[i]) Month=$(MonthSentinel[i]), Day=$(DaySentinel[i]), Cloud=$(CloudCover[i])", Label="Lai", colormap=:avocado, ColorReverse=true, Categorical=false, MinValue=0, MaxValue=10)
+         geoPlot.HEATMAP_LAI(;colormap=:avocado, DaySentinel₁=DaySentinel[i], Fapar_2, Fvc_2, Lai_2, MonthSentinel₁=MonthSentinel[i], Ndvi_2, Path_Plot, titlecolor=titlecolor, titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, YearSentinel₁=YearSentinel[i], ylabelsize=ylabelsize, yticksize=yticksize, Lai_Raw, Fapar_Raw, Ndvi_Raw, Fvc_Raw
+         )
       end # if 🎏_Plots
 
       # Perfornming the cycle
