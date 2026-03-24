@@ -180,7 +180,7 @@ module geoPlot
 
 			Axis_Fvc_B = CairoMakie.Axis(Fig[4, 2], title="Fvc Raw",  xlabel= Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlesize=titlesize, titlecolor=titlecolor, aspect=DataAspect())
 
-			Plot_Fvc_B = CairoMakie.heatmap!(Axis_Fvc, Fvc_Raw; colormap, colorrange=(0, 1))
+			Plot_Fvc_B = CairoMakie.heatmap!(Axis_Fvc_B, Fvc_Raw; colormap, colorrange=(0, 1))
 
 			CairoMakie.Colorbar(Fig[4,3], Plot_Fvc, label="Fvc", width=15, ticksize=15, tickalign=0.5)
 
