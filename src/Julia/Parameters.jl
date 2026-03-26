@@ -402,13 +402,13 @@ elseif 🎏_CatchmentName == "Timoleague"
    Coordinate_LowerRight = (51.57392, -8.70776)  # EPSG:4326
 
    CopernicusDate_Start = (2023, 1, 1)
-   CopernicusDate_End = (2026, 03, 10)
+   CopernicusDate_End = (2026, 03, 25)
 
    # Deriving LAI from SNAP
    🎏_SentinelDataWeb = true
-   🎏_Lai = false
+   🎏_LaiFromSnap = false
    🎏_Lai_2_Wflow = true
-
+   🎏_Lai_CompilePdf = true
 
    # Flags: Options
    🎏_Fix_Cyclic = false # obsolete
@@ -423,7 +423,7 @@ elseif 🎏_CatchmentName == "Timoleague"
    🎏_LandUseMap = true
 
    # Flags: NetCDF
-   🎏_NetCDF = true
+   🎏_NetCDF = false
    🎏_Forcing_2_NetCDF = false
 
    # Flags: Potential Evapotranspiration
