@@ -123,7 +123,7 @@ end # HEATMAP_TIME
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		FUNCTION : HEATMAP_LAI
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function HEATMAP_LAI(; colormap=:viridis, DaySentinel₁, Fapar_2, Fvc_2, Lai_2, MonthSentinel₁, Ndvi_2, Path_Plot, titlecolor=titlecolor, titlesize=titlesize, Xlabel=L"$Latitude$", xlabelSize=xlabelSize, xticksize=xticksize, YearSentinel₁, Ylabel=L"$Longitude$", ylabelsize=ylabelsize, yticksize=yticksize, Width=600, Height=400, Dpi=100, Lai_Raw, Fapar_Raw, Ndvi_Raw, Fvc_Raw, LaiCloudTrue_2, FaparCloudTrue_2, FvcCloudTrue_2, ΔMaxIncrease, Rasterize=0.5, CloudCoverPercent)
+function HEATMAP_LAI(; colormap=:viridis, DaySentinel₁, Fapar_2, Fvc_2, Lai_2, MonthSentinel₁, Ndvi_2, Path_Plot, titlecolor=titlecolor, titlesize=titlesize, Xlabel=L"$Latitude$", xlabelSize=xlabelSize, xticksize=xticksize, YearSentinel₁, Ylabel=L"$Longitude$", ylabelsize=ylabelsize, yticksize=yticksize, Width=600, Height=400, Dpi=100, Lai_Raw, Fapar_Raw, Ndvi_Raw, Fvc_Raw, LaiCloudTrue_2, FaparCloudTrue_2, FvcCloudTrue_2, ΔMaxMin_Lai, Rasterize=0.5, CloudCoverPercent, TransperencyCloud=0.15)
 
    ylabelsize = 14
    xlabelSize = 14
@@ -133,78 +133,62 @@ function HEATMAP_LAI(; colormap=:viridis, DaySentinel₁, Fapar_2, Fvc_2, Lai_2,
    # size=(3 * Width, 4 * Height)
    Fig = Makie.Figure(; font="Sans", titlesize=15, labelsize=10, fontsize=10, backgroundcolor=:transparent)
 
-   TitlePage = "TIMOLEAGUE: Year=$(YearSentinel₁), Month=$(MonthSentinel₁), Day=$(DaySentinel₁), ΔchangeMax= $(string(ΔMaxIncrease)), CloudCover=$(floor(CloudCoverPercent*100)) %"
-
+   TitlePage = "TIMOLEAGUE: Year=$(YearSentinel₁), Month=$(MonthSentinel₁), Day=$(DaySentinel₁), ΔchangeMax= $(string(floor(ΔMaxMin_Lai*100))), CloudCover=$(floor(CloudCoverPercent*100)) %"
 
    #__________________________________________________________________________________________________
 
-
-   Axis_Lai = Makie.Axis(Fig[1, 3], title="Lai FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
-
-   Plot_Lai = Makie.heatmap!(Axis_Lai, Lai_2; colormap=Reverse(colormap), colorrange=(0, 10), rasterize=Rasterize)
 
    Axis_Lai_B = Makie.Axis(Fig[1, 1], title="Lai Raw", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
-   Plot_Lai_B = Makie.heatmap!(Axis_Lai_B, Lai_Raw; colormap=Reverse(colormap), colorrange=(0, 10), rasterize=Rasterize)
+      Plot_Lai_B = Makie.heatmap!(Axis_Lai_B, Lai_Raw; colormap=Reverse(colormap), colorrange=(0, 10), rasterize=Rasterize)
 
-   Axis_Lai_C = Makie.Axis(Fig[1, 2], title="LaiCloudTrue", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
+      Plot_Lai_C = Makie.heatmap!(Axis_Lai_B, LaiCloudTrue_2; colormap=(:reds, TransperencyCloud), colorrange=(0, 1), rasterize=Rasterize, transparency=true)
 
-   Plot_Lai_C = Makie.heatmap!(Axis_Lai_C, LaiCloudTrue_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+   Axis_Lai = Makie.Axis(Fig[1, 2], title="Lai FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
-   # Makie.Colorbar(Fig[1, end+1], Plot_Lai, label="Lai", width=15, ticksize=15, tickalign=1)
-   Makie.Colorbar(Fig[1, 4], Plot_Lai, label="Lai", width=15, ticksize=15, tickalign=1, tickwidth=2, height=Relative(0.85))
+      Plot_Lai = Makie.heatmap!(Axis_Lai, Lai_2; colormap=Reverse(colormap), colorrange=(0, 10), rasterize=Rasterize)
 
-   Label(Fig[0, :], TitlePage, font=:bold, fontsize=25, color=:navyblue)
+      Makie.Colorbar(Fig[1, 3], Plot_Lai, label="Lai", width=15, ticksize=15, tickalign=1, tickwidth=2, height=Relative(0.85))
 
-   # Label(Fig[1, 1, TopRight()],"RAW DATA", fontsize = 26, font = :bold, padding = (0, 50, 50, 0), halign =:right, color=:blue3)
+      Label(Fig[0, :], TitlePage, font=:bold, fontsize=20, color=:navyblue)
 
-   # Label(Fig[1, 2, TopLeft()],"FREE CLOUDS", fontsize = 26, font = :bold, padding = (0, 50, 50, 0), halign =:right, color=:blue3)
-
+      # Axis_Lai_C = Makie.Axis(Fig[1, 2], title="LaiCloudTrue", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
    #__________________________________________________________________________________________________
-
-   Axis_Fapar = Makie.Axis(Fig[2, 3], title="Fapar FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
-
-   Plot_Fapar = Makie.heatmap!(Axis_Fapar, Fapar_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
    Axis_Fapar_B = Makie.Axis(Fig[2, 1], title="Fapar Raw", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
-   Plot_Fapar_B = Makie.heatmap!(Axis_Fapar_B, Fapar_Raw; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+      Plot_Fapar_B = Makie.heatmap!(Axis_Fapar_B, Fapar_Raw; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
-   Axis_Fapar_C = Makie.Axis(Fig[2, 2], title="FaparCLoudTrue", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
+      Plot_Fapar_C = Makie.heatmap!(Axis_Fapar_B, FaparCloudTrue_2;  colormap=(:reds, TransperencyCloud), colorrange=(0, 1), rasterize=Rasterize)
 
-   Plot_Fapar_C = Makie.heatmap!(Axis_Fapar_C, FaparCloudTrue_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+   Axis_Fapar = Makie.Axis(Fig[2, 2], title="Fapar FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
-   # Makie.Colorbar(Fig[2, 4], Plot_Fapar, label="Fapar", width=15, ticksize=15, tickalign=0.5)
-   Makie.Colorbar(Fig[2:3, 4], Plot_Fapar, label="Lai", width=15, ticksize=15, tickalign=1, tickwidth=2, height=Relative(0.9))
+   Plot_Fapar = Makie.heatmap!(Axis_Fapar, Fapar_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
+   Makie.Colorbar(Fig[2:4, 3], Plot_Fapar, label="Lai", width=15, ticksize=15, tickalign=1, tickwidth=2, height=Relative(0.9))
 
    #__________________________________________________________________________________________________
-
-   Axis_Fvc = Makie.Axis(Fig[3, 3], title="Fvc FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
-
-   Plot_Fvc = Makie.heatmap!(Axis_Fvc, Fvc_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
    Axis_Fvc_B = Makie.Axis(Fig[3, 1], title="Fvc Raw", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
 
-   Plot_Fvc_B = Makie.heatmap!(Axis_Fvc_B, Fvc_Raw; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+      Plot_Fvc_B = Makie.heatmap!(Axis_Fvc_B, Fvc_Raw; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
-   Axis_Fvc_C = Makie.Axis(Fig[3, 2], title="FvcCloudTrue", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
+      Plot_Fvc_C = Makie.heatmap!(Axis_Fvc_B, FvcCloudTrue_2; colormap=(:reds, TransperencyCloud), colorrange=(0, 1), rasterize=Rasterize)
 
-   Plot_Fvc_B = Makie.heatmap!(Axis_Fvc_C, FvcCloudTrue_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+   Axis_Fvc = Makie.Axis(Fig[3, 2], title="Fvc FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
 
-   # Makie.Colorbar(Fig[3, 4], Plot_Fvc, label="Fvc", width=15, ticksize=15, tickalign=0.5)
+      Plot_Fvc = Makie.heatmap!(Axis_Fvc, Fvc_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
    #__________________________________________________________________________________________________
 
+   Axis_Ndvi_B = Makie.Axis(Fig[4, 1], title="Ndvi Raw",  xlabel= Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
 
-   # Axis_Ndvi = Makie.Axis(Fig[4, 3], title="Ndvi FreeCloud",  xlabel= Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
+         Plot_Ndvi_B = Makie.heatmap!(Axis_Ndvi_B, Ndvi_Raw; colormap=Reverse(colormap), colorrange=(0, 1),  rasterize=Rasterize)
 
-   # 	Plot_Ndvi = Makie.heatmap!(Axis_Ndvi, Ndvi_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+   Axis_Ndvi = Makie.Axis(Fig[4, 2], title="Ndvi FreeCloud",  xlabel= Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
 
-   # Axis_Ndvi_B = Makie.Axis(Fig[4, 1], title="Ndvi Raw",  xlabel= Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
-
-   # 		Plot_Ndvi_B = Makie.heatmap!(Axis_Ndvi_B, Ndvi_Raw; colormap=Reverse(colormap), colorrange=(0, 1),  rasterize=Rasterize)
+   	Plot_Ndvi = Makie.heatmap!(Axis_Ndvi, Ndvi_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
    # 	Makie.Colorbar(Fig[4, 4], Plot_Ndvi, label="Ndvi", width=15, ticksize=15, tickalign=0.5)
 
