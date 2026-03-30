@@ -1,6 +1,10 @@
 # =============================================================
 #		module: copernicus
 # =============================================================
+"""
+I developed a software which is used to download and process sentinel data from the Copernicus Open Access Hub. It includes functions to search for sentinel data, download it, and process it using SNAP software to derive biophysical parameters such as LAI, FAPAR, NDVI, and FVC. Additionally, it includes a function to remove clouds from the derived biophysical parameters based on certain criteria.
+
+"""
 module copernicus
 
 using GeoDataFrames, Dates, CSV, Rasters
@@ -295,51 +299,53 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
    CloudCover    = convert(Vector{Float64}, Tables.getcolumn(MetaData, :Cloud))
 
    # Selecting data
-   N = sum(🎏_Sucessfull)
+   N            = sum(🎏_Sucessfull)
    DateSentinel = DateSentinel[🎏_Sucessfull]
-   CloudCover = CloudCover[🎏_Sucessfull]
+   CloudCover   = CloudCover[🎏_Sucessfull]
 
    # Putting in memory
-   Path_Lai          = fill("", N)
-   Path_Ndvi         = fill("", N)
-   Path_Fvc          = fill("", N)
-   Path_Fapar        = fill("", N)
-   NameOutput_Lai₁   = fill("", N)
-   NameOutput_Ndvi₁  = fill("", N)
-   NameOutput_Fvc₁   = fill("", N)
-   NameOutput_Fapar₁ = fill("", N)
-   NameOutput_Plot₁  = fill("", N)
-   YearSentinel      = zeros(Int64, N)
-   MonthSentinel     = zeros(Int64, N)
-   DaySentinel       = zeros(Int64, N)
+      Path_Lai            = fill("", N)
+      Path_Ndvi           = fill("", N)
+      Path_Fvc            = fill("", N)
+      Path_Fapar          = fill("", N)
+      NameOutput_Lai₁     = fill("", N)
+      NameOutput_Ndvi₁    = fill("", N)
+      NameOutput_Fvc₁     = fill("", N)
+      NameOutput_Fapar₁   = fill("", N)
+      NameOutput_Plot₁    = fill("", N)
+      YearSentinel        = zeros(Int64, N)
+      MonthSentinel       = zeros(Int64, N)
+      DaySentinel         = zeros(Int64, N)
+      CloudCoverPercent_2 = fill(NaN, N)
 
    # Deriving the paths
    Threads.@threads for i = 1:N
       # Dates of output
-      YearSentinel[i] = Dates.year(DateSentinel[i])
-      MonthSentinel[i] = Dates.month(DateSentinel[i])
-      DaySentinel[i] = Dates.day(DateSentinel[i])
-      DateFormat = YearSentinel[i] * 10000 + MonthSentinel[i] * 100 + DaySentinel[i]
+         YearSentinel[i]  = Dates.year(DateSentinel[i])
+         MonthSentinel[i] = Dates.month(DateSentinel[i])
+         DaySentinel[i]   = Dates.day(DateSentinel[i])
+         DateFormat       = YearSentinel[i] * 10000 + MonthSentinel[i] * 100 + DaySentinel[i]
 
       # Paths of output
-      NameOutput_Lai₁[i]   = string(DateFormat) * "_" * NamePath_Lai * ".tif"
-      Path_Lai[i]          = joinpath(Path_SentinelBiophysical₁, NamePath_Lai, NameOutput_Lai₁[i])
-      @assert isfile(Path_Lai[i])
+         NameOutput_Lai₁[i] = string(DateFormat) * "_" * NamePath_Lai * ".tif"
+         Path_Lai[i]        = joinpath(Path_SentinelBiophysical₁, NamePath_Lai, NameOutput_Lai₁[i])
+         @assert isfile(Path_Lai[i])
 
-      NameOutput_Ndvi₁[i]  = string(DateFormat) * "_" * NamePath_Ndvi * ".tif"
-      Path_Ndvi[i]         = joinpath(Path_SentinelBiophysical₁, NamePath_Ndvi, NameOutput_Ndvi₁[i])
+      NameOutput_Ndvi₁[i] = string(DateFormat) * "_" * NamePath_Ndvi * ".tif"
+      Path_Ndvi[i] = joinpath(Path_SentinelBiophysical₁, NamePath_Ndvi, NameOutput_Ndvi₁[i])
       @assert isfile(Path_Ndvi[i])
 
-      NameOutput_Fvc₁[i]   = string(DateFormat) * "_" * NamePath_Fvc * ".tif"
-      Path_Fvc[i]          = joinpath(Path_SentinelBiophysical₁, NamePath_Fvc, NameOutput_Fvc₁[i])
+      NameOutput_Fvc₁[i] = string(DateFormat) * "_" * NamePath_Fvc * ".tif"
+      Path_Fvc[i] = joinpath(Path_SentinelBiophysical₁, NamePath_Fvc, NameOutput_Fvc₁[i])
       @assert isfile(Path_Fvc[i])
 
       NameOutput_Fapar₁[i] = string(DateFormat) * "_" * NamePath_Fapar * ".tif"
-      Path_Fapar[i]        = joinpath(Path_SentinelBiophysical₁, NamePath_Fapar, NameOutput_Fapar₁[i])
+      Path_Fapar[i] = joinpath(Path_SentinelBiophysical₁, NamePath_Fapar, NameOutput_Fapar₁[i])
       @assert isfile(Path_Fapar[i])
 
-      NameOutput_Plot₁[i]  = string(DateFormat) * "_PLOT" * ".pdf"
+      NameOutput_Plot₁[i] = string(DateFormat) * "_PLOT" * ".pdf"
    end # for i = 1:N
+
 
    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    #		FUNCTION : CORRECT_CLOUDS
@@ -355,20 +361,20 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
 
       Obs₂_Max = min(Obs₁ + (ObsMax - ObsMin) * ΔMaxIncrease₂, ObsMax)
       Obs₂_Min = max(Obs₁ - (ObsMax - ObsMin) * ΔMaxIncrease₂, ObsMin)
-   return min(max(Obs₂, Obs₂_Min), Obs₂_Max)
+      return min(max(Obs₂, Obs₂_Min), Obs₂_Max)
    end
 
    function INTERPOLATE(; Obs₁, Obs₂, ΔDays_21, ΔDays_32)
       W = ΔDays_32 / (ΔDays_21 + ΔDays_32)
-   return W * Obs₁ + (1.0 - W) * Obs₂
+      return W * Obs₁ + (1.0 - W) * Obs₂
    end
 
    function BOUND(; Obs₁, ObsMin, ObsMax)
       return min(max(Obs₁, ObsMin), ObsMax)
    end
 
-   function RELATIONSHIP(;CloudCoverPercent_2, ΔMaxIncrease_Max=0.45)
-      return max((-ΔMaxIncrease_Max / CloudCoverPercent_Max) * CloudCoverPercent_2 + ΔMaxIncrease_Max, 0.005)
+   function RELATIONSHIP(; CloudCoverPercent, ΔMaxIncrease_Max=0.45)
+      return max((-ΔMaxIncrease_Max / CloudCoverPercent_Max) * CloudCoverPercent + ΔMaxIncrease_Max, 0.005)
    end
 
    """ Percentage converted to month"""
@@ -389,15 +395,15 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
    end # function COUNT_NONAN(Obs₁, Metadatas)
 
    # Initializing
-      Lai_1, ~   = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Lai[1], Subcatchment)
+      Lai_1, ~ = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Lai[1], Subcatchment)
       Fapar_1, ~ = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Fapar[1], Subcatchment)
-      Ndvi_1, ~  = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Ndvi[1], Subcatchment)
-      Fvc_1, ~   = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Fvc[1], Subcatchment)
+      Ndvi_1, ~ = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Ndvi[1], Subcatchment)
+      Fvc_1, ~ = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Fvc[1], Subcatchment)
 
-      Lai_2, LaiCloudTrue_2     = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Lai[2], Subcatchment)
+      Lai_2, LaiCloudTrue_2 = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Lai[2], Subcatchment)
       Fapar_2, FaparCloudTrue_2 = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Fapar[2], Subcatchment)
-      Ndvi_2, ~                 = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Ndvi[2], Subcatchment)
-      Fvc_2, FvcCloudTrue_2     = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Fvc[2], Subcatchment)
+      Ndvi_2, ~ = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Ndvi[2], Subcatchment)
+      Fvc_2, FvcCloudTrue_2 = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Fvc[2], Subcatchment)
 
    # Cloud cover of FVC & Lai not reliable, could change in future release
       LaiCloudTrue_2 = deepcopy(FaparCloudTrue_2)
@@ -406,15 +412,17 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
 
       Count_LaiNoNan = COUNT_NONAN(Lai_2, Metadatas)
 
+      CloudCoverPercent_2[1] = COUNT_NONAN(FaparCloudTrue_2, Metadatas) / (Count_LaiNoNan + 1)
+
    # For every satelite image
    for i = 2:N-1
       println(" ==== $i : $(NameOutput_Lai₁[i]) ==== ")
 
       # Discretisation
-         Fapar_3, FaparCloudTrue_3 = copernicus.DISCRETISATION(; Dtm, iCount=i+1, Latitude, Longitude, Metadatas, Path=Path_Fapar[i+1], Subcatchment)
-         Lai_3, LaiCloudTrue_3     = copernicus.DISCRETISATION(; Dtm, iCount=i+1, Latitude, Longitude, Metadatas, Path=Path_Lai[i+1], Subcatchment)
-         Ndvi_3, ~                 = copernicus.DISCRETISATION(; Dtm, iCount=i+1, Latitude, Longitude, Metadatas, Path=Path_Ndvi[i+1], Subcatchment)
-         Fvc_3, FvcCloudTrue_3     = copernicus.DISCRETISATION(; Dtm, iCount=i+1, Latitude, Longitude, Metadatas, Path=Path_Fvc[i+1], Subcatchment)
+         Fapar_3, FaparCloudTrue_3 = copernicus.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Fapar[i+1], Subcatchment)
+         Lai_3, LaiCloudTrue_3     = copernicus.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Lai[i+1], Subcatchment)
+         Ndvi_3, ~                 = copernicus.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Ndvi[i+1], Subcatchment)
+         Fvc_3, FvcCloudTrue_3     = copernicus.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Fvc[i+1], Subcatchment)
 
       # Cloud cover of FVC & Lai not reliable, could change in future release
          FvcCloudTrue_3  = deepcopy(FaparCloudTrue_3)
@@ -422,41 +430,41 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
          NdviCloudTrue_3 = deepcopy(FaparCloudTrue_3)
 
       # For plotting
-         if 🎏_Plots
-            Lai_Raw   = deepcopy(Lai_2)
-            Fapar_Raw = deepcopy(Fapar_2)
-            Ndvi_Raw  = deepcopy(Ndvi_2)
-            Fvc_Raw   = deepcopy(Fvc_2)
-         end
+      if 🎏_Plots
+         Lai_Raw   = deepcopy(Lai_2)
+         Fapar_Raw = deepcopy(Fapar_2)
+         Ndvi_Raw  = deepcopy(Ndvi_2)
+         Fvc_Raw   = deepcopy(Fvc_2)
+      end
 
-      CloudCoverPercent_2 = COUNT_NONAN(FaparCloudTrue_2, Metadatas) / (Count_LaiNoNan + 1)
-      CloudCoverPercent_3 = COUNT_NONAN(FaparCloudTrue_3, Metadatas) / (Count_LaiNoNan + 1)
+      CloudCoverPercent_2[i] = COUNT_NONAN(FaparCloudTrue_2, Metadatas) / (Count_LaiNoNan + 1)
+      CloudCoverPercent_3    = COUNT_NONAN(FaparCloudTrue_3, Metadatas) / (Count_LaiNoNan + 1)
 
-      ΔMaxMin_Lai   = RELATIONSHIP(;CloudCoverPercent_2, ΔMaxIncrease_Max=0.45)
-      ΔMaxMin_Fvc   = RELATIONSHIP(;CloudCoverPercent_2, ΔMaxIncrease_Max=0.5)
-      ΔMaxMin_Fapar = RELATIONSHIP(;CloudCoverPercent_2, ΔMaxIncrease_Max=0.5)
-      ΔMaxMin_Ndvi  = RELATIONSHIP(;CloudCoverPercent_2, ΔMaxIncrease_Max=0.5)
+      ΔMaxMin_Lai   = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.45)
+      ΔMaxMin_Fvc   = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.5)
+      ΔMaxMin_Fapar = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.5)
+      ΔMaxMin_Ndvi  = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.5)
 
       # Days between different events
-         ΔDays_21 = Dates.days(DateSentinel[i] - DateSentinel[i-1])
-         ΔDays_32 = Dates.days(DateSentinel[i+1] - DateSentinel[i])
-         ΔDays_31 = Dates.days(DateSentinel[i+1] - DateSentinel[i-1])
+      ΔDays_21 = Dates.days(DateSentinel[i] - DateSentinel[i-1])
+      ΔDays_32 = Dates.days(DateSentinel[i+1] - DateSentinel[i])
+      ΔDays_31 = Dates.days(DateSentinel[i+1] - DateSentinel[i-1])
 
       # For every image
       Threads.@threads for iX = 1:Metadatas.N_Width
          Threads.@threads for iY = 1:Metadatas.N_Height
 
             # Feasible range
-               Lai_2[iX, iY]   = BOUND(Obs₁=Lai_2[iX, iY], ObsMin=Lai_Min, ObsMax=Lai_Max)
-               Fapar_2[iX, iY] = BOUND(Obs₁=Fapar_2[iX, iY], ObsMin=Fapar_Min, ObsMax=Fapar_Max)
-               Fvc_2[iX, iY]   = BOUND(Obs₁=Fvc_2[iX, iY], ObsMin=Fvc_Min, ObsMax=Fvc_Max)
-               Ndvi_2[iX, iY]  = BOUND(Obs₁=Ndvi_2[iX, iY], ObsMin=Ndvi_Min, ObsMax=Ndvi_Max)
+            Lai_2[iX, iY] = BOUND(Obs₁=Lai_2[iX, iY], ObsMin=Lai_Min, ObsMax=Lai_Max)
+            Fapar_2[iX, iY] = BOUND(Obs₁=Fapar_2[iX, iY], ObsMin=Fapar_Min, ObsMax=Fapar_Max)
+            Fvc_2[iX, iY] = BOUND(Obs₁=Fvc_2[iX, iY], ObsMin=Fvc_Min, ObsMax=Fvc_Max)
+            Ndvi_2[iX, iY] = BOUND(Obs₁=Ndvi_2[iX, iY], ObsMin=Ndvi_Min, ObsMax=Ndvi_Max)
 
             if 🎏_Plots
-               Lai_Raw[iX, iY]   = BOUND(Obs₁=Lai_Raw[iX, iY], ObsMin=Lai_Min, ObsMax=Lai_Max)
+               Lai_Raw[iX, iY] = BOUND(Obs₁=Lai_Raw[iX, iY], ObsMin=Lai_Min, ObsMax=Lai_Max)
                Fapar_Raw[iX, iY] = BOUND(Obs₁=Fapar_Raw[iX, iY], ObsMin=Fapar_Min, ObsMax=Fapar_Max)
-               Fvc_Raw[iX, iY]   = BOUND(Obs₁=Fvc_Raw[iX, iY], ObsMin=Fvc_Min, ObsMax=Fvc_Max)
-               Ndvi_Raw[iX, iY]  = BOUND(Obs₁=Ndvi_Raw[iX, iY], ObsMin=Ndvi_Min, ObsMax=Ndvi_Max)
+               Fvc_Raw[iX, iY] = BOUND(Obs₁=Fvc_Raw[iX, iY], ObsMin=Fvc_Min, ObsMax=Fvc_Max)
+               Ndvi_Raw[iX, iY] = BOUND(Obs₁=Ndvi_Raw[iX, iY], ObsMin=Ndvi_Min, ObsMax=Ndvi_Max)
             end
 
             # Variation of Lai
@@ -475,7 +483,7 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
             #-------
 
             # The LaiCloudTrue does not always pick up clouds but also uncertainty, therefore we determine if there is issue if there is a significan change in ΔLai
-            if ((LaiCloudTrue_2[iX, iY] == 1) && (ΔLai_21 > ΔMaxMin_Lai)) || (CloudCoverPercent_2 ≥ CloudCoverPercent_Max)
+            if ((LaiCloudTrue_2[iX, iY] == 1) && (ΔLai_21 > ΔMaxMin_Lai)) || (CloudCoverPercent_2[i] ≥ CloudCoverPercent_Max)
                # Assume that at [iX,iY] Lai_3 is free cloud
                if (LaiCloudTrue_3[iX, iY] ≠ 1) && (ΔLai_31 ≤ ΔMaxMin_Lai) && (CloudCoverPercent_3 < CloudCoverPercent_Max)
                   Lai_2[iX, iY] = INTERPOLATE(; Obs₁=Lai_1[iX, iY], Obs₂=Lai_3[iX, iY], ΔDays_21, ΔDays_32)
@@ -489,7 +497,7 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
             #-------
 
             # The LaiCloudTrue does not always pick up clouds but also uncertainty, therefore we determine if there is issue if there is a significan change in ΔLai
-            if ((FaparCloudTrue_2[iX, iY] == 1) && (ΔFapar_21 > ΔMaxMin_Fapar)) || (CloudCoverPercent_2 ≥ CloudCoverPercent_Max)
+            if ((FaparCloudTrue_2[iX, iY] == 1) && (ΔFapar_21 > ΔMaxMin_Fapar)) || (CloudCoverPercent_2[i] ≥ CloudCoverPercent_Max)
                # Assume that at [iX,iY] Lai_3 is free cloud
                if (FaparCloudTrue_3[iX, iY] ≠ 1) && (ΔFapar_31 ≤ ΔMaxMin_Fapar) && (CloudCoverPercent_3 < CloudCoverPercent_Max)
                   Fapar_2[iX, iY] = INTERPOLATE(; Obs₁=Fapar_1[iX, iY], Obs₂=Fapar_3[iX, iY], ΔDays_21, ΔDays_32)
@@ -503,7 +511,7 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
             #-------
 
             # The LaiCloudTrue does not always pick up clouds but also uncertainty, therefore we determine if there is issue if there is a significan change in ΔLai
-            if ((FvcCloudTrue_2[iX, iY] == 1) && (ΔFvc_21 > ΔMaxMin_Fvc)) || (CloudCoverPercent_2 ≥ CloudCoverPercent_Max)
+            if ((FvcCloudTrue_2[iX, iY] == 1) && (ΔFvc_21 > ΔMaxMin_Fvc)) || (CloudCoverPercent_2[i] ≥ CloudCoverPercent_Max)
                # Assume that at [iX,iY] Lai_3 is free cloud
                if ((FvcCloudTrue_3[iX, iY] ≠ 1) && (ΔFvc_31 ≤ ΔMaxMin_Fvc)) && (CloudCoverPercent_3 < CloudCoverPercent_Max)
                   Fvc_2[iX, iY] = INTERPOLATE(; Obs₁=Fvc_1[iX, iY], Obs₂=Fvc_3[iX, iY], ΔDays_21, ΔDays_32)
@@ -517,7 +525,7 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
             #-------
 
             # The LaiCloudTrue does not always pick up clouds but also uncertainty, therefore we determine if there is issue if there is a significan change in ΔLai
-            if ((LaiCloudTrue_2[iX, iY] == 1) && (ΔNdvi_21 > ΔMaxMin_Ndvi)) || (CloudCoverPercent_2 ≥ CloudCoverPercent_Max)
+            if ((LaiCloudTrue_2[iX, iY] == 1) && (ΔNdvi_21 > ΔMaxMin_Ndvi)) || (CloudCoverPercent_2[i] ≥ CloudCoverPercent_Max)
                # Assume that at [iX,iY] Lai_3 is free cloud
                if (LaiCloudTrue_3[iX, iY] ≠ 1) && (ΔNdvi_31 ≤ ΔMaxMin_Ndvi) && (CloudCoverPercent_3 < CloudCoverPercent_Max)
                   Ndvi_2[iX, iY] = INTERPOLATE(; Obs₁=Ndvi_1[iX, iY], Obs₂=Ndvi_3[iX, iY], ΔDays_21, ΔDays_32)
@@ -530,15 +538,15 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
 
 
             # Maximum allowed variation
-               Lai_2[iX, iY]   = MAXMIN_INCREASE(; ΔMaxIncrease₁=ΔMaxMin_Lai, Obs₁=Lai_1[iX, iY], Obs₂=Lai_2[iX, iY], ΔDays_21, ObsMin=Lai_Min, ObsMax=Lai_Max)
-               Fapar_2[iX, iY] = MAXMIN_INCREASE(; ΔMaxIncrease₁=ΔMaxMin_Fapar, Obs₁=Fapar_1[iX, iY], Obs₂=Fapar_2[iX, iY], ΔDays_21, ObsMin=Fapar_Min, ObsMax=Fapar_Max)
-               Fvc_2[iX, iY]   = MAXMIN_INCREASE(; ΔMaxIncrease₁=ΔMaxMin_Fvc, Obs₁=Fvc_1[iX, iY], Obs₂=Fvc_2[iX, iY], ΔDays_21, ObsMin=Fvc_Min, ObsMax=Fvc_Max)
-               Ndvi_2[iX, iY]  = MAXMIN_INCREASE(; ΔMaxIncrease₁=ΔMaxMin_Ndvi, Obs₁=Ndvi_1[iX, iY], Obs₂=Ndvi_2[iX, iY], ΔDays_21, ObsMin=Ndvi_Min, ObsMax=Ndvi_Max)
+            Lai_2[iX, iY] = MAXMIN_INCREASE(; ΔMaxIncrease₁=ΔMaxMin_Lai, Obs₁=Lai_1[iX, iY], Obs₂=Lai_2[iX, iY], ΔDays_21, ObsMin=Lai_Min, ObsMax=Lai_Max)
+            Fapar_2[iX, iY] = MAXMIN_INCREASE(; ΔMaxIncrease₁=ΔMaxMin_Fapar, Obs₁=Fapar_1[iX, iY], Obs₂=Fapar_2[iX, iY], ΔDays_21, ObsMin=Fapar_Min, ObsMax=Fapar_Max)
+            Fvc_2[iX, iY] = MAXMIN_INCREASE(; ΔMaxIncrease₁=ΔMaxMin_Fvc, Obs₁=Fvc_1[iX, iY], Obs₂=Fvc_2[iX, iY], ΔDays_21, ObsMin=Fvc_Min, ObsMax=Fvc_Max)
+            Ndvi_2[iX, iY] = MAXMIN_INCREASE(; ΔMaxIncrease₁=ΔMaxMin_Ndvi, Obs₁=Ndvi_1[iX, iY], Obs₂=Ndvi_2[iX, iY], ΔDays_21, ObsMin=Ndvi_Min, ObsMax=Ndvi_Max)
 
             # Correction of Lai with knowledge of Fvc & Lai
-               if Fvc_2[iX, iY] ≤ 0.1
-                  Lai_2[iX, iY] = min(Fvc_2[iX, iY], Lai_2[iX, iY])
-               end
+            if Fvc_2[iX, iY] ≤ 0.1
+               Lai_2[iX, iY] = min(Fvc_2[iX, iY], Lai_2[iX, iY])
+            end
          end # for iY=1:Metadatas.N_Height
       end # for iX=1:Metadatas.N_Width
 
@@ -547,29 +555,34 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
 
       # WRITTING OUTPUT
       if 🎏_Write
-         Path_Julia_Lai   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Lai, NameOutput_Lai₁[i])
-         Path_Julia_Fapar = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fapar, NameOutput_Fapar₁[i])
-         Path_Julia_Ndvi  = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Ndvi, NameOutput_Ndvi₁[i])
-         Path_Julia_Fvc   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fvc, NameOutput_Fvc₁[i])
-
-         rm(Path_Julia_Lai, force=true)
-         rm(Path_Julia_Fapar, force=true)
-         rm(Path_Julia_Ndvi, force=true)
-         rm(Path_Julia_Fvc, force=true)
+         Path_Julia_Lai   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Lai, "FreeCloud", "FreeCloud_" * NameOutput_Lai₁[i])
+         Path_Julia_Fapar = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fapar, "FreeCloud", "FreeCloud_" * NameOutput_Fapar₁[i])
+         Path_Julia_Ndvi  = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Ndvi, "FreeCloud", "FreeCloud_" * NameOutput_Ndvi₁[i])
+         Path_Julia_Fvc   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fvc, "FreeCloud", "FreeCloud_" * NameOutput_Fvc₁[i])
 
          Rasters.write(Path_Julia_Lai, Lai_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
          Rasters.write(Path_Julia_Fapar, Fapar_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
          Rasters.write(Path_Julia_Ndvi, Ndvi_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
          Rasters.write(Path_Julia_Fvc, Fvc_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
+
+         Path_Julia_Lai_raw   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Lai, "Raw", "Raw_" * NameOutput_Lai₁[i])
+         Path_Julia_Fapar_raw = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fapar, "Raw", "Raw_" * NameOutput_Fapar₁[i])
+         Path_Julia_Ndvi_raw  = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Ndvi, "Raw", "Raw_" * NameOutput_Ndvi₁[i])
+         Path_Julia_Fvc_raw   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fvc, "Raw", "Raw_" * NameOutput_Fvc₁[i])
+
+         Rasters.write(Path_Julia_Lai_raw, Lai_Raw; ext=".tiff", missingval=NaN, force=true, verbose=true)
+         Rasters.write(Path_Julia_Fapar_raw, Fapar_Raw; ext=".tiff", missingval=NaN, force=true, verbose=true)
+         Rasters.write(Path_Julia_Ndvi_raw, Ndvi_Raw; ext=".tiff", missingval=NaN, force=true, verbose=true)
+         Rasters.write(Path_Julia_Fvc_raw, Fvc_Raw; ext=".tiff", missingval=NaN, force=true, verbose=true)
       end  #  if 🎏_Write
 
       if 🎏_Plots
          Path_Plot = joinpath(Path_SentinelBiophysicalRemoveCloud, "PLOTS", NameOutput_Plot₁[i])
          # :viridis :linear_bgy_10_95_c74_n256
-         geoPlot.HEATMAP_LAI(; colormap=:avocado, DaySentinel₁=DaySentinel[i], Fapar_2, Fvc_2, Lai_2, MonthSentinel₁=MonthSentinel[i], Ndvi_2, Path_Plot, titlecolor=titlecolor, titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, YearSentinel₁=YearSentinel[i], ylabelsize=ylabelsize, yticksize=yticksize, Lai_Raw, Fapar_Raw, Ndvi_Raw, Fvc_Raw, LaiCloudTrue_2, FaparCloudTrue_2, FvcCloudTrue_2, ΔMaxMin_Lai, CloudCoverPercent=CloudCoverPercent_2)
+         geoPlot.HEATMAP_LAI(; colormap=:avocado, DaySentinel₁=DaySentinel[i], Fapar_2, Fvc_2, Lai_2, MonthSentinel₁=MonthSentinel[i], Ndvi_2, Path_Plot, titlecolor=titlecolor, titlesize=titlesize, xlabelSize=xlabelSize, xticksize=xticksize, YearSentinel₁=YearSentinel[i], ylabelsize=ylabelsize, yticksize=yticksize, Lai_Raw, Fapar_Raw, Ndvi_Raw, Fvc_Raw, LaiCloudTrue_2, FaparCloudTrue_2, FvcCloudTrue_2, ΔMaxMin_Lai, CloudCoverPercent=CloudCoverPercent_2[i])
       end # if 🎏_Plots
 
-      # Perfornming the cycle
+      # Cycle
          Lai_1 = deepcopy(Lai_2)
          Lai_2 = deepcopy(Lai_3)
          LaiCloudTrue_2 = deepcopy(LaiCloudTrue_3)
@@ -588,18 +601,25 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
 
    end # for iiSentinelData ∈ AllSentinelData
 
+   # METADATA
+      Path_Metadata = joinpath(Path_SentinelBiophysicalRemoveCloud, "METADATA", "Metadata_Biophyiscal.csv")
+
+         Header = ["Year", "Month", "Day", "CloudCoverPercent", "NameOutput_Lai", "NameOutput_Fapar", "NameOutput_Ndvi", "NameOutput_Fvc"]
+         CSV.write(Path_Metadata, Tables.table([YearSentinel MonthSentinel DaySentinel floor.(100.0 .* CloudCoverPercent_2) NameOutput_Lai₁ NameOutput_Fapar₁ NameOutput_Ndvi₁ NameOutput_Fvc₁]), writeheader=true, header=Header, bom=true)
+
    # Combining plots into one pdf
-   if 🎏_Lai_CompilePdf
-      Path_Plot = joinpath(Path_SentinelBiophysicalRemoveCloud, "PLOTS")
-      cd(Path_Plot)
-      Folder_List = readdir(Path_Plot)
-      Folder_List = sort(Folder_List)
+      if 🎏_Lai_CompilePdf
+         Path_Plot = joinpath(Path_SentinelBiophysicalRemoveCloud, "PLOTS")
+         cd(Path_Plot)
+         Folder_List = readdir(Path_Plot)
+         Folder_List = sort(Folder_List)
 
-      Path_Output_Pdf = joinpath(Path_SentinelBiophysicalRemoveCloud, "ALL_PLOTS_SENTINEL_" * string(ΔMaxMin_Lai) * ".pdf")
-      PDFmerger.merge_pdfs(Folder_List, Path_Output_Pdf)
-   end
+         Path_Output_Pdf = joinpath(Path_SentinelBiophysicalRemoveCloud, "ALL_PLOTS_SENTINEL_" * string(today()) * "_" *string(Dates.hour(now()))
+         * ".pdf")
+         PDFmerger.merge_pdfs(Folder_List, Path_Output_Pdf)
+      end
 
-   printstyled(" ================ FINISHED ===================", color=:red)
+      printstyled(" ================ FINISHED ===================", color=:red)
 
    return nothing
 end  # function WFLOW_REMOVING_CLOUDS()

@@ -49,15 +49,15 @@ Path_Wflow            = "OutputWflow"
 Filename_Input_Forcing = "Forcing_" * Forcing_ΔT * "_" * "$🎏_CatchmentName" * ".csv"
 
 # === Shape file ===
-Filename_Gauge_Shp = "Gauge_Hydro.shp"
-Filename_Input_SoilMap = "SoilMap.tiff" # Obsolete
-Filename_LandUseMap_Shp = "NationalLandCoverMap.gdb"
-Filename_Landuse_Shp = "Landuse.shp"
-Filename_Mask_Shp = "Crop.shp"
+Filename_Gauge_Shp                          = "Gauge_Hydro.shp"
+Filename_Input_SoilMap                      = "SoilMap.tiff" # Obsolete
+Filename_LandUseMap_Shp                     = "NationalLandCoverMap.gdb"
+Filename_Landuse_Shp                        = "Landuse.shp"
+Filename_Mask_Shp                           = "Crop.shp"
 Filename_Output_ObservationEcologyPoint_Shp = "ObservationEcologyPoint.shp"
-Filename_River_Shp = "RiversIreland.shp"
-Filename_Roads_Shp = "Roads.shp"
-Filename_SoilMap_Shp = "Soils//SoilMap.shp"
+Filename_River_Shp                          = "RiversIreland.shp"
+Filename_Roads_Shp                          = "Roads.shp"
+Filename_SoilMap_Shp                        = "Soils//SoilMap.shp"
 
 # === Input from Python ===
 Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tiff"
