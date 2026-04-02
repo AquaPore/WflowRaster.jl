@@ -112,7 +112,7 @@ end  # function: LOOKUPTABLE_2_NETCDF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		FUNCTION : TIFF_2_NETCDF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, LandUse_Header, LandUse_Maps, Latitude, Ldd, Longitude, Metadatas, ObservationPoint, River, River_Header, River_Maps, RiverLength_Mask, RiverSlope, Slope, Soil_Header, Soil_Maps, Subcatchment, Deflatelevel=0)
+function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, LandUse_Header, LandUse_Maps, Latitude, Ldd, Longitude, Metadatas, ObservationPoint, River, River_Header, River_Maps, RiverLength_Mask, RiverSlope, Slope, Soil_Header, Soil_Maps, Subcatchment, Deflatelevel=0, Path_Lai)
 
    # Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
    Path_NetCDF_Full = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
@@ -293,6 +293,12 @@ function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Fi
 
    # == LEAF AREA INDEX input ==========================================
    printstyled("==== LEAF AREA INDEX MAPS ====\n"; color=:green)
+
+      for iMonth=1:12
+         Path_Lai₁ = joinpath(Path_Lai, "Lai_" * string(iMonth) * ".tiff")
+
+         
+   end
 
 
 

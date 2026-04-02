@@ -44,6 +44,8 @@ Path_River = "RIVERS\\SHAPEFILE"
 Path_TimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
 Path_Wflow = "OutputWflow"
 Path_Sentinel = "Sentinel"
+Path_Sentinel_WflowLai = "BiophysicalWflow"
+
 
 # ======= INPUT =======
 # === Input  Forcing ===
