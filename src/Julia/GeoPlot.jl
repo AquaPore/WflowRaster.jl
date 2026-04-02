@@ -18,11 +18,12 @@ function HEATMAP(; 🎏_Colorbar=true, Input, Label="", Title, Xlabel=L"$Latitud
 
    Axis_100.yreversed = Yreversed
 
+   Ncategories = 1
    if isnan(MinValue)
-      MinValue = minimum(X for X ∈ Input if !isnan(X))
+      MinValue = minimum(X for X ∈ Input if !isnan(X) && !ismissing(X))
    end
    if isnan(MaxValue)
-      MaxValue = maximum(X for X ∈ Input if !isnan(X))
+      MaxValue = maximum(X for X ∈ Input if !isnan(X) && !ismissing(X))
    end
    Ncategories = Int64(floor(MaxValue - MinValue) + 1)
 

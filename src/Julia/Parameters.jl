@@ -27,37 +27,38 @@ Forcing_ΔT = "Daily" # <"Hourly"> or <"Daily">
 🎏_Plot_NetCDF = true
 
 # ======= PATHS =======
-Path_Root_Data = raw"D:/JOE/MAIN/MODELS/WFLOW/DATA/"
+Path_Root_Data = raw"D:/JOE/MAIN/MODELS/WFLOW/DATA/CATCHMENTS/"
 Path_Root = joinpath(Path_Root_Data, "$🎏_CatchmentName")
 Path_Root_NetCDF = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
 Path_Root_LookupTable = raw"DATA\Lookuptable"
 
-Path_Forcing₀         = "InputTimeSeries\\TimeSeries_Process"
-Path_Forcing          = joinpath(Path_Forcing₀, Forcing_ΔT)
-Path_Gis              = "InputGis"
-Path_Julia            = "OutputJulia"
-Path_Lookuptable      = "LookupTable"
-Path_NetCDF           = "OutputNetCDF"
+Path_Forcing₀ = "InputTimeSeries\\TimeSeries_Process"
+Path_Forcing = joinpath(Path_Forcing₀, Forcing_ΔT)
+Path_Gis = "InputGis"
+Path_Julia = "OutputJulia"
+Path_Lookuptable = "LookupTable"
+Path_NetCDF = "OutputNetCDF"
 Path_ObservationPoint = "InputObservationPoint"
-Path_Python           = "OutputPython"
-Path_River            = "RIVERS\\SHAPEFILE"
-Path_TimeSeriesWflow  = "InputTimeSeries/TimeSeries_Wflow"
-Path_Wflow            = "OutputWflow"
+Path_Python = "OutputPython"
+Path_River = "RIVERS\\SHAPEFILE"
+Path_TimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
+Path_Wflow = "OutputWflow"
+Path_Sentinel = "Sentinel"
 
 # ======= INPUT =======
 # === Input  Forcing ===
 Filename_Input_Forcing = "Forcing_" * Forcing_ΔT * "_" * "$🎏_CatchmentName" * ".csv"
 
 # === Shape file ===
-Filename_Gauge_Shp                          = "Gauge_Hydro.shp"
-Filename_Input_SoilMap                      = "SoilMap.tiff" # Obsolete
-Filename_LandUseMap_Shp                     = "NationalLandCoverMap.gdb"
-Filename_Landuse_Shp                        = "Landuse.shp"
-Filename_Mask_Shp                           = "Crop.shp"
+Filename_Gauge_Shp = "Gauge_Hydro.shp"
+Filename_Input_SoilMap = "SoilMap.tiff" # Obsolete
+Filename_LandUseMap_Shp = "NationalLandCoverMap.gdb"
+Filename_Landuse_Shp = "Landuse.shp"
+Filename_Mask_Shp = "Crop.shp"
 Filename_Output_ObservationEcologyPoint_Shp = "ObservationEcologyPoint.shp"
-Filename_River_Shp                          = "RiversIreland.shp"
-Filename_Roads_Shp                          = "Roads.shp"
-Filename_SoilMap_Shp                        = "Soils//SoilMap.shp"
+Filename_River_Shp = "RiversIreland.shp"
+Filename_Roads_Shp = "Roads.shp"
+Filename_SoilMap_Shp = "Soils//SoilMap.shp"
 
 # === Input from Python ===
 Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tiff"
@@ -78,42 +79,43 @@ Filename_Lookuptable_LandUse = "LookupTable_Veg_NLCM.csv"
 Filename_Lookuptable_River = "LookupTable_River.csv"
 
 # ======= OUTPUT =======
-   # === Output Julia ===
-      Filename_Coastline = "Coastline.tiff"
-      Filename_Julia_Dtm = "Ireland_DEM_Croped.tiff"
-      Filename_Julia_DtmCorrected = "DEM_Corrected.tiff"
-      Filename_Julia_Gauge = "Gauge.tiff"
-      Filename_Julia_Pits = "Pits.tiff"
-      Filename_Julia_RiverOrder = "RiverOrder.tiff"
+# === Output Julia ===
+Filename_Coastline = "Coastline.tiff"
+Filename_Julia_Dtm = "Ireland_DEM_Croped.tiff"
+Filename_Julia_DtmCorrected = "DEM_Corrected.tiff"
+Filename_Julia_Gauge = "Gauge.tiff"
+Filename_Julia_Pits = "Pits.tiff"
+Filename_Julia_RiverOrder = "RiverOrder.tiff"
 
-   # === Output wflow ===
-      Filename_Dtm = "Dtm.tiff"
-      Filename_Gauge = "Gauges_grdc.tiff"
-      Filename_Ldd = "Ldd.tiff"
-      Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
-      Filename_RiverLength = "RiverLength.tiff"
-      Filename_RiverSlope = "RiverSlope.tiff"
-      Filename_Rivers = "River.tiff"
-      Filename_Slope = "Slope.tiff"
-      Filename_Subcatchment = "Subcatchment.tiff"
+# === Output wflow ===
+Filename_Dtm = "Dtm.tiff"
+Filename_Gauge = "Gauges_grdc.tiff"
+Filename_Ldd = "Ldd.tiff"
+Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
+Filename_RiverLength = "RiverLength.tiff"
+Filename_RiverSlope = "RiverSlope.tiff"
+Filename_Rivers = "River.tiff"
+Filename_Slope = "Slope.tiff"
+Filename_Subcatchment = "Subcatchment.tiff"
+FileName_Lai = "Lai_"
 
-   # === Output netCDF ===
-   Filename_NetCDF_Forcing = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
-   Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
+# === Output netCDF ===
+Filename_NetCDF_Forcing = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
+Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
 
 # SENTINEL DATA
-   # === Input boundary ===
-      Path_SentinelBoundary = raw"Boundary\TimoleagueBoundaries3.geojson"
+# === Input boundary ===
+Path_SentinelBoundary = raw"Boundary\TimoleagueBoundaries3.geojson"
 
-   # === Output sentinel data ===
-      # Keep the "/"
-      Path_SentinelDownload      = "Sentinel/DownloadSentinel"
-      Path_SentinelMetadata      = "Sentinel/Metadata"
-      Path_SentinelBiophysical   = "Sentinel/Biophysical"
-      Path_SentinelBiophysicalCloudRemoval   = "Sentinel/BiophysicalCloud"
-      Filename_SentinelXml       = "Sentinel/SnapXml/BatchProcessing/BatchSnap_Biophysical.xml"
-      Filename_SentinelMetadata  = "SentinelMetadata.csv"
-      Filename_CatchmentBoundary = "Boundary/CatchmentBoundary3.shp"
+# === Output sentinel data ===
+# Keep the "/"
+Path_SentinelDownload = "Sentinel/DownloadSentinel"
+Path_SentinelMetadata = "Sentinel/Metadata"
+Path_SentinelBiophysical = "Sentinel/Biophysical"
+Path_SentinelBiophysicalCloudRemoval = "Sentinel/BiophysicalCloud"
+Filename_SentinelXml = "Sentinel/SnapXml/BatchProcessing/BatchSnap_Biophysical.xml"
+Filename_SentinelMetadata = "SentinelMetadata.csv"
+Filename_CatchmentBoundary = "Boundary/CatchmentBoundary3.shp"
 
 
 #  ======= PARAMETERS =======
@@ -126,11 +128,11 @@ Param_Crs = 29902    # [-] This is the default projection TM65 / Irish Grid
 if 🎏_CatchmentName == "Ballycanew"
    # Flags: processing inputs
    # Dtm derived from Mosaic
-   🎏_Mosaic = false
+   🎏_DtmMosaic = false
    🎏_DtmFromMosaic = false # Gis stored
    🎏_MaskFromDtm = false
 
-   @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
+   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
 
    # Flags: Options
    🎏_Fix_Cyclic = false # obsolete
@@ -179,11 +181,11 @@ if 🎏_CatchmentName == "Ballycanew"
 elseif 🎏_CatchmentName == "Castledockerell"
    # Flags: processing inputs
    # Dtm derived from Mosaic
-   🎏_Mosaic = false
+   🎏_DtmMosaic = false
    🎏_DtmFromMosaic = false # Gis stored
    🎏_MaskFromDtm = false
 
-   @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
+   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
 
    # Flags: Options
    🎏_Fix_Cyclic = false # obsolete
@@ -232,11 +234,11 @@ elseif 🎏_CatchmentName == "Castledockerell"
 elseif 🎏_CatchmentName == "Corduff"
    # Flags: processing inputs
    # Dtm derived from Mosaic
-   🎏_Mosaic = false
+   🎏_DtmMosaic = false
    🎏_DtmFromMosaic = false # Gis stored
    🎏_MaskFromDtm = false
 
-   @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
+   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
 
    # Flags: Options
    🎏_Fix_Cyclic = false # obsolete
@@ -285,11 +287,11 @@ elseif 🎏_CatchmentName == "Corduff"
 elseif 🎏_CatchmentName == "Cregduff"
    # Flags: processing inputs
    # Dtm derived from Mosaic
-   🎏_Mosaic = false
+   🎏_DtmMosaic = false
    🎏_DtmFromMosaic = false # Gis stored
    🎏_MaskFromDtm = false
 
-   @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
+   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
 
    # Flags: Options
    🎏_Fix_Cyclic = false # obsolete
@@ -338,11 +340,11 @@ elseif 🎏_CatchmentName == "Cregduff"
 elseif 🎏_CatchmentName == "Dunleer"
    # Flags: processing inputs
    # Dtm derived from Mosaic
-   🎏_Mosaic = false
+   🎏_DtmMosaic = false
    🎏_DtmFromMosaic = false # Gis stored
    🎏_MaskFromDtm = false
 
-   @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
+   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
 
    # Flags: Options
    🎏_Fix_Cyclic = false # obsolete
@@ -391,11 +393,11 @@ elseif 🎏_CatchmentName == "Dunleer"
 elseif 🎏_CatchmentName == "Timoleague"
    # Flags: processing inputs
    # Dtm derived from Mosaic
-   🎏_Mosaic = false
+   🎏_DtmMosaic = false
    🎏_DtmFromMosaic = false # Gis stored
    🎏_MaskFromDtm = true
 
-   @assert(!(🎏_Mosaic && 🎏_DtmFromMosaic))
+   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
 
    # Collecting Sentinel Data
    Coordinate_UpperLeft = (51.67436, -8.85758) # EPSG:4326
@@ -423,8 +425,8 @@ elseif 🎏_CatchmentName == "Timoleague"
    🎏_LandUseMap = true
 
    # Flags: NetCDF
-   🎏_NetCDF = false
-   🎏_Forcing_2_NetCDF = false
+   🎏_NetCDF = true
+   🎏_Forcing_2_NetCDF = true
 
    # Flags: Potential Evapotranspiration
 
@@ -435,7 +437,7 @@ elseif 🎏_CatchmentName == "Timoleague"
    Filename_Input_Dtm = "Timoleague_DTM_Intermap_EPSG29902.tif"
 
    # Resampling method of DEM in 2 steps:
-   Param_ResampleMethod₁ = :average
+   Param_ResampleMethod₁ = :near
    Param_ΔX₁ = 5 # [m]  resampling, Gridded spatial resolution
    Param_ResampleMethod₂ = :cubicspline
    Param_ΔX₂ = -1 # [m]  if >0 then resampling, Gridded spatial resolution should be a multiple of Param_ΔX₁

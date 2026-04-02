@@ -1,11 +1,20 @@
 # =============================================================
-#		module: copernicus
+#		module: sentinel
 # =============================================================
 """
 I developed a software which is used to download and process sentinel data from the Copernicus Open Access Hub. It includes functions to search for sentinel data, download it, and process it using SNAP software to derive biophysical parameters such as LAI, FAPAR, NDVI, and FVC. Additionally, it includes a function to remove clouds from the derived biophysical parameters based on certain criteria.
 
+I automatically derive LAI, FAPAR, NDVI, and FVC (defined below) at 10 m resolution, which I upscale to 5m as required by the model
+ The software has 3 components:
+Step 1:
+Download and process Sentinel-2 data from the Copernicus Open Access Hub https://dataspace.copernicus.eu/ . It includes functions to search for sentinel data within a date range and an area of interest, and to automatically download the two least cloudy days for every month (roughly every 10 days).
+Step 2:
+Process the sentinel-2 using SNAP software https://step.esa.int/main/download/snap-download/ to derive biophysical parameters such as LAI, FAPAR, NDVI, and FVC . https://step.esa.int/docs/extra/ATBD_S2ToolBox_V2.0.pdf
+Step 3
+From the time-series data, I developed software to remove cloud contamination from the derived biophysical parameters. Nevertheless, the flags for detecting cloudiness are not always precise, so I developed an algorithm to detect anomalies in time-series data. In the downloads, one can select to obtain processes or unprocessed data. The attached file contains the time series output for the Timoleague catchments.
+
 """
-module copernicus
+module sentinel
 
 using GeoDataFrames, Dates, CSV, Rasters
 using ZipFile, PDFmerger
@@ -75,7 +84,7 @@ function SENTINEL_DATA(; 🎏_DownloadTwiceMonth=false, Authenticate_Password="J
                # If dates are good
                if CopernicusDate_StartDate ≤ DateSearch_Start ≤ DateSearch_End ≤ CopernicusDate_EndDate
 
-                  🎏_Sucessfull, CloudCover_Scene, Date_Scene, Name_Scene = copernicus.SENTINEL_SEARCH(; 🎏_Sucessfull, Box, CloudCover_Scene, CloudMax, Date_Scene, DateSearch, FirstSecond, Name_Scene, Path_SentinelDownload₁, Product, Satelite, require_ssl_verification)
+                  🎏_Sucessfull, CloudCover_Scene, Date_Scene, Name_Scene = sentinel.SENTINEL_SEARCH(; 🎏_Sucessfull, Box, CloudCover_Scene, CloudMax, Date_Scene, DateSearch, FirstSecond, Name_Scene, Path_SentinelDownload₁, Product, Satelite, require_ssl_verification)
 
                   # Write to CSV
                   Path_Sentinel₁ = joinpath(Path_SentinelMetadata₁, Filename_SentinelMetadata)
@@ -100,13 +109,13 @@ end  # function: SENTINEL_DATA
 function SENTINEL_SEARCH(; 🎏_Sucessfull, Box, CloudCover_Scene, CloudMax, Date_Scene, DateSearch, FirstSecond, Name_Scene, Path_SentinelDownload₁, Product, Satelite, require_ssl_verification)
 
    # #    using HTTP
-   # # HTTP.get("https://catalogue.dataspace.copernicus.eu/odata/v1/Products?\$top=1"; require_ssl_verification=false)
+   # # HTTP.get("https://catalogue.dataspace.sentinel.eu/odata/v1/Products?\$top=1"; require_ssl_verification=false)
 
 
    🎏_DataAvailable = true
    SearchMap = []
    try
-      SearchMap = copernicus.SentinelExplorer.search(Satelite, dates=DateSearch, geom=Box, clouds=CloudMax, product=Product, require_ssl_verification=require_ssl_verification)
+      SearchMap = sentinel.SentinelExplorer.search(Satelite, dates=DateSearch, geom=Box, clouds=CloudMax, product=Product, require_ssl_verification=require_ssl_verification)
    catch
       🎏_DataAvailable = false
       printstyled("   ==== DATA NOT AVAILABLE for $DateSearch ==== \n"; color=:red)
@@ -145,7 +154,7 @@ function SENTINEL_SEARCH(; 🎏_Sucessfull, Box, CloudCover_Scene, CloudMax, Dat
       if !(isfile(PathFile))
          try
             printstyled(" ======  DOWNLOADING SENTINEL MAP: $(Date_Scene₀) ==== \n"; color=:green)
-            copernicus.SentinelExplorer.download_scene(Scene.Name, Path_SentinelDownload₁; unzip=false, log_progress=false, access_token=nothing, require_ssl_verification=require_ssl_verification)
+            sentinel.SentinelExplorer.download_scene(Scene.Name, Path_SentinelDownload₁; unzip=false, log_progress=false, access_token=nothing, require_ssl_verification=require_ssl_verification)
 
             # METADATA
             Date_Scene = push!(Date_Scene, Date_Scene₀)
@@ -154,7 +163,7 @@ function SENTINEL_SEARCH(; 🎏_Sucessfull, Box, CloudCover_Scene, CloudMax, Dat
          catch
             # Try again
             try
-               copernicus.SentinelExplorer.download_scene(Scene.Name, Path_SentinelDownload₁; unzip=false, log_progress=false, access_token=nothing, require_ssl_verification=require_ssl_verification)
+               sentinel.SentinelExplorer.download_scene(Scene.Name, Path_SentinelDownload₁; unzip=false, log_progress=false, access_token=nothing, require_ssl_verification=require_ssl_verification)
                printstyled(" ======  2nd ATTEPT SUCESSFULL ==== \n"; color=:green)
 
                # METADATA
@@ -292,44 +301,44 @@ end # function RUN_SNAP()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapar_Max=0.94, Fapar_Min=0.0, Fvc_Max=1.0, Fvc_Min=0.0, Lai_Max=8.0, Lai_Min=0.0, Ndvi_Min=0.0, Ndvi_Max=1.0, Latitude, Longitude, Metadatas, NamePath_Fapar="FAPAR", NamePath_Fvc="FVC", NamePath_Lai="LAI", NamePath_Ndvi="NDVI", Path_SentinelBiophysical₁, Path_SentinelBiophysicalRemoveCloud, Path_SentinelMetadata₁, Subcatchment, CloudCoverPercent_Max=0.4, ΔMaxMin_Lai=0.3, ΔMaxMin_Ndvi=0.45, ΔMaxMin_Fapar=0.45, ΔMaxMin_Fvc=0.45)
 
-   MetaData      = CSV.read(Path_SentinelMetadata₁, DataFrame; header=true)
+   MetaData = CSV.read(Path_SentinelMetadata₁, DataFrame; header=true)
    DataFrames.sort!(MetaData, [:Date])
    🎏_Sucessfull = convert(Vector{Bool}, Tables.getcolumn(MetaData, :🎏_Sucessfull))
-   DateSentinel  = convert(Vector{DateTime}, Tables.getcolumn(MetaData, :Date))
-   CloudCover    = convert(Vector{Float64}, Tables.getcolumn(MetaData, :Cloud))
+   DateSentinel = convert(Vector{DateTime}, Tables.getcolumn(MetaData, :Date))
+   CloudCover = convert(Vector{Float64}, Tables.getcolumn(MetaData, :Cloud))
 
    # Selecting data
-   N            = sum(🎏_Sucessfull)
+   N = sum(🎏_Sucessfull)
    DateSentinel = DateSentinel[🎏_Sucessfull]
-   CloudCover   = CloudCover[🎏_Sucessfull]
+   CloudCover = CloudCover[🎏_Sucessfull]
 
    # Putting in memory
-      Path_Lai            = fill("", N)
-      Path_Ndvi           = fill("", N)
-      Path_Fvc            = fill("", N)
-      Path_Fapar          = fill("", N)
-      NameOutput_Lai₁     = fill("", N)
-      NameOutput_Ndvi₁    = fill("", N)
-      NameOutput_Fvc₁     = fill("", N)
-      NameOutput_Fapar₁   = fill("", N)
-      NameOutput_Plot₁    = fill("", N)
-      YearSentinel        = zeros(Int64, N)
-      MonthSentinel       = zeros(Int64, N)
-      DaySentinel         = zeros(Int64, N)
-      CloudCoverPercent_2 = fill(NaN, N)
+   Path_Lai = fill("", N)
+   Path_Ndvi = fill("", N)
+   Path_Fvc = fill("", N)
+   Path_Fapar = fill("", N)
+   NameOutput_Lai₁ = fill("", N)
+   NameOutput_Ndvi₁ = fill("", N)
+   NameOutput_Fvc₁ = fill("", N)
+   NameOutput_Fapar₁ = fill("", N)
+   NameOutput_Plot₁ = fill("", N)
+   YearSentinel = zeros(Int64, N)
+   MonthSentinel = zeros(Int64, N)
+   DaySentinel = zeros(Int64, N)
+   CloudCoverPercent_2 = fill(NaN, N)
 
    # Deriving the paths
    Threads.@threads for i = 1:N
       # Dates of output
-         YearSentinel[i]  = Dates.year(DateSentinel[i])
-         MonthSentinel[i] = Dates.month(DateSentinel[i])
-         DaySentinel[i]   = Dates.day(DateSentinel[i])
-         DateFormat       = YearSentinel[i] * 10000 + MonthSentinel[i] * 100 + DaySentinel[i]
+      YearSentinel[i] = Dates.year(DateSentinel[i])
+      MonthSentinel[i] = Dates.month(DateSentinel[i])
+      DaySentinel[i] = Dates.day(DateSentinel[i])
+      DateFormat = YearSentinel[i] * 10000 + MonthSentinel[i] * 100 + DaySentinel[i]
 
       # Paths of output
-         NameOutput_Lai₁[i] = string(DateFormat) * "_" * NamePath_Lai * ".tif"
-         Path_Lai[i]        = joinpath(Path_SentinelBiophysical₁, NamePath_Lai, NameOutput_Lai₁[i])
-         @assert isfile(Path_Lai[i])
+      NameOutput_Lai₁[i] = string(DateFormat) * "_" * NamePath_Lai * ".tif"
+      Path_Lai[i] = joinpath(Path_SentinelBiophysical₁, NamePath_Lai, NameOutput_Lai₁[i])
+      @assert isfile(Path_Lai[i])
 
       NameOutput_Ndvi₁[i] = string(DateFormat) * "_" * NamePath_Ndvi * ".tif"
       Path_Ndvi[i] = joinpath(Path_SentinelBiophysical₁, NamePath_Ndvi, NameOutput_Ndvi₁[i])
@@ -395,55 +404,55 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
    end # function COUNT_NONAN(Obs₁, Metadatas)
 
    # Initializing
-      Lai_1, ~ = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Lai[1], Subcatchment)
-      Fapar_1, ~ = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Fapar[1], Subcatchment)
-      Ndvi_1, ~ = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Ndvi[1], Subcatchment)
-      Fvc_1, ~ = copernicus.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Fvc[1], Subcatchment)
+   Lai_1, ~ = sentinel.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Lai[1], Subcatchment)
+   Fapar_1, ~ = sentinel.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Fapar[1], Subcatchment)
+   Ndvi_1, ~ = sentinel.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Ndvi[1], Subcatchment)
+   Fvc_1, ~ = sentinel.DISCRETISATION(; Dtm, iCount=1, Latitude, Longitude, Metadatas, Path=Path_Fvc[1], Subcatchment)
 
-      Lai_2, LaiCloudTrue_2 = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Lai[2], Subcatchment)
-      Fapar_2, FaparCloudTrue_2 = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Fapar[2], Subcatchment)
-      Ndvi_2, ~ = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Ndvi[2], Subcatchment)
-      Fvc_2, FvcCloudTrue_2 = copernicus.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Fvc[2], Subcatchment)
+   Lai_2, LaiCloudTrue_2 = sentinel.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Lai[2], Subcatchment)
+   Fapar_2, FaparCloudTrue_2 = sentinel.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Fapar[2], Subcatchment)
+   Ndvi_2, ~ = sentinel.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Ndvi[2], Subcatchment)
+   Fvc_2, FvcCloudTrue_2 = sentinel.DISCRETISATION(; Dtm, iCount=2, Latitude, Longitude, Metadatas, Path=Path_Fvc[2], Subcatchment)
 
    # Cloud cover of FVC & Lai not reliable, could change in future release
-      LaiCloudTrue_2 = deepcopy(FaparCloudTrue_2)
-      FvcCloudTrue_2 = deepcopy(FaparCloudTrue_2)
-      NdviCloudTrue_2 = deepcopy(FaparCloudTrue_2)
+   LaiCloudTrue_2 = deepcopy(FaparCloudTrue_2)
+   FvcCloudTrue_2 = deepcopy(FaparCloudTrue_2)
+   NdviCloudTrue_2 = deepcopy(FaparCloudTrue_2)
 
-      Count_LaiNoNan = COUNT_NONAN(Lai_2, Metadatas)
+   Count_LaiNoNan = COUNT_NONAN(Lai_2, Metadatas)
 
-      CloudCoverPercent_2[1] = COUNT_NONAN(FaparCloudTrue_2, Metadatas) / (Count_LaiNoNan + 1)
+   CloudCoverPercent_2[1] = COUNT_NONAN(FaparCloudTrue_2, Metadatas) / (Count_LaiNoNan + 1)
 
    # For every satelite image
    for i = 2:N-1
       println(" ==== $i : $(NameOutput_Lai₁[i]) ==== ")
 
       # Discretisation
-         Fapar_3, FaparCloudTrue_3 = copernicus.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Fapar[i+1], Subcatchment)
-         Lai_3, LaiCloudTrue_3     = copernicus.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Lai[i+1], Subcatchment)
-         Ndvi_3, ~                 = copernicus.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Ndvi[i+1], Subcatchment)
-         Fvc_3, FvcCloudTrue_3     = copernicus.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Fvc[i+1], Subcatchment)
+      Fapar_3, FaparCloudTrue_3 = sentinel.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Fapar[i+1], Subcatchment)
+      Lai_3, LaiCloudTrue_3 = sentinel.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Lai[i+1], Subcatchment)
+      Ndvi_3, ~ = sentinel.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Ndvi[i+1], Subcatchment)
+      Fvc_3, FvcCloudTrue_3 = sentinel.DISCRETISATION(; Dtm, iCount=i + 1, Latitude, Longitude, Metadatas, Path=Path_Fvc[i+1], Subcatchment)
 
       # Cloud cover of FVC & Lai not reliable, could change in future release
-         FvcCloudTrue_3  = deepcopy(FaparCloudTrue_3)
-         LaiCloudTrue_3  = deepcopy(FaparCloudTrue_3)
-         NdviCloudTrue_3 = deepcopy(FaparCloudTrue_3)
+      FvcCloudTrue_3 = deepcopy(FaparCloudTrue_3)
+      LaiCloudTrue_3 = deepcopy(FaparCloudTrue_3)
+      NdviCloudTrue_3 = deepcopy(FaparCloudTrue_3)
 
       # For plotting
       if 🎏_Plots
-         Lai_Raw   = deepcopy(Lai_2)
+         Lai_Raw = deepcopy(Lai_2)
          Fapar_Raw = deepcopy(Fapar_2)
-         Ndvi_Raw  = deepcopy(Ndvi_2)
-         Fvc_Raw   = deepcopy(Fvc_2)
+         Ndvi_Raw = deepcopy(Ndvi_2)
+         Fvc_Raw = deepcopy(Fvc_2)
       end
 
       CloudCoverPercent_2[i] = COUNT_NONAN(FaparCloudTrue_2, Metadatas) / (Count_LaiNoNan + 1)
-      CloudCoverPercent_3    = COUNT_NONAN(FaparCloudTrue_3, Metadatas) / (Count_LaiNoNan + 1)
+      CloudCoverPercent_3 = COUNT_NONAN(FaparCloudTrue_3, Metadatas) / (Count_LaiNoNan + 1)
 
-      ΔMaxMin_Lai   = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.45)
-      ΔMaxMin_Fvc   = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.5)
+      ΔMaxMin_Lai = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.45)
+      ΔMaxMin_Fvc = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.5)
       ΔMaxMin_Fapar = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.5)
-      ΔMaxMin_Ndvi  = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.5)
+      ΔMaxMin_Ndvi = RELATIONSHIP(; CloudCoverPercent=CloudCoverPercent_2[i], ΔMaxIncrease_Max=0.5)
 
       # Days between different events
       ΔDays_21 = Dates.days(DateSentinel[i] - DateSentinel[i-1])
@@ -555,20 +564,20 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
 
       # WRITTING OUTPUT
       if 🎏_Write
-         Path_Julia_Lai   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Lai, "FreeCloud", "FreeCloud_" * NameOutput_Lai₁[i])
+         Path_Julia_Lai = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Lai, "FreeCloud", "FreeCloud_" * NameOutput_Lai₁[i])
          Path_Julia_Fapar = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fapar, "FreeCloud", "FreeCloud_" * NameOutput_Fapar₁[i])
-         Path_Julia_Ndvi  = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Ndvi, "FreeCloud", "FreeCloud_" * NameOutput_Ndvi₁[i])
-         Path_Julia_Fvc   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fvc, "FreeCloud", "FreeCloud_" * NameOutput_Fvc₁[i])
+         Path_Julia_Ndvi = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Ndvi, "FreeCloud", "FreeCloud_" * NameOutput_Ndvi₁[i])
+         Path_Julia_Fvc = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fvc, "FreeCloud", "FreeCloud_" * NameOutput_Fvc₁[i])
 
          Rasters.write(Path_Julia_Lai, Lai_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
          Rasters.write(Path_Julia_Fapar, Fapar_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
          Rasters.write(Path_Julia_Ndvi, Ndvi_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
          Rasters.write(Path_Julia_Fvc, Fvc_2; ext=".tiff", missingval=NaN, force=true, verbose=true)
 
-         Path_Julia_Lai_raw   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Lai, "Raw", "Raw_" * NameOutput_Lai₁[i])
+         Path_Julia_Lai_raw = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Lai, "Raw", "Raw_" * NameOutput_Lai₁[i])
          Path_Julia_Fapar_raw = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fapar, "Raw", "Raw_" * NameOutput_Fapar₁[i])
-         Path_Julia_Ndvi_raw  = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Ndvi, "Raw", "Raw_" * NameOutput_Ndvi₁[i])
-         Path_Julia_Fvc_raw   = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fvc, "Raw", "Raw_" * NameOutput_Fvc₁[i])
+         Path_Julia_Ndvi_raw = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Ndvi, "Raw", "Raw_" * NameOutput_Ndvi₁[i])
+         Path_Julia_Fvc_raw = joinpath(Path_SentinelBiophysicalRemoveCloud, NamePath_Fvc, "Raw", "Raw_" * NameOutput_Fvc₁[i])
 
          Rasters.write(Path_Julia_Lai_raw, Lai_Raw; ext=".tiff", missingval=NaN, force=true, verbose=true)
          Rasters.write(Path_Julia_Fapar_raw, Fapar_Raw; ext=".tiff", missingval=NaN, force=true, verbose=true)
@@ -583,43 +592,43 @@ function WFLOW_REMOVING_CLOUDS(; 🎏_Lai_CompilePdf, 🎏_Write=true, Dtm, Fapa
       end # if 🎏_Plots
 
       # Cycle
-         Lai_1 = deepcopy(Lai_2)
-         Lai_2 = deepcopy(Lai_3)
-         LaiCloudTrue_2 = deepcopy(LaiCloudTrue_3)
+      Lai_1 = deepcopy(Lai_2)
+      Lai_2 = deepcopy(Lai_3)
+      LaiCloudTrue_2 = deepcopy(LaiCloudTrue_3)
 
-         Fapar_1 = deepcopy(Fapar_2)
-         Fapar_2 = deepcopy(Fapar_3)
-         FaparCloudTrue_2 = deepcopy(FaparCloudTrue_3)
+      Fapar_1 = deepcopy(Fapar_2)
+      Fapar_2 = deepcopy(Fapar_3)
+      FaparCloudTrue_2 = deepcopy(FaparCloudTrue_3)
 
-         Fvc_1 = deepcopy(Fvc_2)
-         Fvc_2 = deepcopy(Fvc_3)
-         FvcCloudTrue_2 = deepcopy(FvcCloudTrue_3)
+      Fvc_1 = deepcopy(Fvc_2)
+      Fvc_2 = deepcopy(Fvc_3)
+      FvcCloudTrue_2 = deepcopy(FvcCloudTrue_3)
 
-         Ndvi_1 = deepcopy(Ndvi_2)
-         Ndvi_2 = deepcopy(Ndvi_3)
-         NdviCloudTrue_2 = deepcopy(NdviCloudTrue_3)
+      Ndvi_1 = deepcopy(Ndvi_2)
+      Ndvi_2 = deepcopy(Ndvi_3)
+      NdviCloudTrue_2 = deepcopy(NdviCloudTrue_3)
 
    end # for iiSentinelData ∈ AllSentinelData
 
    # METADATA
-      Path_Metadata = joinpath(Path_SentinelBiophysicalRemoveCloud, "METADATA", "Metadata_Biophyiscal.csv")
+   Path_Metadata = joinpath(Path_SentinelBiophysicalRemoveCloud, "METADATA", "Metadata_Biophyiscal.csv")
 
-         Header = ["Year", "Month", "Day", "CloudCoverPercent", "NameOutput_Lai", "NameOutput_Fapar", "NameOutput_Ndvi", "NameOutput_Fvc"]
-         CSV.write(Path_Metadata, Tables.table([YearSentinel MonthSentinel DaySentinel floor.(100.0 .* CloudCoverPercent_2) NameOutput_Lai₁ NameOutput_Fapar₁ NameOutput_Ndvi₁ NameOutput_Fvc₁]), writeheader=true, header=Header, bom=true)
+   Header = ["Year", "Month", "Day", "CloudCoverPercent", "NameOutput_Lai", "NameOutput_Fapar", "NameOutput_Ndvi", "NameOutput_Fvc"]
+   CSV.write(Path_Metadata, Tables.table([YearSentinel MonthSentinel DaySentinel floor.(100.0 .* CloudCoverPercent_2) NameOutput_Lai₁ NameOutput_Fapar₁ NameOutput_Ndvi₁ NameOutput_Fvc₁]), writeheader=true, header=Header, bom=true)
 
    # Combining plots into one pdf
-      if 🎏_Lai_CompilePdf
-         Path_Plot = joinpath(Path_SentinelBiophysicalRemoveCloud, "PLOTS")
-         cd(Path_Plot)
-         Folder_List = readdir(Path_Plot)
-         Folder_List = sort(Folder_List)
+   if 🎏_Lai_CompilePdf
+      Path_Plot = joinpath(Path_SentinelBiophysicalRemoveCloud, "PLOTS")
+      cd(Path_Plot)
+      Folder_List = readdir(Path_Plot)
+      Folder_List = sort(Folder_List)
 
-         Path_Output_Pdf = joinpath(Path_SentinelBiophysicalRemoveCloud, "ALL_PLOTS_SENTINEL_" * string(today()) * "_" *string(Dates.hour(now()))
-         * ".pdf")
-         PDFmerger.merge_pdfs(Folder_List, Path_Output_Pdf)
-      end
+      Path_Output_Pdf = joinpath(Path_SentinelBiophysicalRemoveCloud, "ALL_PLOTS_SENTINEL_" * string(today()) * "_" * string(Dates.hour(now()))
+                                                                      * ".pdf")
+      PDFmerger.merge_pdfs(Folder_List, Path_Output_Pdf)
+   end
 
-      printstyled(" ================ FINISHED ===================", color=:red)
+   printstyled(" ================ FINISHED ===================", color=:red)
 
    return nothing
 end  # function WFLOW_REMOVING_CLOUDS()
@@ -763,7 +772,7 @@ function get_access_token(username, password)
 
    status_error = nothing
    try
-      auth_url = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
+      auth_url = "https://identity.dataspace.sentinel.eu/auth/realms/CDSE/protocol/openid-connect/token"
       response = HTTP.post(auth_url, body=data)
       return @pipe String(response.body) |> JSON.parse |> _["access_token"]
    catch e
@@ -866,7 +875,7 @@ function search(satellite::String; product=nothing, dates=nothing, tile=nothing,
       "\$expand" => "Attributes",
       "\$top" => max_results,
       "\$orderby" => "ContentDate/Start asc")
-   url = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products"
+   url = "https://catalogue.dataspace.sentinel.eu/odata/v1/Products"
    response = HTTP.get(url, query=query; require_ssl_verification=require_ssl_verification)
 
    # Process Results
@@ -929,7 +938,7 @@ function get_scene_id(scene)
    push!(filters, nf)
 
    # Prepare Query
-   url = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products"
+   url = "https://catalogue.dataspace.sentinel.eu/odata/v1/Products"
    query = Dict("\$filter" => join(filters, " and "), "\$expand" => "Attributes",)
 
    # Post Query
@@ -960,7 +969,7 @@ function download_scene(scene, dir=pwd(); unzip=false, log_progress=true, access
 
    # Prepare Headers
    access_token = isnothing(access_token) ? get_access_token() : access_token
-   url = "https://zipper.dataspace.copernicus.eu/odata/v1/Products($id)/\$value"
+   url = "https://zipper.dataspace.sentinel.eu/odata/v1/Products($id)/\$value"
    headers = Dict("Authorization" => "Bearer $access_token")
 
    # Download Scene
@@ -1057,5 +1066,5 @@ export Point, BoundingBox, authenticate, get_access_token, search, get_scene_id,
 
 end
 
-end  # module: copernicus
+end  # module: sentinel
 # ............................................................

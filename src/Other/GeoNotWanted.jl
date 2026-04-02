@@ -101,7 +101,7 @@
 				Keys = splitext(Filename_Wflow_Ldd)[1]
 				Ldd_NetCDF = NCDatasets.defVar(NetCDF, Keys, UInt8, ("x","y"), fillvalue=0)
 
-				Ldd_NetCDF .= Array(Ldd_Mask)
+				Ldd_NetCDF .= Array(Ldd)
 
 				Ldd_NetCDF.attrib["units"] = "1-9"
 				Ldd_NetCDF.attrib["comments"] = "Derived from hydromt.flw.d8_from_dem"
@@ -132,7 +132,7 @@
 				Keys = splitext(Filename_Wflow_Slope)[1]
 				Slope_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x","y"), fillvalue=NaN)
 
-				Slope_NetCDF .= Array(Slope_Mask)
+				Slope_NetCDF .= Array(Slope)
 
 				Slope_NetCDF.attrib["units"] = "deg"
 				Slope_NetCDF.attrib["comments"] = "Derived from hydromt"
