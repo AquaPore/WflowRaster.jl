@@ -112,7 +112,7 @@ end  # function: LOOKUPTABLE_2_NETCDF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		FUNCTION : TIFF_2_NETCDF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, LandUse_Header, LandUse_Maps, Latitude, Ldd, Longitude, Metadatas, ObservationPoint, River, River_Header, River_Maps, RiverLength_Mask, RiverSlope, Slope, Soil_Header, Soil_Maps, Subcatchment, Deflatelevel=0, Path_Lai)
+function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, LandUse_Header, LandUse_Maps, Latitude, Ldd, Longitude, Metadatas, ObservationPoint, River, River_Header, River_Maps, RiverLength_Mask, RiverSlope, Slope, Soil_Header, Soil_Maps, Subcatchment, Deflatelevel=0, Lai, Months=12)
 
    # Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
    Path_NetCDF_Full = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
@@ -128,6 +128,7 @@ function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Fi
    # Define the dimension "x" and "y"
    NCDatasets.defDim(NetCDF, "x", Metadatas.N_Width)
    NCDatasets.defDim(NetCDF, "y", Metadatas.N_Height)
+   NCDatasets.defDim(NetCDF, "time", Months)
 
    N_soil_layer__thickness = length(soil_layer__thickness)
    NCDatasets.defDim(NetCDF, "layer", N_soil_layer__thickness + 1)
@@ -173,6 +174,17 @@ function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Fi
    Layers = Int64.(Layers)
    Layer = NCDatasets.defVar(NetCDF, Keys, Layers, ("layer",), fillvalue=-1; deflatelevel=Deflatelevel,)
    Layer.attrib["units"] = "-"
+   println(Keys)
+
+   # == TIME input ==========================================
+   Keys = "time"
+   Time = collect(1:1:12)
+   # for i = 1:12
+   #    append!(Time, i )
+   # end
+   # Time = Int64.(Time)
+   Time_Var = NCDatasets.defVar(NetCDF, Keys, Time, ("time",); deflatelevel=Deflatelevel,)
+   Time_Var.attrib["units"] = "-"
    println(Keys)
 
 
@@ -292,15 +304,16 @@ function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Fi
 
 
    # == LEAF AREA INDEX input ==========================================
-   printstyled("==== LEAF AREA INDEX MAPS ====\n"; color=:green)
+   if 🎏_Lai_2_Wflow
+      printstyled("==== LEAF AREA INDEX MAPS ====\n"; color=:green)
 
-      for iMonth=1:12
-         Path_Lai₁ = joinpath(Path_Lai, "Lai_" * string(iMonth) * ".tiff")
-
-         
+      Keys = "Lai"
+      Lai_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x", "y","time"), fillvalue=NaN; deflatelevel=Deflatelevel,)
+      Lai_NetCDF .= Array(Lai)
+      Lai_NetCDF.attrib["units"] = "0.0-8.0"
+      Lai_NetCDF.attrib["long_name"] = "Lai"
+      println(Keys)
    end
-
-
 
    close(NetCDF)
    return NetCDF, Path_NetCDF_Full

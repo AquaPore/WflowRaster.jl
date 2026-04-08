@@ -119,6 +119,15 @@ Filename_SentinelXml = "Sentinel/SnapXml/BatchProcessing/BatchSnap_Biophysical.x
 Filename_SentinelMetadata = "SentinelMetadata.csv"
 Filename_CatchmentBoundary = "Boundary/CatchmentBoundary3.shp"
 
+# ==== OUTPUT NETCDF Wflow model =====
+Filename_WflowOutput     = "Output_Timoleague.nc"
+Path_Root_Wflow_Output   = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\output"
+Path_Wflow_NetCDF_Output = joinpath(Path_Root_Wflow_Output, "$🎏_CatchmentName", "Output_" * "$🎏_CatchmentName" * ".nc" )
+
+Path_WflowModelOutput = "WflowModelOutput"
+Filename_WflowCatchementAverage_Csv = "CatchementAverage_" * "$🎏_CatchmentName" * ".csv"
+
+
 
 #  ======= PARAMETERS =======
 # Coordinate reference system
