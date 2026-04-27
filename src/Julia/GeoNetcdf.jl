@@ -329,9 +329,9 @@ function TIMESERIES_2_NETCDF(Latitude, Longitude, Metadatas, Subcatchment; Keys_
    Keys_Forcing = [Keys_Precip, Keys_Pet, Keys_Temp]
 
    # Reading dates
-   Datewflow = DATES()
+   Datewflow      = DATES()
    Start_DateTime = Dates.DateTime.(Datewflow.Start_Year, Datewflow.Start_Month, Datewflow.Start_Day, Datewflow.Start_Hour)
-   End_DateTime = Dates.DateTime.(Datewflow.End_Year, Datewflow.End_Month, Datewflow.End_Day, Datewflow.End_Hour)
+   End_DateTime   = Dates.DateTime.(Datewflow.End_Year, Datewflow.End_Month, Datewflow.End_Day, Datewflow.End_Hour)
 
    printstyled("Starting Dates = $Start_DateTime \n"; color=:green)
    printstyled("Ending Dates = $End_DateTime \n"; color=:green)
@@ -342,12 +342,12 @@ function TIMESERIES_2_NETCDF(Latitude, Longitude, Metadatas, Subcatchment; Keys_
 
    Data₀ = CSV.File(Path_Input, header=true)
 
-   Year = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Year))
+   Year  = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Year))
    Month = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Month))
-   Day = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Day))
-   Hour = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Hour))
+   Day   = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Day))
+   Hour  = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Hour))
 
-   Nsplit = (Year[end] - Year[1] + 1) ÷ NsplitYear
+   Nsplit     = (Year[end] - Year[1] + 1) ÷ NsplitYear
 
    Time_Array = Dates.DateTime.(Year, Month, Day, Hour) #  <"standard"> "proleptic_gregorian" calendar
 
@@ -368,19 +368,19 @@ function TIMESERIES_2_NETCDF(Latitude, Longitude, Metadatas, Subcatchment; Keys_
    printstyled("Number of time steps = $Nit \n"; color=:green)
 
    Precip = convert(Vector{Float64}, Tables.getcolumn(Data₀, :precip))
-   Pet = convert(Vector{Float64}, Tables.getcolumn(Data₀, :pet))
-   Temp = convert(Vector{Float64}, Tables.getcolumn(Data₀, :temp))
+   Pet    = convert(Vector{Float64}, Tables.getcolumn(Data₀, :pet))
+   Temp   = convert(Vector{Float64}, Tables.getcolumn(Data₀, :temp))
 
    # Reducing the size of the time series
-   Precip = Precip[True[:]]
-   Pet = Pet[True[:]]
-   Temp = Temp[True[:]]
+   Precip     = Precip[True[:]]
+   Pet        = Pet[True[:]]
+   Temp       = Temp[True[:]]
    Time_Array = Time_Array[True[:]]
 
    # Create a 3D array for the time series
    Precip_Array_iT = fill(NaN, Metadatas.N_Width, Metadatas.N_Height)
-   Pet_Array_iT = fill(NaN, Metadatas.N_Width, Metadatas.N_Height)
-   Temp_Array_iT = fill(NaN, Metadatas.N_Width, Metadatas.N_Height)
+   Pet_Array_iT    = fill(NaN, Metadatas.N_Width, Metadatas.N_Height)
+   Temp_Array_iT   = fill(NaN, Metadatas.N_Width, Metadatas.N_Height)
 
    # Preparing splitting NetCDF files to reduce the size
    SplitArray = zeros(Int64, Nsplit, 2)
@@ -472,8 +472,8 @@ function TIMESERIES_2_NETCDF(Latitude, Longitude, Metadatas, Subcatchment; Keys_
             Threads.@threads for iY = 1:Metadatas.N_Height
                if Subcatchment[iX, iY] == 1
                   Precip_Array_iT[iX, iY] = Precip[iT]
-                  Pet_Array_iT[iX, iY] = Pet[iT]
-                  Temp_Array_iT[iX, iY] = Temp[iT]
+                  Pet_Array_iT[iX, iY]    = Pet[iT]
+                  Temp_Array_iT[iX, iY]   = Temp[iT]
                end # if Subcatchment[iX,iY] == 1
             end # for iY=1:Metadatas.N_Height
          end # for iX=1:Metadatas.N_Width

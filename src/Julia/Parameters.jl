@@ -7,9 +7,9 @@
 
 # DATES
 Base.@kwdef mutable struct DATES
-   Start_Year = 2020::Int64
-   Start_Month = 3::Int64
-   Start_Day = 6::Int64
+   Start_Year = 2010::Int64
+   Start_Month = 1::Int64
+   Start_Day = 1::Int64
    Start_Hour = 0::Int64
 
    End_Year = 2024::Int64
@@ -30,6 +30,7 @@ Forcing_ΔT = "Daily" # <"Hourly"> or <"Daily">
 Path_Root_Data = raw"D:/JOE/MAIN/MODELS/WFLOW/DATA/CATCHMENTS/"
 Path_Root = joinpath(Path_Root_Data, "$🎏_CatchmentName")
 Path_Root_NetCDF = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
+Path_Root_NetCDF_Output = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\output", "$🎏_CatchmentName")
 Path_Root_LookupTable = raw"DATA\Lookuptable"
 
 Path_Forcing₀ = "InputTimeSeries\\TimeSeries_Process"
@@ -52,15 +53,15 @@ Path_Sentinel_WflowLai = "BiophysicalWflow"
 Filename_Input_Forcing = "Forcing_" * Forcing_ΔT * "_" * "$🎏_CatchmentName" * ".csv"
 
 # === Shape file ===
-Filename_Gauge_Shp = "Gauge_Hydro.shp"
-Filename_Input_SoilMap = "SoilMap.tiff" # Obsolete
-Filename_LandUseMap_Shp = "NationalLandCoverMap.gdb"
-Filename_Landuse_Shp = "Landuse.shp"
-Filename_Mask_Shp = "Crop.shp"
+Filename_Gauge_Shp                          = "Gauge_Hydro.shp"
+Filename_Input_SoilMap                      = "SoilMap.tiff" # Obsolete
+Filename_LandUseMap_Shp                     = "NationalLandCoverMap.gdb"
+Filename_Landuse_Shp                        = "Landuse.shp"
+Filename_Mask_Shp                           = "Crop.shp"
 Filename_Output_ObservationEcologyPoint_Shp = "ObservationEcologyPoint.shp"
-Filename_River_Shp = "RiversIreland.shp"
-Filename_Roads_Shp = "Roads.shp"
-Filename_SoilMap_Shp = "Soils//SoilMap.shp"
+Filename_River_Shp                          = "RiversIreland.shp"
+Filename_Roads_Shp                          = "Roads.shp"
+Filename_SoilMap_Shp                        = "Soils//SoilMap.shp"
 
 # === Input from Python ===
 Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tiff"
