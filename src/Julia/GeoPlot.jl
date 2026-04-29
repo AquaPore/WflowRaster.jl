@@ -1,6 +1,6 @@
 
 module geoPlot
-using CairoMakie, Colors, ColorSchemes, GLMakie
+using CairoMakie, Colors, ColorSchemes, GLMakie, Dates
 using NCDatasets
 
 include("Parameters.jl")
@@ -49,6 +49,8 @@ end  # function: HEATMAP
 function HEATMAP_TIME(; Path=Path, NameOutput="temp", Layer=1, 🎏_Reverse=false)
    Output_NCDatasets = NCDatasets.NCDataset(Path)
 
+
+   iTime = 1
    # using GLMakie
    GLMakie.activate!()
    Makie.inline!(false)  # Make sure to inline plots into Documenter output!
@@ -141,27 +143,27 @@ function HEATMAP_LAI(; colormap=:viridis, DaySentinel₁, Fapar_2, Fvc_2, Lai_2,
 
    Axis_Lai_B = Makie.Axis(Fig[1, 1], title="Lai Raw", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
-      Plot_Lai_B = Makie.heatmap!(Axis_Lai_B, Lai_Raw; colormap=Reverse(colormap), colorrange=(0, 10), rasterize=Rasterize)
+   Plot_Lai_B = Makie.heatmap!(Axis_Lai_B, Lai_Raw; colormap=Reverse(colormap), colorrange=(0, 10), rasterize=Rasterize)
 
-      Plot_Lai_C = Makie.heatmap!(Axis_Lai_B, LaiCloudTrue_2; colormap=(:reds, TransperencyCloud), colorrange=(0, 1), rasterize=Rasterize, transparency=true)
+   Plot_Lai_C = Makie.heatmap!(Axis_Lai_B, LaiCloudTrue_2; colormap=(:reds, TransperencyCloud), colorrange=(0, 1), rasterize=Rasterize, transparency=true)
 
    Axis_Lai = Makie.Axis(Fig[1, 2], title="Lai FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
-      Plot_Lai = Makie.heatmap!(Axis_Lai, Lai_2; colormap=Reverse(colormap), colorrange=(0, 10), rasterize=Rasterize)
+   Plot_Lai = Makie.heatmap!(Axis_Lai, Lai_2; colormap=Reverse(colormap), colorrange=(0, 10), rasterize=Rasterize)
 
-      Makie.Colorbar(Fig[1, 3], Plot_Lai, label="Lai", width=15, ticksize=15, tickalign=1, tickwidth=2, height=Relative(0.85))
+   Makie.Colorbar(Fig[1, 3], Plot_Lai, label="Lai", width=15, ticksize=15, tickalign=1, tickwidth=2, height=Relative(0.85))
 
-      Label(Fig[0, :], TitlePage, font=:bold, fontsize=20, color=:navyblue)
+   Label(Fig[0, :], TitlePage, font=:bold, fontsize=20, color=:navyblue)
 
-      # Axis_Lai_C = Makie.Axis(Fig[1, 2], title="LaiCloudTrue", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
+   # Axis_Lai_C = Makie.Axis(Fig[1, 2], title="LaiCloudTrue", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
    #__________________________________________________________________________________________________
 
    Axis_Fapar_B = Makie.Axis(Fig[2, 1], title="Fapar Raw", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
-      Plot_Fapar_B = Makie.heatmap!(Axis_Fapar_B, Fapar_Raw; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+   Plot_Fapar_B = Makie.heatmap!(Axis_Fapar_B, Fapar_Raw; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
-      Plot_Fapar_C = Makie.heatmap!(Axis_Fapar_B, FaparCloudTrue_2;  colormap=(:reds, TransperencyCloud), colorrange=(0, 1), rasterize=Rasterize)
+   Plot_Fapar_C = Makie.heatmap!(Axis_Fapar_B, FaparCloudTrue_2; colormap=(:reds, TransperencyCloud), colorrange=(0, 1), rasterize=Rasterize)
 
    Axis_Fapar = Makie.Axis(Fig[2, 2], title="Fapar FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height, backgroundcolor=:transparent)
 
@@ -173,23 +175,23 @@ function HEATMAP_LAI(; colormap=:viridis, DaySentinel₁, Fapar_2, Fvc_2, Lai_2,
 
    Axis_Fvc_B = Makie.Axis(Fig[3, 1], title="Fvc Raw", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
 
-      Plot_Fvc_B = Makie.heatmap!(Axis_Fvc_B, Fvc_Raw; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+   Plot_Fvc_B = Makie.heatmap!(Axis_Fvc_B, Fvc_Raw; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
-      Plot_Fvc_C = Makie.heatmap!(Axis_Fvc_B, FvcCloudTrue_2; colormap=(:reds, TransperencyCloud), colorrange=(0, 1), rasterize=Rasterize)
+   Plot_Fvc_C = Makie.heatmap!(Axis_Fvc_B, FvcCloudTrue_2; colormap=(:reds, TransperencyCloud), colorrange=(0, 1), rasterize=Rasterize)
 
    Axis_Fvc = Makie.Axis(Fig[3, 2], title="Fvc FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
 
-      Plot_Fvc = Makie.heatmap!(Axis_Fvc, Fvc_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+   Plot_Fvc = Makie.heatmap!(Axis_Fvc, Fvc_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
    #__________________________________________________________________________________________________
 
-   Axis_Ndvi_B = Makie.Axis(Fig[4, 1], title="Ndvi Raw",  xlabel= Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
+   Axis_Ndvi_B = Makie.Axis(Fig[4, 1], title="Ndvi Raw", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
 
-         Plot_Ndvi_B = Makie.heatmap!(Axis_Ndvi_B, Ndvi_Raw; colormap=Reverse(colormap), colorrange=(0, 1),  rasterize=Rasterize)
+   Plot_Ndvi_B = Makie.heatmap!(Axis_Ndvi_B, Ndvi_Raw; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
-   Axis_Ndvi = Makie.Axis(Fig[4, 2], title="Ndvi FreeCloud",  xlabel= Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
+   Axis_Ndvi = Makie.Axis(Fig[4, 2], title="Ndvi FreeCloud", xlabel=Xlabel, ylabel=Ylabel, ylabelsize=ylabelsize, xlabelsize=xlabelSize, xticksize=xticksize, yticksize=yticksize, titlecolor=titlecolor, aspect=DataAspect(), width=Width, height=Height)
 
-   	Plot_Ndvi = Makie.heatmap!(Axis_Ndvi, Ndvi_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
+   Plot_Ndvi = Makie.heatmap!(Axis_Ndvi, Ndvi_2; colormap=Reverse(colormap), colorrange=(0, 1), rasterize=Rasterize)
 
    # 	Makie.Colorbar(Fig[4, 4], Plot_Ndvi, label="Ndvi", width=15, ticksize=15, tickalign=0.5)
 
@@ -207,5 +209,67 @@ function HEATMAP_LAI(; colormap=:viridis, DaySentinel₁, Fapar_2, Fvc_2, Lai_2,
    GC.gc()
    return nothing
 end  # function: PLOT_LAI
+# ------------------------------------------------------------------
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#		FUNCTION : WFLOW_TIME
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function WFLOW_TIME(; Precipitation_Mm, PotentialEvaporation_Mm, InfiltrationSoil_Mm, DatesWflow, Qriver_Wflow_mm, Qriver_Obs_mm, OverlandFlow_Mm, SubsurfaceFlow_Average, 🎏_CatchmentName="Timoleague", 🎏_GLMakie=true, Forcing_ΔT="Daily")
+
+   N_Dates = length(Qriver_Wflow_mm)
+
+   if 🎏_GLMakie
+      GLMakie.activate!()
+   else
+      CairoMakie.activate!(type="svg", pt_per_unit=1)
+   end
+   Fig = Figure(font="Sans", titlesize=20, xlabelsize=20, ylabelsize=20, labelsize=30, fontsize=20)
+
+   # Dates
+   X = 1:N_Dates
+   X_Ticks = 1:30:N_Dates
+   Time_Dates = Date.(DatesWflow[X_Ticks])
+
+   Axis_1 = Axis(Fig[1, 1], yticklabelcolor=:darkgreen, yaxisposition=:left, rightspinecolor=:black, ytickcolor=:black, ylabel=L"$\Delta ET$ $[mm]$", xgridvisible=false, ygridvisible=false, width=800, height=200)
+
+   hidexdecorations!(Axis_1, grid=false, ticks=true, ticklabels=true)
+
+   Plot_Et = lines!(Axis_1, X, PotentialEvaporation_Mm, linewidth=2, color=:darkgreen)
+
+   Axis_1b = Axis(Fig[1, 1], ylabel=L"$\Delta Precipitation$ $[mm]$", , yaxisposition=:right, xgridvisible=false, ygridvisible=false, yticklabelcolor=:darkblue)
+
+   barplot!(Axis_1b, X, Precipitation_Mm, strokecolor=:blue, strokewidth=1.5, color=:cyan)
+   barplot!(Axis_1b, X, InfiltrationSoil_Mm, strokecolor=:brown, strokewidth=1.5, color=:cyan)
+   hidexdecorations!(Axis_1b, grid=false, ticks=true, ticklabels=true)
+
+   Axis_2 = Axis(Fig[2, 1], ylabel=L"$\Delta Qriver_{Wflow}$ $[m^{3}]$", xgridvisible=false, ygridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yticksize=5, width=800, height=300, yticklabelcolor=:red, ylabelcolor=:red)
+
+   Axis_2.xticks = (X_Ticks, string.(Time_Dates))
+
+   lines!(Axis_2, X, Qriver_Wflow_mm, linewidth=2, color=:red, label="Qriver_Wflow")
+
+   Axis_2b = Axis(Fig[2, 1], ylabel=L"$\Delta Qriver_{Obs}$ $[m^{3}]$", xgridvisible=false, ygridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yticksize=5, yaxisposition=:right, yticklabelcolor=:blue, ylabelcolor=:blue)
+
+   hidespines!(Axis_2b)
+   hidexdecorations!(Axis_2b)
+
+   lines!(Axis_2b, X, Qriver_Obs_mm, linewidth=2, color=:blue, label="Qriver_Obs")
+
+   Axis_3 = Axis(Fig[3, 1], ylabel=L"$\Delta Q$ $[m^{3}]$", xgridvisible=false, ygridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yticksize=5, yaxisposition=:right, yticklabelcolor=:blue, ylabelcolor=:blue, width=800, height=300)
+   lines!(Axis_3, X, OverlandFlow_Mm, color=:orange, linewidth=1.5, label="OverlandFlow")
+   lines!(Axis_3, X, SubsurfaceFlow_Average, color=:green, linewidth=1.5, label="SubsurfaceFlow")
+
+   # Legend(Fig[3,1], Axis_1, framecolor=(:grey, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=4 , backgroundcolor=:gray100)
+
+
+   colgap!(Fig.layout, 15)
+   rowgap!(Fig.layout, 15)
+   resize_to_layout!(Fig)
+   trim!(Fig.layout)
+   display(Fig)
+
+   return nothing
+end  # function: WFLOW_TIME
 # ------------------------------------------------------------------
 end # geoPlot

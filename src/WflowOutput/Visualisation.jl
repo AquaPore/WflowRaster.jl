@@ -25,7 +25,6 @@ module visualisation
 			@assert isfile(Path_Qwflow)
 
 
-
 		# Reading Wflow data
          DataWflow  = CSV.File(Path_Qwflow; header=true)
          Time_Wflow = convert(Vector, Tables.getcolumn(DataWflow, :time))
