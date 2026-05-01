@@ -215,52 +215,52 @@ end  # function: PLOT_LAI
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		FUNCTION : WFLOW_TIME
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function WFLOW_TIME(; Precipitation_Mm, PotentialEvaporation_Mm, InfiltrationSoil_Mm, DatesWflow, Qriver_Wflow_mm, Qriver_Obs_mm, OverlandFlow_Mm, SubsurfaceFlow_Average, 🎏_CatchmentName="Timoleague", 🎏_GLMakie=true, Forcing_ΔT="Daily")
+function WFLOW_TIME(; DatesWflow, InfiltrationSoil_Mm, PotentialEvaporation_Mm, Precipitation_Mm, QriverObs_Day_Mm, QriverWflow_Day_Mm, 🎏_CatchmentName="Timoleague", 🎏_GLMakie=false, Forcing_ΔT="Daily")
 
-   N_Dates = length(Qriver_Wflow_mm)
+ylabelsize=15
+
+   N_Dates = length(QriverWflow_Day_Mm)
 
    if 🎏_GLMakie
       GLMakie.activate!()
    else
       CairoMakie.activate!(type="svg", pt_per_unit=1)
    end
-   Fig = Figure(font="Sans", titlesize=20, xlabelsize=20, ylabelsize=20, labelsize=30, fontsize=20)
+   Fig = Figure(font="Sans", titlesize=20, labelsize=30, fontsize=15)
 
    # Dates
    X = 1:N_Dates
    X_Ticks = 1:30:N_Dates
    Time_Dates = Date.(DatesWflow[X_Ticks])
 
-   Axis_1 = Axis(Fig[1, 1], yticklabelcolor=:darkgreen, yaxisposition=:left, rightspinecolor=:black, ytickcolor=:black, ylabel=L"$\Delta ET$ $[mm]$", xgridvisible=false, ygridvisible=false, width=800, height=200)
+   Axis_1 = Axis(Fig[1, 1], yautolimitmargin=(0,0),  height=200, title=🎏_CatchmentName, titlecolor=:navyblue, width=800, xaxisposition = :top, xgridvisible=false, xtickalign=0.9, yaxisposition=:left, ygridvisible=false, ylabel=L"$\Delta Precip$ $[mm \ day^{-1}]$", ylabelcolor=:blue3, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, ytickcolor=:darkblue, yticklabelcolor=:darkblue)
 
-   hidexdecorations!(Axis_1, grid=false, ticks=true, ticklabels=true)
+      hidexdecorations!(Axis_1, grid=false, ticks=false, ticklabels=true)
+      barplot!(Axis_1, X, Precipitation_Mm, strokecolor=:navy, strokewidth=1., color=:blue3, label="Precipitation")
 
-   Plot_Et = lines!(Axis_1, X, PotentialEvaporation_Mm, linewidth=2, color=:darkgreen)
+      barplot!(Axis_1, X, InfiltrationSoil_Mm, strokecolor=:navy, strokewidth=1., color=:chocolate3, label="Infiltration")
 
-   Axis_1b = Axis(Fig[1, 1], ylabel=L"$\Delta Precipitation$ $[mm]$", , yaxisposition=:right, xgridvisible=false, ygridvisible=false, yticklabelcolor=:darkblue)
+      lines!(Axis_1, X, PotentialEvaporation_Mm, linewidth=2.5, color=:darkgreen, label="EvapoTranspiration")
 
-   barplot!(Axis_1b, X, Precipitation_Mm, strokecolor=:blue, strokewidth=1.5, color=:cyan)
-   barplot!(Axis_1b, X, InfiltrationSoil_Mm, strokecolor=:brown, strokewidth=1.5, color=:cyan)
-   hidexdecorations!(Axis_1b, grid=false, ticks=true, ticklabels=true)
+      Legend(Fig[2,1], Axis_1, framecolor=(:gray63, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=3 , backgroundcolor=:gray100)
 
-   Axis_2 = Axis(Fig[2, 1], ylabel=L"$\Delta Qriver_{Wflow}$ $[m^{3}]$", xgridvisible=false, ygridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yticksize=5, width=800, height=300, yticklabelcolor=:red, ylabelcolor=:red)
 
-   Axis_2.xticks = (X_Ticks, string.(Time_Dates))
+   Axis_2 = Axis(Fig[3, 1],  height=250, width=800, xgridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yautolimitmargin=(0,0), ygridvisible=false, ylabel=L"$\Delta Precip$ $[mm \ day^{-1}]$", ylabelcolor=:darkblue, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, yticklabelcolor=:blue3, yticksize=5,
+   xminortickalign=0.95, xminorticks=IntervalsBetween(5), xminorticksvisible=true, xtickalign=0.9, xticklabelcolor=:blue3)
 
-   lines!(Axis_2, X, Qriver_Wflow_mm, linewidth=2, color=:red, label="Qriver_Wflow")
+      Axis_2.xticks = (X_Ticks, string.(Time_Dates))
 
-   Axis_2b = Axis(Fig[2, 1], ylabel=L"$\Delta Qriver_{Obs}$ $[m^{3}]$", xgridvisible=false, ygridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yticksize=5, yaxisposition=:right, yticklabelcolor=:blue, ylabelcolor=:blue)
+      lines!(Axis_2, X, QriverWflow_Day_Mm, linewidth=2, color=:blue2, label=L"$Qriver_{Wflow}$", linestyle=Linestyle([0, 2, 4, 12, 14]))
 
-   hidespines!(Axis_2b)
-   hidexdecorations!(Axis_2b)
+      lines!(Axis_2, X, QriverObs_Day_Mm, linewidth=2, color=:firebrick2, label=L"$Qriver_{Obs}$")
 
-   lines!(Axis_2b, X, Qriver_Obs_mm, linewidth=2, color=:blue, label="Qriver_Obs")
+      Legend(Fig[4,1], Axis_2, framecolor=(:gray63, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=3 , backgroundcolor=:gray100)
 
-   Axis_3 = Axis(Fig[3, 1], ylabel=L"$\Delta Q$ $[m^{3}]$", xgridvisible=false, ygridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yticksize=5, yaxisposition=:right, yticklabelcolor=:blue, ylabelcolor=:blue, width=800, height=300)
-   lines!(Axis_3, X, OverlandFlow_Mm, color=:orange, linewidth=1.5, label="OverlandFlow")
-   lines!(Axis_3, X, SubsurfaceFlow_Average, color=:green, linewidth=1.5, label="SubsurfaceFlow")
+   # Axis_3 = Axis(Fig[3, 1], ylabel=L"$\Delta Q$ $[m^{3}]$", xgridvisible=false, ygridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yticksize=5, yaxisposition=:right, yticklabelcolor=:blue, ylabelcolor=:blue, width=800, height=300)
+   # lines!(Axis_3, X, OverlandFlow_Mm, color=:orange, linewidth=1.5, label="OverlandFlow")
+   # lines!(Axis_3, X, SubsurfaceFlow_Average, color=:green, linewidth=1.5, label="SubsurfaceFlow")
 
-   # Legend(Fig[3,1], Axis_1, framecolor=(:grey, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=4 , backgroundcolor=:gray100)
+
 
 
    colgap!(Fig.layout, 15)
