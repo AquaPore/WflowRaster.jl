@@ -215,9 +215,9 @@ end  # function: PLOT_LAI
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		FUNCTION : WFLOW_TIME
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function WFLOW_TIME(; DatesWflow, InfiltrationSoil_Mm, PotentialEvaporation_Mm, Evapotranspiration_Mm, Precipitation_Mm, QriverObs_Day_Mm, QriverWflow_Day_Mm, SoilLayerWaterUnsatDepth_Aver, Nlayer, 🎏_CatchmentName="Timoleague", 🎏_GLMakie=false, Forcing_ΔT="Daily")
+function WFLOW_TIME(; DatesWflow, InfiltrationSoil_Mm, PotentialEvaporation_Mm, Evapotranspiration_Mm, Precipitation_Mm, QriverObs_Day_Mm, QriverWflow_Day_Mm, θlayer_Aver, Nlayer, OverlandFlow_Mm, SubsurfaceFlow_Mm, 🎏_CatchmentName="Timoleague", 🎏_GLMakie=false, Forcing_ΔT="Daily", 🎏_Plot_θ_2D=true)
 
-ylabelsize=15
+   ylabelsize = 15
 
    N_Dates = length(QriverWflow_Day_Mm)
 
@@ -226,14 +226,17 @@ ylabelsize=15
    else
       CairoMakie.activate!(type="svg", pt_per_unit=1)
    end
-   Fig = Figure(font="Sans", titlesize=20, labelsize=30, fontsize=15)
+   Fig = Figure(font="Sans", titlesize=20, labelsize=30, fontsize=10)
 
    # Dates
    X = 1:N_Dates
    X_Ticks = 1:30:N_Dates
    Time_Dates = Date.(DatesWflow[X_Ticks])
 
-   Axis_1 = Axis(Fig[1, 1], yautolimitmargin=(0,0),  height=200, title=🎏_CatchmentName, titlecolor=:navyblue, width=800, xaxisposition = :top, xgridvisible=false, xtickalign=0.9, yaxisposition=:left, ygridvisible=false, ylabel=L"$\Delta Precip$ $[mm \ day^{-1}]$", ylabelcolor=:blue3, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, ytickcolor=:darkblue, yticklabelcolor=:darkblue)
+   Title = "Wflow output: per unit area of " *🎏_CatchmentName
+
+   # ~~~~~~ Precipitation, Infiltration, PotentialEvaporation, EvapoTranspiration ~~~~~~
+   Axis_1 = Axis(Fig[1, 1], yautolimitmargin=(0, 0), height=200, title=Title, titlecolor=:navyblue, width=800, xaxisposition=:top, xgridvisible=false, xtickalign=0.9, yaxisposition=:left, ygridvisible=false, ylabel=L"$\Delta Precip$ $[mm \ day^{-1}]$", ylabelcolor=:blue3, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, ytickcolor=:darkblue, yticklabelcolor=:darkblue)
 
       hidexdecorations!(Axis_1, grid=false, ticks=false, ticklabels=true)
 
@@ -243,40 +246,66 @@ ylabelsize=15
 
       lines!(Axis_1, X, PotentialEvaporation_Mm, linewidth=2.5, color=:darkgreen, label="PotentialEvaporation")
 
-      lines!(Axis_1, X, Evapotranspiration_Mm, linewidth=2., color=:olivedrab,  linestyle = ( :dash, :dense), label="EvapoTranspiration")
+      lines!(Axis_1, X, Evapotranspiration_Mm, linewidth=2., color=:olivedrab, linestyle=(:dash, :dense), label="EvapoTranspiration")
 
-      Legend(Fig[2,1], Axis_1, framecolor=(:gray63, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=4 , backgroundcolor=:gray100)
+      Legend(Fig[2, 1], Axis_1, framecolor=(:gray63, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=4, backgroundcolor=:gray100)
 
 
-   Axis_3 = Axis(Fig[3, 1],  height=200, width=800, xgridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yautolimitmargin=(0,0), ygridvisible=false, ylabel=L"$\theta$ $[m \ m^{-1}]$", ylabelcolor=:darkblue, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, yticklabelcolor=:blue3, yticksize=5, xminortickalign=0.95, xminorticks=IntervalsBetween(5), xminorticksvisible=true, xtickalign=0.9, xticklabelcolor=:blue3)
+   # ~~~~~~ Effective soil moisture ~~~~~~
+   Axis_2 = Axis(Fig[3, 1], height=150, width=800, xgridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yautolimitmargin=(0, 0), ygridvisible=false, ylabel=L"$\theta$ $[m \ m^{-1}]$", ylabelcolor=:blue3, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, yticklabelcolor=:blue3, yticksize=5, xminortickalign=0.95, xminorticks=IntervalsBetween(5), xminorticksvisible=true, xtickalign=0.9, xticklabelcolor=:blue3)
 
-      hidexdecorations!(Axis_3, grid=false, ticks=false, ticklabels=true)
+      # ylims!(Axis_2, 0.0, 1.0)
+
+      hidexdecorations!(Axis_2, grid=false, ticks=false, ticklabels=true)
 
       for iLayer = 1:Nlayer-1
-         lines!(Axis_3, X, SoilLayerWaterUnsatDepth_Aver[iLayer, :], linewidth=3.0, colormap = (:Spectral_10, 0.85), label="SoilLayer_$iLayer")
+         lines!(Axis_2, X, θlayer_Aver[:, iLayer], linewidth=3.0, colormap=(:Spectral_10, 0.85), label=" θ_ Layer_$iLayer")
       end
 
-      Legend(Fig[4,1], Axis_3, framecolor=(:gray63, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=Nlayer , backgroundcolor=:gray100)
-
-   Axis_4 = Axis(Fig[5, 1],  height=250, width=800, xgridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yautolimitmargin=(0,0), ygridvisible=false, ylabel=L"$\Delta Qriver$ $[mm \ day^{-1}]$", ylabelcolor=:darkblue, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, yticklabelcolor=:blue3, yticksize=5, xminortickalign=0.95, xminorticks=IntervalsBetween(5), xminorticksvisible=true, xtickalign=0.9, xticklabelcolor=:blue3)
-
-      Axis_4.xticks = (X_Ticks, string.(Time_Dates))
-
-      lines!(Axis_4, X, QriverWflow_Day_Mm, linewidth=2, color=:blue2, label=L"$Qriver_{Wflow}$", linestyle=Linestyle([0, 2, 4, 12, 14]))
-
-      lines!(Axis_4, X, QriverObs_Day_Mm, linewidth=2, color=:firebrick2, label=L"$Qriver_{Obs}$")
-
-      Legend(Fig[6,1], Axis_4, framecolor=(:gray63, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=3 , backgroundcolor=:gray100)
-
-   # Axis_3 = Axis(Fig[3, 1], ylabel=L"$\Delta Q$ $[m^{3}]$", xgridvisible=false, ygridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yticksize=5, yaxisposition=:right, yticklabelcolor=:blue, ylabelcolor=:blue, width=800, height=300)
-   # lines!(Axis_3, X, OverlandFlow_Mm, color=:orange, linewidth=1.5, label="OverlandFlow")
-   # lines!(Axis_3, X, SubsurfaceFlow_Average, color=:green, linewidth=1.5, label="SubsurfaceFlow")
+      Legend(Fig[4, 1], Axis_2, framecolor=(:gray63, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=Nlayer, backgroundcolor=:gray100)
 
 
+   if 🎏_Plot_θ_2D
+      Axis_3 = Axis(Fig[5, 1], height=100, width=800, xgridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yautolimitmargin=(0, 0), ygridvisible=false, ylabel=L"Soil \ Layers", ylabelcolor=:darkblue, ylabelsize=ylabelsize, xminortickalign=0.95, xminorticks=IntervalsBetween(5), xminorticksvisible=true, xtickalign=0.9, xticklabelcolor=:blue3, ytickcolor=:darkblue, yticklabelcolor=:darkblue)
+
+         Axis_3.yticks = (1:3, string.(Nlayer-1:-1:1))
+         hidexdecorations!(Axis_3, grid=false, ticks=false, ticklabels=true)
+
+      Plot_θ = heatmap!(Axis_3, X, 1:1:Nlayer-1, reverse(θlayer_Aver[:,1:Nlayer-1],dims=2); colorrange=(0.0, 1.0), colormap=Reverse(:linear_kbc_5_95_c73_n256))
+
+      Colorbar(Fig[5, 2], Plot_θ; label=L"$\theta$ $[m \ m^{-1}]$", width=20, ticks=0:0.25:1, labelsize=10)
+   end
 
 
-   colgap!(Fig.layout, 10)
-   rowgap!(Fig.layout, 10)
+   # ~~~~~~ Overland flow and Subsurface flow ~~~~~~
+   Axis_5 = Axis(Fig[6, 1], height=200, width=800, xgridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yautolimitmargin=(0, 0), ygridvisible=false, ylabel=L"$\Delta QoverlandFlow$ $[mm \ day^{-1}]$", ylabelcolor=:darkblue, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, yticklabelcolor=:blue3, yticksize=5, xminortickalign=0.95, xminorticks=IntervalsBetween(5), xminorticksvisible=true, xtickalign=0.9, xticklabelcolor=:blue3, yaxisposition = :left)
+
+      hidexdecorations!(Axis_5, grid=false, ticks=false, ticklabels=true)
+Correction = 60 *24
+      lines!(Axis_5, X, InfiltrationSoil_Mm, linewidth=2, color=:chocolate3, label=L"$InfiltrationSoil$")
+      lines!(Axis_5, X, OverlandFlow_Mm / Correction, linewidth=2, color=:indigo, label=L"$OverlandFlow$")
+
+   Axis_5b = Axis(Fig[6, 1], xgridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yautolimitmargin=(0, 0), ygridvisible=false, ylabel=L"$\Delta SubsurfaceFlow$ $[mm \ day^{-1}]$", ylabelcolor=:darkgreen, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, yticklabelcolor=:darkgreen, yticksize=5, xminortickalign=0.95, xminorticks=IntervalsBetween(5), xminorticksvisible=true, xtickalign=0.9, xticklabelcolor=:blue3, yaxisposition = :right)
+
+      hidexdecorations!(Axis_5b, grid=false, ticks=false, ticklabels=true)
+
+      lines!(Axis_5b, X, SubsurfaceFlow_Mm, linewidth=2, color=:darkgreen, label=L"$SubsurfaceFlow$")
+
+      Legend(Fig[7, 1], [Axis_5, Axis_5b], framecolor=(:gray63, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=3, backgroundcolor=:gray100)
+
+
+   Axis_6 = Axis(Fig[8, 1], height=250, width=800, xgridvisible=false, xticklabelrotation=π / 2.0, xticksize=5, yautolimitmargin=(0, 0), ygridvisible=false, ylabel=L"$\Delta Qriver$ $[mm \ day^{-1}]$", ylabelcolor=:darkblue, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, yticklabelcolor=:blue3, yticksize=5, xminortickalign=0.95, xminorticks=IntervalsBetween(5), xminorticksvisible=true, xtickalign=0.9, xticklabelcolor=:blue3)
+
+      Axis_6.xticks = (X_Ticks, string.(Time_Dates))
+
+      lines!(Axis_6, X, QriverWflow_Day_Mm, linewidth=2, color=:blue2, label=L"$Qriver_{Wflow}$", linestyle=Linestyle([0, 2, 4, 12, 14]))
+
+      lines!(Axis_6, X, QriverObs_Day_Mm, linewidth=2, color=:firebrick2, label=L"$Qriver_{Obs}$")
+
+      Legend(Fig[9, 1], Axis_6, framecolor=(:gray63, 0.5), labelsize=12, valign=:top, padding=1, tellheight=true, tellwidt=true, nbanks=3, backgroundcolor=:gray100)
+
+   colgap!(Fig.layout, 5)
+   rowgap!(Fig.layout, 15)
    resize_to_layout!(Fig)
    trim!(Fig.layout)
    display(Fig)
