@@ -79,8 +79,7 @@ function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_Averag
    # Summing up every fluxes and calculating average fluxes in mm/day for each time step
    DatesWflow[1] = StartDate
 
-   #   Threads.@threads
-   for iT = 1:Nt
+   Threads.@threads for iT = 1:Nt
 
       for iX = 1:Nx
          for iY = 1:Ny
@@ -182,6 +181,10 @@ function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_Averag
    Header = ["Date", "∑Precipitation[M3]", "∑PotentialEvapotranspiration[M3]", "∑InfiltrationSoil[M3]", "∑Evapotranspiration[M3]", "∑OverlandFlow[M3]", "∑SubsurfaceFlow[M3]", "QriverWflow_Day[M3]", "QriverObs_Day[M3]", "Precipitation[Mm]", "PotentialEvapotranspiration[Mm]", "InfiltrationSoil[Mm]", "Evapotranspiration[Mm]", "OverlandFlow[Mm]", "∑SubsurfaceFlow[Mm]", "QriverWflow[Mm]", "QriverObs[mm]"]
 
    CSV.write(Path_AverageFluxes_Csv, Tables.table([DatesWflow ∑Precipitation_M3 ∑PotentialEvapotranspiration_M3 ∑InfiltrationSoil_M3 ∑Evapotranspiration_M3 ∑OverlandFlow_M3 ∑SubsurfaceFlow_M3 QriverWflow_Day_M3 QriverObs_Day_M3 Precipitation_Mm PotentialEvaporation_Mm InfiltrationSoil_Mm Evapotranspiration_Mm OverlandFlow_Mm SubsurfaceFlow_Mm QriverWflow_Day_Mm QriverObs_Day_Mm]), writeheader=true, header=Header, bom=true)
+
+   # Cleaning up
+      GC.gc()
+      GC.gc()
 
    return ∑PotentialEvapotranspiration_M3, ∑Precipitation_M3, ∑SubsurfaceFlow_M3, DatesWflow, Evapotranspiration_Mm, InfiltrationSoil_Mm, Interception_Mm, OverlandFlow_Mm, PotentialEvaporation_Mm, QriverObs_Day_M3, QriverObs_Day_Mm, QriverWflow_Day_M3, QriverWflow_Day_Mm, SubsurfaceFlow_Mm, θlayer_Aver
 end  # function: WFLOW_PROCESS_OUTPUT()

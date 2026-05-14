@@ -49,7 +49,6 @@ end  # function: HEATMAP
 function HEATMAP_TIME(; Path=Path, NameOutput="temp", Layer=1, 🎏_Reverse=false)
    Output_NCDatasets = NCDatasets.NCDataset(Path)
 
-
    iTime = 1
    # using GLMakie
    GLMakie.activate!()
@@ -237,6 +236,8 @@ function WFLOW_TIME(; DatesWflow, InfiltrationSoil_Mm, PotentialEvaporation_Mm, 
 
    # ~~~~~~ Precipitation, Infiltration, PotentialEvaporation, EvapoTranspiration ~~~~~~
    Axis_1 = Axis(Fig[1, 1], yautolimitmargin=(0, 0), height=200, title=Title, titlecolor=:navyblue, width=800, xaxisposition=:top, xgridvisible=false, xtickalign=0.9, yaxisposition=:left, ygridvisible=false, ylabel=L"$\Delta Precip$ $[mm \ day^{-1}]$", ylabelcolor=:blue3, ylabelsize=ylabelsize, yminortickalign=0.95, yminorticks=IntervalsBetween(5), yminorticksvisible=true, ytickalign=0.9, ytickcolor=:darkblue, yticklabelcolor=:darkblue)
+
+      text!(Axis_1, "(A)", color = :blue3, align=(:left,:top), fontsize=18)
 
       hidexdecorations!(Axis_1, grid=false, ticks=false, ticklabels=true)
 
