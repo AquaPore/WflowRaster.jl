@@ -171,7 +171,7 @@ function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Fi
    for i = 1:N_soil_layer__thickness+1
       append!(Layers, i - 1)
    end
-   Layers = Int64.(Layers)
+   Layers = Int32.(Layers)
    Layer = NCDatasets.defVar(NetCDF, Keys, Layers, ("layer",), fillvalue=-1; deflatelevel=Deflatelevel,)
    Layer.attrib["units"] = "-"
    println(Keys)

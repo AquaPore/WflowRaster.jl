@@ -6,6 +6,7 @@ module wflowModelProcess
 using CSV, Dates, Tables, NCDatasets, Dates, FLoops
 
 include("GeoPlot.jl")
+include("Efficiency.jl")
 
 const M_2_Mm = 1000.0
 const Mm_2_M = 0.001
@@ -18,12 +19,36 @@ Threads.nthreads() = 32
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		FUNCTION : WFLOW_PROCESS_OUTPUT()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_AverageFluxes_Csv, Path_Qobs, Path_Wflow_Csv_Output, Path_Wflow_NetCDF_Output, StartDate, StartDay, StartMonth, StartYear, Precipitation_NetCDF="atmosphere_water__precipitation_volume_flux", PotentialEvapotranspiration_NetCDF="land_surface_water__potential_evaporation_volume_flux", Interception_NetCDF="vegetation_canopy_water__interception_volume_flux", Evapotranspiration_NetCDF="land_surface__evapotranspiration_volume_flux", OverlandFlow_NetCDF="land_surface_water__volume_flow_rate", SoilLayerSoilMoisture_NetCDF="soil_layer_water__volume_fraction", SubsurfaceFlow_NetCDF="subsurface_water__volume_flow_rate", 🎏_Plotting=true, 🎏_CatchmentName, 🎏_Qobs=true, QwflowName)
+```
+Plotting of Wflow output and writting csv file of average fluxes. The function also returns the average fluxes and soil moisture for each layer.
+```
+function WFLOW_PROCESS_OUTPUT(; EndDate,
+   Path_AverageFluxes_Csv,
+   Path_Qobs,
+   Path_Wflow_Csv_Output,
+   Path_Wflow_NetCDF_Output,
+   StartDate,
+   StartDay,
+   StartMonth,
+   StartYear,
+   Precipitation_NetCDF="atmosphere_water__precipitation_volume_flux",
+   PotentialEvapotranspiration_NetCDF="land_surface_water__potential_evaporation_volume_flux",
+   Interception_NetCDF="vegetation_canopy_water__interception_volume_flux",
+   Evapotranspiration_NetCDF="land_surface__evapotranspiration_volume_flux",
+   OverlandFlow_NetCDF="land_surface_water__volume_flow_rate",
+   SoilLayerSoilMoisture_NetCDF="soil_layer_water__volume_fraction",
+   SubsurfaceFlow_NetCDF="subsurface_water__volume_flow_rate",
+   InfiltrationWflow_NetCDF="soil_water__infiltration_volume_flux",
+   OverlandFlow_2_River_NetCDF = "land_surface_water__to_river_volume_flow_rate",
+   🎏_Plotting=true,
+   🎏_CatchmentName,
+   🎏_Qobs=true,
+   QwflowName)
 
    # Reading NetCDF output files
    @assert isfile(joinpath(Path_Wflow_NetCDF_Output))
    println(Path_Wflow_NetCDF_Output)
-   WflowOutput                 = NCDatasets.NCDataset(Path_Wflow_NetCDF_Output)
+   WflowOutput                 = NCDatasets.NCDataset(Path_Wflow_NetCDF_Output, "r", maskingvalue=NaN)
    Precipitation               = Array(WflowOutput[Precipitation_NetCDF])
    PotentialEvapotranspiration = Array(WflowOutput[PotentialEvapotranspiration_NetCDF])
    Interception                = Array(WflowOutput[Interception_NetCDF])
@@ -31,6 +56,18 @@ function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_Averag
    OverlandFlow                = Array(WflowOutput[OverlandFlow_NetCDF])
    θlayer                      = Array(WflowOutput[SoilLayerSoilMoisture_NetCDF])
    SubsurfaceFlow              = Array(WflowOutput[SubsurfaceFlow_NetCDF])
+   InfiltrationWflow           = Array(WflowOutput[InfiltrationWflow_NetCDF])
+   OverlandFlow_2_River        = Array(WflowOutput[OverlandFlow_2_River_NetCDF])
+
+
+   # try
+      Xcoordinate = Array(WflowOutput["x"])
+      Ycoordinate = Array(WflowOutput["y"])
+   # catch
+      # Xcoordinate = Array(WflowOutput["lat"])
+      # Ycoordinate = Array(WflowOutput["lon"])
+   # end
+
    close(WflowOutput)
 
    Nx, Ny, Nt = size(Precipitation)
@@ -55,16 +92,22 @@ function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_Averag
    ∑SubsurfaceFlow_M3              = copy(∑Precipitation_M3)
    SubsurfaceFlow_Mm               = copy(∑Precipitation_M3)
 
+   ∑InfiltrationWflow_M3           = copy(∑Precipitation_M3)
+   InfiltrationWflow_Mm            = copy(∑Precipitation_M3)
+
+   ∑OverlandFlow_2_River_M3        = copy(∑Precipitation_M3)
+   OverlandFlow_2_River_Mm         = copy(∑Precipitation_M3)
+
    Interception_Mm = 0.0
 
-   DatesWflow = fill(Date(StartYear, StartMonth, StartDay), Nt)
+   DatesWflow = fill(Date(StartYear, StartMonth, StartDay),    Nt)
 
    # Counting active cells
    NotMissing = fill(false, Nx, Ny)
    CountCell = Threads.Atomic{Int}(0)
    Threads.@threads for iX = 1:Nx
       Threads.@threads for iY = 1:Ny
-         if Precipitation[iX, iY, 2] !== missing
+         if !isnan(Precipitation[iX, iY, 2])
             Threads.atomic_add!(CountCell, 1) # Safe addition
             NotMissing[iX, iY] = true
          end
@@ -72,29 +115,40 @@ function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_Averag
    end
    CountCell = CountCell[] # convert atomic to regular integer
 
-   CellSize_M2 = Param_ΔX₁ * Param_ΔX₁
+   ΔX = Xcoordinate[3] - Xcoordinate[2]
+   ΔY = Ycoordinate[3] - Ycoordinate[2]
+
+   CellSize_M2 = ΔX * ΔY
+   printstyled("	Grid resolution $CellSize_M2 = $ΔX m x $ΔY m \n", color=:green)
    CatchmentArea = CountCell * CellSize_M2  # m2
    printstyled("	Number of grids = $CountCell , CatchmentSize = $CatchmentArea  m² \n", color=:green)
 
    # Summing up every fluxes and calculating average fluxes in mm/day for each time step
    DatesWflow[1] = StartDate
-
+   Count =0
    Threads.@threads for iT = 1:Nt
-
       for iX = 1:Nx
          for iY = 1:Ny
             if NotMissing[iX, iY]
 
-               ∑Precipitation_M3[iT]               += Precipitation[iX, iY, iT] * Mm_2_M * CellSize_M2
+               ∑Precipitation_M3[iT] += Precipitation[iX, iY, iT] * Mm_2_M * CellSize_M2
                ∑PotentialEvapotranspiration_M3[iT] += PotentialEvapotranspiration[iX, iY, iT] * Mm_2_M * CellSize_M2
-               ∑Interception_M3[iT]                += Interception[iX, iY, iT] * Mm_2_M * CellSize_M2
-               ∑Evapotranspiration_M3[iT]          += Evapotranspiration[iX, iY, iT] * Mm_2_M * CellSize_M2
+               ∑Interception_M3[iT] += Interception[iX, iY, iT] * Mm_2_M * CellSize_M2
+               ∑Evapotranspiration_M3[iT] += Evapotranspiration[iX, iY, iT] * Mm_2_M * CellSize_M2
 
-               ∑OverlandFlow_M3[iT]                += OverlandFlow[iX, iY, iT] * CellSize_M2 / Seconds_2_Days # m3/s to m3/day
-               ∑SubsurfaceFlow_M3[iT]              += SubsurfaceFlow[iX, iY, iT] * CellSize_M2 # m3/day
+               ∑OverlandFlow_M3[iT] += OverlandFlow[iX, iY, iT] * CellSize_M2 / Seconds_2_Days # m3/s to m3/day
+               ∑SubsurfaceFlow_M3[iT] += SubsurfaceFlow[iX, iY, iT] * CellSize_M2 # m3/day
+
+
+               ∑InfiltrationWflow_M3[iT] += InfiltrationWflow[iX, iY, iT] * Mm_2_M * CellSize_M2
 
                for iLayer = 1:Nlayer-1
                   θlayer_Aver[iT, iLayer] += θlayer[iX, iY, iLayer, iT]
+               end
+
+               Count =0
+               if !isnan(OverlandFlow_2_River[iX, iY, iT])
+                  ∑OverlandFlow_2_River_M3[iT] += OverlandFlow_2_River[iX, iY, iT] * CellSize_M2 / Seconds_2_Days # m3/s to m3/day
                end
 
                ∑InfiltrationSoil_M3[iT] = ∑Precipitation_M3[iT] - ∑Interception_M3[iT]
@@ -114,12 +168,19 @@ function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_Averag
       OverlandFlow_Mm[iT]         = ∑OverlandFlow_M3[iT] * M_2_Mm / CatchmentArea
       SubsurfaceFlow_Mm[iT]       = ∑SubsurfaceFlow_M3[iT] * M_2_Mm / CatchmentArea
 
+      InfiltrationWflow_Mm[iT]    = ∑InfiltrationWflow_M3[iT] * M_2_Mm / CatchmentArea
+
+      OverlandFlow_2_River_Mm[iT] = ∑OverlandFlow_2_River_M3[iT] * M_2_Mm / CatchmentArea
+
       for iLayer = 1:Nlayer-1
          θlayer_Aver[iT, iLayer] = θlayer_Aver[iT, iLayer] / CountCell
       end
 
       DatesWflow[iT] += Dates.Day(iT)
    end # for iT=1:Nt
+
+   sum_OverlandFlow_2_River_Mm = sum(OverlandFlow_2_River_Mm)
+   printstyled("    OverlandFlow_2_River_Mm = $sum_OverlandFlow_2_River_Mm \n", color=:green)
 
    InterceptionLost = 100.0 * sum(∑Interception_M3) / sum(∑Precipitation_M3)
    printstyled("	Interception lost = $(floor(InterceptionLost)) %  \n", color=:green)
@@ -130,6 +191,7 @@ function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_Averag
       # Reading climate data
       println(Path_Qobs)
       @assert isfile(Path_Qobs)
+
       Data₀ = CSV.File(Path_Qobs; header=true)
       Year = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Year))
       Month = convert(Vector{Int64}, Tables.getcolumn(Data₀, :Month))
@@ -159,19 +221,26 @@ function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_Averag
    end # if 🎏_Qobs
 
    # ~~~~~~~~~~~~~~~~  READING WFLOW OUTPUT  ~~~~~~~~~~~~~~~~
-   DataWflow          = CSV.File(Path_Wflow_Csv_Output; header=true)
-   Time_Wflow         = convert(Vector, Tables.getcolumn(DataWflow, :time))
-   Qriver_Wflow       = convert(Vector{Float64}, Tables.getcolumn(DataWflow, QwflowName))
+   DataWflow = CSV.File(Path_Wflow_Csv_Output; header=true)
+   Time_Wflow = convert(Vector, Tables.getcolumn(DataWflow, :time))
+   Qriver_Wflow = convert(Vector{Float64}, Tables.getcolumn(DataWflow, QwflowName))
    QriverWflow_Day_M3 = Qriver_Wflow ./ Seconds_2_Days # cumec to m3/day
    QriverWflow_Day_Mm = (QriverWflow_Day_M3 ./ CatchmentArea) .* M_2_Mm # cumec to mm/ m2 / day
 
 
-   # # ~~~~~~~~~~~~~~~~ PLOTTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   if 🎏_Plotting
+   # ~~~~~~~~~~~~~~~~  STATISCIS  ~~~~~~~~~~~~~~~~
 
+   # Calculating Kling-Gupta efficiency (KGE) between observed and simulated river discharge
+   Efficiency_Kge = efficiency.KLING_GUPTA_EFFICIENCY(; Qobs=QriverObs_Day_Mm, Qsim=QriverWflow_Day_Mm)
+   printstyled("	Kling-Gupta efficiency (KGE) between observed and simulated river discharge = $Efficiency_Kge", color=:green)
+
+
+   # # ~~~~~~~~~~~~~~~~ PLOTTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   🎏_Plotting=true
+   if 🎏_Plotting
       printstyled("	Plotting Wflow output... \n", color=:green)
 
-      geoPlot.WFLOW_TIME(; 🎏_CatchmentName, 🎏_GLMakie=false, DatesWflow, Evapotranspiration_Mm, Forcing_ΔT="Daily", InfiltrationSoil_Mm, Nlayer, OverlandFlow_Mm, PotentialEvaporation_Mm, Precipitation_Mm, QriverObs_Day_Mm, QriverWflow_Day_Mm, SubsurfaceFlow_Mm, θlayer_Aver)
+      geoPlot.WFLOW_TIME(; 🎏_CatchmentName, 🎏_GLMakie=false, DatesWflow, Efficiency_Kge, Evapotranspiration_Mm, Forcing_ΔT="Daily", InfiltrationSoil_Mm, InfiltrationWflow_Mm, Nlayer, OverlandFlow_Mm, PotentialEvaporation_Mm, Precipitation_Mm, QriverObs_Day_Mm, QriverWflow_Day_Mm, SubsurfaceFlow_Mm, θlayer_Aver, OverlandFlow_2_River_Mm)
    end
 
    # ~~~~~~~~~~~~~~~~  WRITTING CSV WFLOW OUTPUT  ~~~~~~~~~~~~~~~~
@@ -183,12 +252,16 @@ function WFLOW_PROCESS_OUTPUT(; EndDate, Param_ΔX₁, Param_ΔX₂, Path_Averag
    CSV.write(Path_AverageFluxes_Csv, Tables.table([DatesWflow ∑Precipitation_M3 ∑PotentialEvapotranspiration_M3 ∑InfiltrationSoil_M3 ∑Evapotranspiration_M3 ∑OverlandFlow_M3 ∑SubsurfaceFlow_M3 QriverWflow_Day_M3 QriverObs_Day_M3 Precipitation_Mm PotentialEvaporation_Mm InfiltrationSoil_Mm Evapotranspiration_Mm OverlandFlow_Mm SubsurfaceFlow_Mm QriverWflow_Day_Mm QriverObs_Day_Mm]), writeheader=true, header=Header, bom=true)
 
    # Cleaning up
-      GC.gc()
-      GC.gc()
+   GC.gc()
+   GC.gc()
 
-   return ∑PotentialEvapotranspiration_M3, ∑Precipitation_M3, ∑SubsurfaceFlow_M3, DatesWflow, Evapotranspiration_Mm, InfiltrationSoil_Mm, Interception_Mm, OverlandFlow_Mm, PotentialEvaporation_Mm, QriverObs_Day_M3, QriverObs_Day_Mm, QriverWflow_Day_M3, QriverWflow_Day_Mm, SubsurfaceFlow_Mm, θlayer_Aver
+   return ∑PotentialEvapotranspiration_M3, ∑Precipitation_M3, ∑SubsurfaceFlow_M3, DatesWflow, Efficiency_Kge, Evapotranspiration_Mm, InfiltrationSoil_Mm, Interception_Mm, OverlandFlow_Mm, PotentialEvaporation_Mm, QriverObs_Day_M3, QriverObs_Day_Mm, QriverWflow_Day_M3, QriverWflow_Day_Mm, SubsurfaceFlow_Mm, θlayer_Aver
+
 end  # function: WFLOW_PROCESS_OUTPUT()
 # ------------------------------------------------------------------
 
 end  # module: wflowModelProcess
 # ............................................................
+
+
+
