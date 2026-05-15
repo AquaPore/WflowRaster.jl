@@ -31,15 +31,17 @@ function WFLOW_PROCESS_OUTPUT(; EndDate,
    StartDay,
    StartMonth,
    StartYear,
-   Precipitation_NetCDF="atmosphere_water__precipitation_volume_flux",
-   PotentialEvapotranspiration_NetCDF="land_surface_water__potential_evaporation_volume_flux",
-   Interception_NetCDF="vegetation_canopy_water__interception_volume_flux",
-   Evapotranspiration_NetCDF="land_surface__evapotranspiration_volume_flux",
-   OverlandFlow_NetCDF="land_surface_water__volume_flow_rate",
-   SoilLayerSoilMoisture_NetCDF="soil_layer_water__volume_fraction",
-   SubsurfaceFlow_NetCDF="subsurface_water__volume_flow_rate",
-   InfiltrationWflow_NetCDF="soil_water__infiltration_volume_flux",
-   OverlandFlow_2_River_NetCDF = "land_surface_water__to_river_volume_flow_rate",
+   Evapotranspiration_NetCDF          = "land_surface__evapotranspiration_volume_flux",
+   InfiltrationWflow_NetCDF           = "soil_water__infiltration_volume_flux",
+   Interception_NetCDF                = "vegetation_canopy_water__interception_volume_flux",
+   OverlandDepth_NetCDF               = "land_surface_water__depth",
+   OverlandFlow_2_River_NetCDF        = "land_surface_water__to_river_volume_flow_rate",
+   OverlandFlow_NetCDF                = "land_surface_water__volume_flow_rate",
+   OverlandVolume_NetCDF              = "land_surface_water__volume",
+   PotentialEvapotranspiration_NetCDF = "land_surface_water__potential_evaporation_volume_flux",
+   Precipitation_NetCDF               = "atmosphere_water__precipitation_volume_flux",
+   SoilLayerSoilMoisture_NetCDF       = "soil_layer_water__volume_fraction",
+   SubsurfaceFlow_NetCDF              = "subsurface_water__volume_flow_rate",
    🎏_Plotting=true,
    🎏_CatchmentName,
    🎏_Qobs=true,
@@ -49,15 +51,18 @@ function WFLOW_PROCESS_OUTPUT(; EndDate,
    @assert isfile(joinpath(Path_Wflow_NetCDF_Output))
    println(Path_Wflow_NetCDF_Output)
    WflowOutput                 = NCDatasets.NCDataset(Path_Wflow_NetCDF_Output, "r", maskingvalue=NaN)
-   Precipitation               = Array(WflowOutput[Precipitation_NetCDF])
-   PotentialEvapotranspiration = Array(WflowOutput[PotentialEvapotranspiration_NetCDF])
-   Interception                = Array(WflowOutput[Interception_NetCDF])
-   Evapotranspiration          = Array(WflowOutput[Evapotranspiration_NetCDF])
-   OverlandFlow                = Array(WflowOutput[OverlandFlow_NetCDF])
-   θlayer                      = Array(WflowOutput[SoilLayerSoilMoisture_NetCDF])
-   SubsurfaceFlow              = Array(WflowOutput[SubsurfaceFlow_NetCDF])
-   InfiltrationWflow           = Array(WflowOutput[InfiltrationWflow_NetCDF])
-   OverlandFlow_2_River        = Array(WflowOutput[OverlandFlow_2_River_NetCDF])
+
+   Precipitation               = Array(WflowOutput[Precipitation_NetCDF]) # [mm Δt⁻¹]
+   PotentialEvapotranspiration = Array(WflowOutput[PotentialEvapotranspiration_NetCDF]) # [mm Δt⁻¹]
+   Interception                = Array(WflowOutput[Interception_NetCDF]) # [mm Δt⁻¹]
+   Evapotranspiration          = Array(WflowOutput[Evapotranspiration_NetCDF]) # [mm Δt⁻¹]
+   OverlandFlow                = Array(WflowOutput[OverlandFlow_NetCDF])  # [m³ s⁻¹]
+   SubsurfaceFlow              = Array(WflowOutput[SubsurfaceFlow_NetCDF]) # [m³ day⁻¹]
+   θlayer                      = Array(WflowOutput[SoilLayerSoilMoisture_NetCDF]) # [m³ m⁻³]
+   InfiltrationWflow           = Array(WflowOutput[InfiltrationWflow_NetCDF]) # [mm Δt⁻¹]
+   OverlandFlow_2_River        = Array(WflowOutput[OverlandFlow_2_River_NetCDF]) # [m³ s⁻¹]
+   OverlandVolume              = Array(WflowOutput[OverlandVolume_NetCDF]) # [m³]
+   OverlandDepth               = Array(WflowOutput[OverlandDepth_NetCDF]) # [m]
 
 
    # try
@@ -166,11 +171,12 @@ function WFLOW_PROCESS_OUTPUT(; EndDate,
       InfiltrationSoil_Mm[iT]     = Precipitation_Mm[iT] - Interception_Mm
 
       OverlandFlow_Mm[iT]         = ∑OverlandFlow_M3[iT] * M_2_Mm / CatchmentArea
+      OverlandFlow_2_River_Mm[iT] = ∑OverlandFlow_2_River_M3[iT] * M_2_Mm / CatchmentArea
+
       SubsurfaceFlow_Mm[iT]       = ∑SubsurfaceFlow_M3[iT] * M_2_Mm / CatchmentArea
 
       InfiltrationWflow_Mm[iT]    = ∑InfiltrationWflow_M3[iT] * M_2_Mm / CatchmentArea
 
-      OverlandFlow_2_River_Mm[iT] = ∑OverlandFlow_2_River_M3[iT] * M_2_Mm / CatchmentArea
 
       for iLayer = 1:Nlayer-1
          θlayer_Aver[iT, iLayer] = θlayer_Aver[iT, iLayer] / CountCell
