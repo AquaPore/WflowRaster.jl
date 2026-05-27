@@ -155,6 +155,8 @@ function WFLOW_PROCESS_OUTPUT(; EndDate,
          for iY = 1:Ny
             if NotMissing[iX, iY]
 
+               PathwayLength_SurfaceFlow = OverlandVolume[iX, iY, iT] / (OverlandDepth[iX, iY, iT]) # m2
+\
                ∑Precipitation_M3[iT]                  += Precipitation[iX, iY, iT] * Mm_2_M * CellSize_M2
                ∑PotentialEvapotranspiration_M3[iT]    += PotentialEvapotranspiration[iX, iY, iT] * Mm_2_M * CellSize_M2
                ∑Interception_M3[iT]                   += Interception[iX, iY, iT] * Mm_2_M * CellSize_M2
@@ -182,7 +184,9 @@ function WFLOW_PROCESS_OUTPUT(; EndDate,
                if iT ≥ 2
                   ΔT =1.0 # day
                   # ∑OverlandFlow_Model_M3[iT,1] += (OverlandDepth[iX, iY, iT] - OverlandDepth[iX, iY, iT-1]) * CellSize_M2
-                  ∑OverlandFlow_Model_M3[iT,1] += (OverlandVolume[iX, iY, iT] - OverlandVolume[iX, iY, iT-1])
+                  # ∑OverlandFlow_Model_M3[iT,1] += (OverlandVolume[iX, iY, iT] - OverlandVolume[iX, iY, iT-1])
+
+                  ∑OverlandFlow_Model_M3[iT,1] += (OverlandDepth[iX, iY, iT] - OverlandDepth[iX, iY, iT-1]) * CellSize_M2 / ΔT # m3/day
 
                   ∑OverlandFlow_Model_M3[iT,2] += ((OverlandFlowInflow[iX, iY, iT] + Inwater[iX, iY, iT]) - OverlandFlow[iX, iY, iT] ) * Seconds_2_Days
                end
