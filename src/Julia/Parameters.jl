@@ -53,24 +53,24 @@ Path_Sentinel_WflowLai = "BiophysicalWflow"
 Filename_Input_Forcing = "Forcing_" * Forcing_ΔT * "_" * "$🎏_CatchmentName" * ".csv"
 
 # === Shape file ===
-Filename_Gauge_Shp                          = "Gauge_Hydro.shp"
-Filename_Input_SoilMap                      = "SoilMap.tiff" # Obsolete
-Filename_LandUseMap_Shp                     = "NationalLandCoverMap.gdb"
-Filename_Landuse_Shp                        = "Landuse.shp"
-Filename_Mask_Shp                           = "Crop.shp"
+Filename_Gauge_Shp = "Gauge_Hydro.shp"
+Filename_Input_SoilMap = "SoilMap.tiff" # Obsolete
+Filename_LandUseMap_Shp = "NationalLandCoverMap.gdb"
+Filename_Landuse_Shp = "Landuse.shp"
+Filename_Mask_Shp = "Crop.shp"
 Filename_Output_ObservationEcologyPoint_Shp = "ObservationEcologyPoint.shp"
-Filename_River_Shp                          = "RiversIreland.shp"
-Filename_Roads_Shp                          = "Roads.shp"
-Filename_SoilMap_Shp                        = "Soils//SoilMap.shp"
+Filename_River_Shp = "RiversIreland.shp"
+Filename_Roads_Shp = "Roads.shp"
+Filename_SoilMap_Shp = "Soils//SoilMap.shp"
 
 # === Input from Python ===
-Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tiff"
-Filename_Python_Dtm2Rivers = "Dtm2Rivers.tiff"
-Filename_Python_DtmCorrected = "DtmCorrected.tiff"
-Filename_Python_Ldd = "Ldd.tiff"
-Filename_Python_RiverLength = "RiverLength.tiff"
-Filename_Python_RiverOrder = "RiverOrder.tiff"
-Filename_Python_Slope = "Slope.tiff"
+Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tif"
+Filename_Python_Dtm2Rivers = "Dtm2Rivers.tif"
+Filename_Python_DtmCorrected = "DtmCorrected.tif"
+Filename_Python_Ldd = "Ldd.tif"
+Filename_Python_RiverLength = "RiverLength.tif"
+Filename_Python_StreamOrder = "StreamOrder.tif"
+Filename_Python_Slope = "Slope.tif"
 
 # === Input csv ===
 Filename_Csv_ObservationPoint = "ObservationPoint.csv"
@@ -88,7 +88,7 @@ Filename_Julia_Dtm = "Ireland_DEM_Croped.tiff"
 Filename_Julia_DtmCorrected = "DEM_Corrected.tiff"
 Filename_Julia_Gauge = "Gauge.tiff"
 Filename_Julia_Pits = "Pits.tiff"
-Filename_Julia_RiverOrder = "RiverOrder.tiff"
+Filename_Julia_StreamOrder = "StreamOrder.tiff"
 
 # === Output wflow ===
 Filename_Dtm = "Dtm.tiff"
@@ -121,9 +121,9 @@ Filename_SentinelMetadata = "SentinelMetadata.csv"
 Filename_CatchmentBoundary = "Boundary/CatchmentBoundary3.shp"
 
 # ==== OUTPUT NETCDF Wflow model =====
-Filename_WflowOutput     = "Output_Timoleague.nc"
-Path_Root_Wflow_Output   = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\output"
-Path_Wflow_NetCDF_Output = joinpath(Path_Root_Wflow_Output, "$🎏_CatchmentName", "Output_" * "$🎏_CatchmentName" * ".nc" )
+Filename_WflowOutput = "Output_Timoleague.nc"
+Path_Root_Wflow_Output = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\output"
+Path_Wflow_NetCDF_Output = joinpath(Path_Root_Wflow_Output, "$🎏_CatchmentName", "Output_" * "$🎏_CatchmentName" * ".nc")
 
 Path_WflowModelOutput = "WflowModelOutput"
 Filename_WflowCatchementAverage_Csv = "CatchementAverage_" * "$🎏_CatchmentName" * ".csv"
@@ -407,7 +407,7 @@ elseif 🎏_CatchmentName == "Timoleague"
    # Dtm derived from Mosaic
    🎏_DtmMosaic = false
    🎏_DtmFromMosaic = false # Gis stored
-   🎏_MaskFromDtm = true
+   🎏_MaskFromDtm = false
 
    @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
 
