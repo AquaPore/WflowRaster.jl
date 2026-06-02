@@ -458,6 +458,7 @@ elseif 🎏_CatchmentName == "Timoleague"
    Param_RiverWidth = 1.7::Float64 # [m]
    Param_RiverDepth = 0.17::Float64  # must be an integer [m]
    Param_RiverManning = 0.033::Float64
+   Param_StrahlerOrderThreshold = 6.0 # [-] Minimum Strahler order to be considered as river in the river map. This is used to remove small streams that are not relevant for the model. The value of 1 means that only first-order streams are considered as rivers. If set to 0, all streams are considered as rivers. If set to 2, only second-order and higher streams are considered as rivers.
 
    # GAUGE COORDINATES
    # Param_GaugeCoordinate =[146702.538,42182.544]
