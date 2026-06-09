@@ -21,10 +21,10 @@ end # struct METADATA
 Forcing_ΔT = "Daily" # <"Hourly"> or <"Daily">
 
 # Flags: plots
-🎏_Plots = true
-🎏_Plot_TimeSeries = false
-🎏_Plot_FlowAccumulation = true
-🎏_Plot_NetCDF = true
+   🎏_Plots = true
+   🎏_Plot_TimeSeries = false
+   🎏_Plot_FlowAccumulation = false
+   🎏_Plot_NetCDF = true
 
 # ======= PATHS =======
 Path_Root_Data = raw"D:/JOE/MAIN/MODELS/WFLOW/DATA/CATCHMENTS/"
@@ -38,7 +38,6 @@ Path_Forcing = joinpath(Path_Forcing₀, Forcing_ΔT)
 Path_Gis = "InputGis"
 Path_Julia = "OutputJulia"
 Path_Lookuptable = "LookupTable"
-Path_NetCDF = "OutputNetCDF"
 Path_ObservationPoint = "InputObservationPoint"
 Path_Python = "OutputPython"
 Path_River = "RIVERS\\SHAPEFILE"
@@ -95,7 +94,7 @@ Filename_Dtm = "Dtm.tiff"
 Filename_Gauge = "Gauges_grdc.tiff"
 Filename_Ldd = "Ldd.tiff"
 Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
-Filename_RiverLength = "RiverLength.tiff"
+Filename_RiverLength = "RiverLength.tif"
 Filename_RiverSlope = "RiverSlope.tiff"
 Filename_Rivers = "River.tiff"
 Filename_Slope = "Slope.tiff"
@@ -128,8 +127,6 @@ Path_Wflow_NetCDF_Output = joinpath(Path_Root_Wflow_Output, "$🎏_CatchmentName
 Path_WflowModelOutput = "WflowModelOutput"
 Filename_WflowCatchementAverage_Csv = "CatchementAverage_" * "$🎏_CatchmentName" * ".csv"
 
-
-
 #  ======= PARAMETERS =======
 # Coordinate reference system
 Param_Crs = 29902    # [-] This is the default projection TM65 / Irish Grid
@@ -138,266 +135,22 @@ Param_Crs = 29902    # [-] This is the default projection TM65 / Irish Grid
 #                 Ballycanew
 # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
 if 🎏_CatchmentName == "Ballycanew"
-   # Flags: processing inputs
-   # Dtm derived from Mosaic
-   🎏_DtmMosaic = false
-   🎏_DtmFromMosaic = false # Gis stored
-   🎏_MaskFromDtm = false
-
-   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
-
-   # Flags: Options
-   🎏_Fix_Cyclic = false # obsolete
-   🎏_RiverFromDtm = true
-
-   # Flags: outputs of interest
-   🎏_ImpermeableMap = false
-
-   # Flags: LookupTables
-   🎏_SoilMap = true
-   🎏_LandUseMap = true
-
-   # Flags: NetCDF
-   🎏_NetCDF = true
-   🎏_Forcing_2_NetCDF = true
-
-   # ======= PATHS =======
-   Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
-
-   # === Raster input file ===
-   Filename_Input_Dtm = "Ballycanew_DTM_5m.tif"
-
-   # Resampling method of DEM in 2 steps:
-   Param_ResampleMethod₁ = :min
-   Param_ΔX₁ = 5 # [m] Gridded spatial resolution
-   Param_ResampleMethod₂ = :cubicspline
-   Param_ΔX₂ = 5 # [m] Gridded spatial resolution should be a multiple of Param_ΔX₁
-
-   # RIVER PARAMETERS
-   Param_RiverWidth = 5.0::Float64 # [m]
-   Param_RiverDepth = 5.0::Float64  # must be an integer [m]
-
-   # GAUGE COORDINATES=
-   Param_GaugeCoordinate = [314165.67568, 153248.90881]
-
-   # SOILS PARAMETERS
-   Layer_Soil = :Drainage_C
-   soil_layer__thickness = [100, 300, 800]
-
-   # LANDUSE MAPS
-   Layer_LandUse = :CROP_00
 
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    #                 Castledockerell
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
 elseif 🎏_CatchmentName == "Castledockerell"
-   # Flags: processing inputs
-   # Dtm derived from Mosaic
-   🎏_DtmMosaic = false
-   🎏_DtmFromMosaic = false # Gis stored
-   🎏_MaskFromDtm = false
 
-   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
-
-   # Flags: Options
-   🎏_Fix_Cyclic = false # obsolete
-   🎏_RiverFromDtm = true
-
-   # Flags: outputs of interest
-   🎏_ImpermeableMap = false
-
-   # Flags: LookupTables
-   🎏_SoilMap = true
-   🎏_LandUseMap = true
-
-   # Flags: NetCDF
-   🎏_NetCDF = true
-   🎏_Forcing_2_NetCDF = false
-
-   # ======= PATHS =======
-   Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
-
-   # === Raster input file ===
-   Filename_Input_Dtm = "Castledockerell_DTM_5m.tif"
-
-   # Resampling method of DEM in 2 steps:
-   Param_ResampleMethod₁ = :min
-   Param_ΔX₁ = 5 # [m] Gridded spatial resolution
-   Param_ResampleMethod₂ = :cubicspline
-   Param_ΔX₂ = 5 # [m] Gridded spatial resolution should be a multiple of Param_ΔX₁
-
-   # RIVER PARAMETERS
-   Param_RiverWidth = 5.0::Float64 # [m]
-   Param_RiverDepth = 5.0::Float64  # must be an integer [m]
-
-   # GAUGE COORDINATES=
-   Param_GaugeCoordinate = [296106.903, 147242.896]
-
-   # SOILS PARAMETERS
-   Layer_Soil = :Drainage_C
-   soil_layer__thickness = [100, 300, 800]
-
-   # LANDUSE MAPS
-   Layer_LandUse = :CROP_00
-
-   # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
-   #                 Corduff
-   # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
-elseif 🎏_CatchmentName == "Corduff"
-   # Flags: processing inputs
-   # Dtm derived from Mosaic
-   🎏_DtmMosaic = false
-   🎏_DtmFromMosaic = false # Gis stored
-   🎏_MaskFromDtm = false
-
-   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
-
-   # Flags: Options
-   🎏_Fix_Cyclic = false # obsolete
-   🎏_RiverFromDtm = true
-
-   # Flags: outputs of interest
-   🎏_ImpermeableMap = false
-
-   # Flags: LookupTables
-   🎏_SoilMap = true
-   🎏_LandUseMap = true
-
-   # Flags: NetCDF
-   🎏_NetCDF = true
-   🎏_Forcing_2_NetCDF = true
-
-   # ======= PATHS =======
-   Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
-
-   # === Raster input file ===
-   Filename_Input_Dtm = "Corduff_DTM_5m.tif"
-
-   # Resampling method of DEM in 2 steps:
-   Param_ResampleMethod₁ = :min
-   Param_ΔX₁ = 5 # [m] Gridded spatial resolution
-   Param_ResampleMethod₂ = :cubicspline
-   Param_ΔX₂ = 5 # [m] Gridded spatial resolution should be a multiple of Param_ΔX₁
-
-   # RIVER PARAMETERS
-   Param_RiverWidth = 5.0::Float64 # [m]
-   Param_RiverDepth = 5.0::Float64  # must be an integer [m]
-
-   # GAUGE COORDINATES=
-   Param_GaugeCoordinate = [275322.532, 309582.511]
-
-   # SOILS PARAMETERS
-   Layer_Soil = :Drainage_C
-   soil_layer__thickness = [100, 300, 800]
-
-   # LANDUSE MAPS
-   Layer_LandUse = :CROP_00
 
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    #                 Cregduff
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
 elseif 🎏_CatchmentName == "Cregduff"
-   # Flags: processing inputs
-   # Dtm derived from Mosaic
-   🎏_DtmMosaic = false
-   🎏_DtmFromMosaic = false # Gis stored
-   🎏_MaskFromDtm = false
-
-   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
-
-   # Flags: Options
-   🎏_Fix_Cyclic = false # obsolete
-   🎏_RiverFromDtm = true
-
-   # Flags: outputs of interest
-   🎏_ImpermeableMap = false
-
-   # Flags: LookupTables
-   🎏_SoilMap = true
-   🎏_LandUseMap = true
-
-   # Flags: NetCDF
-   🎏_NetCDF = true
-   🎏_Forcing_2_NetCDF = true
-
-   # ======= PATHS =======
-   Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
-
-   # === Raster input file ===
-   Filename_Input_Dtm = "Cregduff_DTM_5m.tif"
-
-   # Resampling method of DEM in 2 steps:
-   Param_ResampleMethod₁ = :min
-   Param_ΔX₁ = 5 # [m] Gridded spatial resolution
-   Param_ResampleMethod₂ = :cubicspline
-   Param_ΔX₂ = 5 # [m] Gridded spatial resolution should be a multiple of Param_ΔX₁
-
-   # RIVER PARAMETERS
-   Param_RiverWidth = 5.0::Float64 # [m]
-   Param_RiverDepth = 5.0::Float64  # must be an integer [m]
-
-   # GAUGE COORDINATES=
-   Param_GaugeCoordinate = [122323.408, 263251.260]
-
-   # SOILS PARAMETERS
-   Layer_Soil = :Drainage_C
-   soil_layer__thickness = [100, 300, 800]
-
-   # LANDUSE MAPS
-   Layer_LandUse = :CROP_00
 
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    #                 Dunleer
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
 elseif 🎏_CatchmentName == "Dunleer"
-   # Flags: processing inputs
-   # Dtm derived from Mosaic
-   🎏_DtmMosaic = false
-   🎏_DtmFromMosaic = false # Gis stored
-   🎏_MaskFromDtm = false
-
-   @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
-
-   # Flags: Options
-   🎏_Fix_Cyclic = false # obsolete
-   🎏_RiverFromDtm = true
-
-   # Flags: outputs of interest
-   🎏_ImpermeableMap = false
-
-   # Flags: LookupTables
-   🎏_SoilMap = true
-   🎏_LandUseMap = true
-
-   # Flags: NetCDF
-   🎏_NetCDF = true
-   🎏_Forcing_2_NetCDF = true
-
-   # ======= PATHS =======
-   Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
-
-   # === Raster input file ===
-   Filename_Input_Dtm = "Dunleer_DTM_5m.tif"
-
-   # Resampling method of DEM in 2 steps:
-   Param_ResampleMethod₁ = :min
-   Param_ΔX₁ = 5 # [m] Gridded spatial resolution
-   Param_ResampleMethod₂ = :cubicspline
-   Param_ΔX₂ = 5 # [m] Gridded spatial resolution should be a multiple of Param_ΔX₁
-
-   # RIVER PARAMETERS
-   Param_RiverWidth = 5.0::Float64 # [m]
-   Param_RiverDepth = 5.0::Float64  # must be an integer [m]
-
-   # GAUGE COORDINATES=
-   Param_GaugeCoordinate = [304378.946, 288471.125]
-
-   # SOILS PARAMETERS
-   Layer_Soil = :Drainage_C
-   soil_layer__thickness = [100, 300, 800]
-
-   # LANDUSE MAPS
-   Layer_LandUse = :CROP_00
 
    # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
    #                 Timoleague
@@ -418,11 +171,12 @@ elseif 🎏_CatchmentName == "Timoleague"
    CopernicusDate_Start = (2023, 1, 1)
    CopernicusDate_End = (2026, 03, 25)
 
-   # Deriving LAI from SNAP
+   # Deriving LAI from Sentinel data
    🎏_SentinelDataWeb = false
    🎏_LaiFromSnap = false
-   🎏_Lai_2_Wflow = true
+   🎏_Lai_2_Wflow = false
    🎏_Lai_CompilePdf = true
+   🎏_Lai_Select = true
 
    # Flags: Options
    🎏_Fix_Cyclic = false # obsolete
@@ -438,7 +192,7 @@ elseif 🎏_CatchmentName == "Timoleague"
 
    # Flags: NetCDF
    🎏_NetCDF = true
-   🎏_Forcing_2_NetCDF = true
+   🎏_Forcing_2_NetCDF = false
 
    # Flags: Potential Evapotranspiration
 
@@ -455,10 +209,10 @@ elseif 🎏_CatchmentName == "Timoleague"
    Param_ΔX₂ = -1 # [m]  if >0 then resampling, Gridded spatial resolution should be a multiple of Param_ΔX₁
 
    # RIVER PARAMETERS
-   Param_RiverWidth = 1.7::Float64 # [m]
-   Param_RiverDepth = 0.17::Float64  # must be an integer [m]
-   Param_RiverManning = 0.033::Float64
-   Param_StrahlerOrderThreshold = 6.0 # [-] Minimum Strahler order to be considered as river in the river map. This is used to remove small streams that are not relevant for the model. The value of 1 means that only first-order streams are considered as rivers. If set to 0, all streams are considered as rivers. If set to 2, only second-order and higher streams are considered as rivers.
+   # Param_RiverWidth = 1.7::Float64 # [m]
+   # Param_RiverDepth = 0.17::Float64  # must be an integer [m]
+   # Param_RiverManning = 0.033::Float64
+   Param_StrahlerOrderThreshold = 7 # [-] Minimum Strahler order to be considered as river in the river map. This is used to remove small streams that are not relevant for the model. The value of 1 means that only first-order streams are considered as rivers. If set to 0, all streams are considered as rivers. If set to 2, only second-order and higher streams are considered as rivers.
 
    # GAUGE COORDINATES
    # Param_GaugeCoordinate =[146702.538,42182.544]

@@ -12,7 +12,7 @@ module geoLookuptable
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	`""" boundary: for polygons, include pixels; <:center>: inside the polygon;
 			polygon <:touches> the pixel, completely <:inside> the polygon"""`
-		function LOOKUPTABLE_2_MAPS(;Dtm, Latitude, Longitude, ShpLayer, Metadatas, Param_Crs, Path_Input_Map, Path_Lookup, Path_Root, Subcatchment, TitleMap, ΔX, 🎏_Plots, 🎏_Progress=false, Boundary=:touches, Colormap=:plasma, Missingval=NaN, N_Layer=4)
+function LOOKUPTABLE_2_MAPS(;Latitude, Longitude, ShpLayer, Metadatas, Param_Crs, Path_Input_Map, Path_Lookup, Path_Root, Subcatchment, TitleMap, ΔX, 🎏_Plots, 🎏_Progress=false, Boundary=:touches, Colormap=:plasma, Missingval=NaN, N_Layer=4)
 
 			# Is the map a shapefile?
 				if split(Path_Input_Map, ".")[end] == "shp" || split(Path_Input_Map, ".")[end] == "gdb"
@@ -106,7 +106,7 @@ module geoLookuptable
 							end
 
 							# Rasterizing
-								Map = Rasters.rasterize(last, MapGeoDataFrames; fill=:Output, res=ΔX, to=Dtm, missingval=Missingval, crs=Param_Crs, boundary=Boundary, shape=:polygon, progress=🎏_Progress, verbose=false)
+								Map = Rasters.rasterize(last, MapGeoDataFrames; fill=:Output, res=ΔX, to=Subcatchment, missingval=Missingval, crs=Param_Crs, boundary=Boundary, shape=:polygon, progress=🎏_Progress, verbose=false)
 
 							# Masking
 								Map = geoRaster.MASK(;Param_Crs=Metadatas.Crs_GeoFormat, Input=Map, Latitude, Longitude, Mask=Subcatchment, Missing=NaN)

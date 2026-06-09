@@ -266,7 +266,7 @@ module geoRaster
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	#		FUNCTION : POINT_2_RASTER
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Dtm, Metadatas, Param_ΔX, Longitude, Latitude, River=[], 🎏_Method_Index ="Rasters", 🎏_PointOnRiver =false)
+		function POINTS_2_RASTER(;PathInput, PathOutputShp, PathOutputRaster, EPSG_Output=29902, Metadatas, Param_ΔX, Longitude, Latitude, River=[], 🎏_Method_Index ="Rasters", 🎏_PointOnRiver =false)
 
 		   # READ DATA
             Data        = CSV.File(PathInput, header=true)
@@ -283,7 +283,7 @@ module geoRaster
 
 				N = length(Longitude_X)
 
-			# CONVERT TO SHAPEFILE
+			# CONVERT TO SHAPEFILE for testing
 				Points = GeoDataFrames.GeoInterface.Point.(Longitude_X, Latitude_Y; crs=GeoDataFrames.EPSG(Epsg[1]))
 				Df = DataFrames.DataFrame(Coordinates=Points, Site=Site)
 				Df = GeoDataFrames.metadata!(Df, "GEOINTERFACE:geometrycolumns", (:Coordinates,); style=:note) # required because of the custom geometry column nam

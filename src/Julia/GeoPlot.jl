@@ -22,11 +22,11 @@ function HEATMAP(; 🎏_Colorbar=true, Input, Label="", Title, Xlabel=L"$Latitud
    Ncategories = 1
 
    if isnan(MinValue)
-      MinValue = minimum(X for X ∈ Input if !isnan(X) && !ismissing(X))
+      MinValue = minimum(X for X ∈ Input if !ismissing(X) && !isnan(X))
       #  MinValue = minimum(skipmissing(Input))
    end
    if isnan(MaxValue)
-      MaxValue = maximum(X for X ∈ Input if !isnan(X) && !ismissing(X))
+      MaxValue = maximum(X for X ∈ Input if !ismissing(X) && !isnan(X))
       #  MaxValue = maximum(skipmissing(Input))
    end
    Ncategories = Int64(floor(MaxValue - MinValue) + 1)
@@ -36,7 +36,7 @@ function HEATMAP(; 🎏_Colorbar=true, Input, Label="", Title, Xlabel=L"$Latitud
       Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=Reverse(cgrad(colormap, 12, categorical=Categorical)), colorrange=(MinValue, MaxValue))
    else
       Map_100 = CairoMakie.heatmap!(Axis_100, Input, colormap=cgrad(colormap, Ncategories, categorical=Categorical), colorrange=(MinValue, MaxValue))
-      println(Ncategories)
+      # println(Ncategories)
    end
 
    if 🎏_Colorbar
