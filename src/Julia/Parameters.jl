@@ -6,130 +6,134 @@
 🎏_CatchmentName = "Timoleague" # <"Timoleague">; <"Ballycanew">; <"Castledockerell">; <"Corduff">; <"Dunleer">; <"Cregduff">
 
 # DATES
-Base.@kwdef mutable struct DATES
-   Start_Year = 2010::Int64
-   Start_Month = 1::Int64
-   Start_Day = 1::Int64
-   Start_Hour = 0::Int64
+   Base.@kwdef mutable struct DATES
+      Start_Year  = 2010::Int64
+      Start_Month = 1::Int64
+      Start_Day   = 1::Int64
+      Start_Hour  = 0::Int64
 
-   End_Year = 2024::Int64
-   End_Month = 12::Int64
-   End_Day = 31::Int64
-   End_Hour = 23::Int64
-end # struct METADATA
+      End_Year    = 2024::Int64
+      End_Month   = 12::Int64
+      End_Day     = 31::Int64
+      End_Hour    = 23::Int64
+   end # struct METADATA
 
-Forcing_ΔT = "Daily" # <"Hourly"> or <"Daily">
+   Forcing_ΔT = "Daily" # <"Hourly"> or <"Daily">
 
 # Flags: plots
-   🎏_Plots = true
-   🎏_Plot_TimeSeries = false
+   🎏_Plots                 = true
+   🎏_Plot_TimeSeries       = false
    🎏_Plot_FlowAccumulation = false
-   🎏_Plot_NetCDF = true
+   🎏_Plot_NetCDF           = true
 
 # ======= PATHS =======
-Path_Root_Data = raw"D:/JOE/MAIN/MODELS/WFLOW/DATA/CATCHMENTS/"
-Path_Root = joinpath(Path_Root_Data, "$🎏_CatchmentName")
-Path_Root_NetCDF = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
-Path_Root_NetCDF_Output = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\output", "$🎏_CatchmentName")
-Path_Root_LookupTable = raw"DATA\Lookuptable"
+   Path_Root_Data          = raw"D:/JOE/MAIN/MODELS/WFLOW/DATA/CATCHMENTS/"
+   Path_Root               = joinpath(Path_Root_Data, "$🎏_CatchmentName")
 
-Path_Forcing₀ = "InputTimeSeries\\TimeSeries_Process"
-Path_Forcing = joinpath(Path_Forcing₀, Forcing_ΔT)
-Path_Gis = "InputGis"
-Path_Julia = "OutputJulia"
-Path_Lookuptable = "LookupTable"
-Path_ObservationPoint = "InputObservationPoint"
-Path_Python = "OutputPython"
-Path_River = "RIVERS\\SHAPEFILE"
-Path_TimeSeriesWflow = "InputTimeSeries/TimeSeries_Wflow"
-Path_Wflow = "OutputWflow"
-Path_Sentinel = "Sentinel"
-Path_Sentinel_WflowLai = "BiophysicalWflow"
+   Path_Root_NetCDF        = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\input", "$🎏_CatchmentName")
+   Path_Root_NetCDF_Output = joinpath(raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\output", "$🎏_CatchmentName")
+   Path_Root_LookupTable = raw"DATA\Lookuptable"
+
+   Path_Forcing₀ = "InputTimeSeries\\TimeSeries_Process"
+      Path_Forcing = joinpath(Path_Forcing₀, Forcing_ΔT)
+
+   Path_Gis               = "InputGis"
+   Path_Julia             = "OutputJulia"
+   Path_Lookuptable       = "LookupTable"
+   Path_ObservationPoint  = "InputObservationPoint"
+   Path_Python            = "OutputPython"
+   Path_River             = "RIVERS\\SHAPEFILE"
+   Path_TimeSeriesWflow   = "InputTimeSeries/TimeSeries_Wflow"
+   Path_Wflow             = "OutputWflow"
+   Path_Sentinel          = "Sentinel"
+   Path_Sentinel_WflowLai = "BiophysicalWflow"
 
 
 # ======= INPUT =======
 # === Input  Forcing ===
-Filename_Input_Forcing = "Forcing_" * Forcing_ΔT * "_" * "$🎏_CatchmentName" * ".csv"
+   Filename_Input_Forcing = "Forcing_" * Forcing_ΔT * "_" * "$🎏_CatchmentName" * ".csv"
 
 # === Shape file ===
-Filename_Gauge_Shp = "Gauge_Hydro.shp"
-Filename_Input_SoilMap = "SoilMap.tiff" # Obsolete
-Filename_LandUseMap_Shp = "NationalLandCoverMap.gdb"
-Filename_Landuse_Shp = "Landuse.shp"
-Filename_Mask_Shp = "Crop.shp"
-Filename_Output_ObservationEcologyPoint_Shp = "ObservationEcologyPoint.shp"
-Filename_River_Shp = "RiversIreland.shp"
-Filename_Roads_Shp = "Roads.shp"
-Filename_SoilMap_Shp = "Soils//SoilMap.shp"
+   Filename_Gauge_Shp                          = "Gauge_Hydro.shp"
+   Filename_Input_SoilMap                      = "SoilMap.tiff" # Obsolete
+   Filename_LandUseMap_Shp                     = "NationalLandCoverMap.gdb"
+   # Filename_Landuse_Shp                        = "Landuse.shp"
+   Filename_Mask_Shp                           = "Crop.shp"
+   Filename_Output_ObservationEcologyPoint_Shp = "ObservationEcologyPoint.shp"
+   Filename_River_Shp                          = "RiversIreland.shp"
+   Filename_Roads_Shp                          = "Roads.shp"
+   Filename_SoilMap_Shp                        = "Soils//SoilMap.shp"
 
 # === Input from Python ===
-Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tif"
-Filename_Python_Dtm2Rivers = "Dtm2Rivers.tif"
-Filename_Python_DtmCorrected = "DtmCorrected.tif"
-Filename_Python_Ldd = "Ldd.tif"
-Filename_Python_RiverLength = "RiverLength.tif"
-Filename_Python_StreamOrder = "StreamOrder.tif"
-Filename_Python_Slope = "Slope.tif"
+   Filename_Python_CatchmentSubcatchment = "CatchmentSubcatchment.tif"
+   Filename_Python_Dtm2Rivers            = "Dtm2Rivers.tif"
+   Filename_Python_DtmCorrected          = "DtmCorrected.tif"
+   Filename_Python_Ldd                   = "Ldd.tif"
+   Filename_Python_RiverLength           = "RiverLength.tif"
+   Filename_Python_StreamOrder           = "StreamOrder.tif"
+   Filename_Python_Slope                 = "Slope.tif"
 
 # === Input csv ===
-Filename_Csv_ObservationPoint = "ObservationPoint.csv"
-Filename_Csv_GaugePoint = "Gauges_grdc.csv"
+   Filename_Csv_ObservationPoint = "ObservationPoint.csv"
+   Filename_Csv_GaugePoint       = "Gauges_grdc.csv"
 
 # === Lookup tables ===
-Filename_Lookuptable_Hydro = "LookupTable_Hydro.csv"
-Filename_Lookuptable_LandUse = "LookupTable_Veg_NLCM.csv"
-Filename_Lookuptable_River = "LookupTable_River.csv"
+   Filename_Lookuptable_Hydro   = "LookupTable_Hydro.csv"
+   Filename_Lookuptable_LandUse = "LookupTable_Veg_NLCM.csv"
+   Filename_Lookuptable_River   = "LookupTable_River.csv"
 
 # ======= OUTPUT =======
 # === Output Julia ===
-Filename_Coastline = "Coastline.tiff"
-Filename_Julia_Dtm = "Ireland_DEM_Croped.tiff"
-Filename_Julia_DtmCorrected = "DEM_Corrected.tiff"
-Filename_Julia_Gauge = "Gauge.tiff"
-Filename_Julia_Pits = "Pits.tiff"
-Filename_Julia_StreamOrder = "StreamOrder.tiff"
+   Filename_Coastline = "Coastline.tiff"
+   Filename_Julia_Dtm = "Ireland_DEM_Croped.tiff"
+   Filename_Julia_DtmCorrected = "DEM_Corrected.tiff"
+   Filename_Julia_Gauge = "Gauge.tiff"
+   Filename_Julia_Pits = "Pits.tiff"
+   Filename_Julia_StreamOrder = "StreamOrder.tiff"
 
 # === Output wflow ===
-Filename_Dtm = "Dtm.tiff"
-Filename_Gauge = "Gauges_grdc.tiff"
-Filename_Ldd = "Ldd.tiff"
-Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
-Filename_RiverLength = "RiverLength.tif"
-Filename_RiverSlope = "RiverSlope.tiff"
-Filename_Rivers = "River.tiff"
-Filename_Slope = "Slope.tiff"
-Filename_Subcatchment = "Subcatchment.tiff"
-FileName_Lai = "Lai_"
+   Filename_Dtm                     = "Dtm.tiff"
+   Filename_Gauge                   = "Gauges_grdc.tiff"
+   Filename_Ldd                     = "Ldd.tiff"
+   Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
+   Filename_RiverLength             = "RiverLength.tif"
+   Filename_RiverSlope              = "RiverSlope.tiff"
+   Filename_Rivers                  = "River.tiff"
+   Filename_Slope                   = "Slope.tiff"
+   Filename_Subcatchment            = "Subcatchment.tiff"
+   FileName_Lai                     = "Lai_"
 
 # === Output netCDF ===
-Filename_NetCDF_Forcing = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
-Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
+   Filename_NetCDF_Forcing = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
+   Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
 
 # SENTINEL DATA
 # === Input boundary ===
-Path_SentinelBoundary = raw"Boundary\TimoleagueBoundaries3.geojson"
+   Path_SentinelBoundary = raw"Boundary\TimoleagueBoundaries3.geojson"
 
 # === Output sentinel data ===
 # Keep the "/"
-Path_SentinelDownload = "Sentinel/DownloadSentinel"
-Path_SentinelMetadata = "Sentinel/Metadata"
-Path_SentinelBiophysical = "Sentinel/Biophysical"
-Path_SentinelBiophysicalCloudRemoval = "Sentinel/BiophysicalCloud"
-Filename_SentinelXml = "Sentinel/SnapXml/BatchProcessing/BatchSnap_Biophysical.xml"
-Filename_SentinelMetadata = "SentinelMetadata.csv"
-Filename_CatchmentBoundary = "Boundary/CatchmentBoundary3.shp"
+   Path_SentinelDownload                = "Sentinel/DownloadSentinel"
+   Path_SentinelMetadata                = "Sentinel/Metadata"
+   Path_SentinelBiophysical             = "Sentinel/Biophysical"
+   Path_SentinelBiophysicalCloudRemoval = "Sentinel/BiophysicalCloud"
+   Filename_SentinelXml                 = "Sentinel/SnapXml/BatchProcessing/BatchSnap_Biophysical.xml"
+   Filename_SentinelMetadata            = "SentinelMetadata.csv"
+   Filename_CatchmentBoundary           = "Boundary/CatchmentBoundary3.shp"
 
 # ==== OUTPUT NETCDF Wflow model =====
-Filename_WflowOutput = "Output_Timoleague.nc"
-Path_Root_Wflow_Output = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\output"
-Path_Wflow_NetCDF_Output = joinpath(Path_Root_Wflow_Output, "$🎏_CatchmentName", "Output_" * "$🎏_CatchmentName" * ".nc")
+   Filename_WflowOutput = "Output_Timoleague.nc"
+   Path_Root_Wflow_Output = raw"D:\JOE\MAIN\MODELS\WFLOW\Wflow.jl\Wflow\Data\output"
+   Path_Wflow_NetCDF_Output = joinpath(Path_Root_Wflow_Output, "$🎏_CatchmentName", "Output_" * "$🎏_CatchmentName" * ".nc")
 
-Path_WflowModelOutput = "WflowModelOutput"
-Filename_WflowCatchementAverage_Csv = "CatchementAverage_" * "$🎏_CatchmentName" * ".csv"
+   Path_WflowModelOutput = "WflowModelOutput"
+   Filename_WflowCatchementAverage_Csv = "CatchementAverage_" * "$🎏_CatchmentName" * ".csv"
 
 #  ======= PARAMETERS =======
 # Coordinate reference system
-Param_Crs = 29902    # [-] This is the default projection TM65 / Irish Grid
+   Param_Crs = 29902    # [-] This is the default projection TM65 / Irish Grid
+
+   Param_RiverSlopeMin = 0.001 # [-] Minimum river slope to avoid numerical instability in Wflow. This value is used to replace any river slope value that is less than or equal to this threshold.
 
 # ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬
 #                 Ballycanew
@@ -160,68 +164,57 @@ elseif 🎏_CatchmentName == "Timoleague"
    # Dtm derived from Mosaic
    🎏_DtmMosaic = false
    🎏_DtmFromMosaic = false # Gis stored
-   🎏_MaskFromDtm = false
+   # 🎏_MaskFromDtm = false
 
    @assert(!(🎏_DtmMosaic && 🎏_DtmFromMosaic))
 
    # Collecting Sentinel Data
-   Coordinate_UpperLeft = (51.67436, -8.85758) # EPSG:4326
-   Coordinate_LowerRight = (51.57392, -8.70776)  # EPSG:4326
+      Coordinate_UpperLeft = (51.67436, -8.85758) # EPSG:4326
+      Coordinate_LowerRight = (51.57392, -8.70776)  # EPSG:4326
 
-   CopernicusDate_Start = (2023, 1, 1)
-   CopernicusDate_End = (2026, 03, 25)
+      CopernicusDate_Start = (2023, 1, 1)
+      CopernicusDate_End = (2026, 03, 25)
 
-   # Deriving LAI from Sentinel data
-   🎏_SentinelDataWeb = false
-   🎏_LaiFromSnap = false
-   🎏_Lai_2_Wflow = false
-   🎏_Lai_CompilePdf = true
-   🎏_Lai_Select = true
-
-   # Flags: Options
-   🎏_Fix_Cyclic = false # obsolete
-   🎏_RiverFromDtm = true
-
-   # Flags: outputs of interest
-   🎏_ImpermeableMap = false
+      # Deriving LAI from Sentinel data
+         🎏_SentinelDataWeb = false
+         🎏_LaiFromSnap = false
+         🎏_Lai_2_Wflow = false
+         🎏_Lai_CompilePdf = true
+         🎏_Lai_Select = true
 
    # Flags: LookupTables
-   🎏_RiverMap = true
-   🎏_SoilMap = true
-   🎏_LandUseMap = true
+      🎏_RiverMap = true
+      🎏_SoilMap = true
+      🎏_LandUseMap = true
 
    # Flags: NetCDF
-   🎏_NetCDF = true
-   🎏_Forcing_2_NetCDF = false
+      🎏_NetCDF = true
+      🎏_Forcing_2_NetCDF = false
 
    # Flags: Potential Evapotranspiration
 
    # ======= PATHS =======
-   Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
+   # Path_Root_Mosaic = raw"C:\OSGeo4W\Gis\DEM\FABDEM\IRELAND_MOSAIC"
 
    # === Raster input file ===
-   Filename_Input_Dtm = "Timoleague_DTM_Intermap_EPSG29902.tif"
+      Filename_Input_Dtm = "Timoleague_DTM_Intermap_EPSG29902.tif"
 
    # Resampling method of DEM in 2 steps:
-   Param_ResampleMethod₁ = :near
-   Param_ΔX₁ = 5 # [m]  resampling, Gridded spatial resolution
-   Param_ResampleMethod₂ = :cubicspline
-   Param_ΔX₂ = -1 # [m]  if >0 then resampling, Gridded spatial resolution should be a multiple of Param_ΔX₁
+      Param_ResampleMethod₁ = :near
+      Param_ΔX₁ = 5 # [m]  resampling, Gridded spatial resolution
+      Param_ResampleMethod₂ = :cubicspline
+      Param_ΔX₂ = -1 # [m]  if >0 then resampling, Gridded spatial resolution should be a multiple of Param_ΔX₁
 
    # RIVER PARAMETERS
-   # Param_RiverWidth = 1.7::Float64 # [m]
-   # Param_RiverDepth = 0.17::Float64  # must be an integer [m]
-   # Param_RiverManning = 0.033::Float64
-   Param_StrahlerOrderThreshold = 7 # [-] Minimum Strahler order to be considered as river in the river map. This is used to remove small streams that are not relevant for the model. The value of 1 means that only first-order streams are considered as rivers. If set to 0, all streams are considered as rivers. If set to 2, only second-order and higher streams are considered as rivers.
+      Param_StrahlerOrderThreshold = 7 # [-] Minimum Strahler order to be considered as river in the river map. This is used to remove small streams that are not relevant for the model. The value of 1 means that only first-order streams are considered as rivers. If set to 0, all streams are considered as rivers. If set to 2, only second-order and higher streams are considered as rivers.
 
    # GAUGE COORDINATES
-   # Param_GaugeCoordinate =[146702.538,42182.544]
-   Param_GaugeCoordinate = [146697.99, 42140.78]
+      Param_GaugeCoordinate = [146697.99, 42140.78]
 
    # SOILS PARAMETERS
-   Layer_Soil = :DRAINAGEid
-   soil_layer__thickness = [100, 300, 800]
+      Layer_Soil = :DRAINAGEid
+      soil_layer__thickness = [100, 300, 800]
 
    # LANDUSE MAPS
-   Layer_LandUse = :LEVEL_2_ID
+      Layer_LandUse = :LEVEL_2_ID
 end

@@ -92,8 +92,8 @@ function WFLOW_PROCESS_OUTPUT(; EndDate,
       # Counting active cells
       NotMissing = fill(false, Nx, Ny)
       CountCell = Threads.Atomic{Int}(0)
-      for iX = 1:Nx
-         for iY = 1:Ny
+      Threads.@threads for iX = 1:Nx
+         Threads.@threads for iY = 1:Ny
             if !isnan(Precipitation[iX, iY, 10])
                Threads.atomic_add!(CountCell, 1) # Safe addition
                NotMissing[iX, iY] = true
