@@ -112,7 +112,7 @@ end  # function: LOOKUPTABLE_2_NETCDF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		FUNCTION : TIFF_2_NETCDF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, LandUse_Header, LandUse_Maps, Latitude, Ldd, Longitude, Metadatas, ObservationPoint, River, River_Header, River_Maps, RiverLength_Mask, RiverSlope, Slope, Soil_Header, Soil_Maps, Subcatchment, Deflatelevel=0, Lai, Months=12)
+function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Filename_Rivers, Filename_RiverSlope, Filename_Subcatchment, Gauge, LandUse_Header, LandUse_Maps, Latitude, Ldd, Longitude, Metadatas, ObservationPoint, River, RiverBankElevation, RiverBottomElevation, River_Header, River_Maps, RiverLength_Mask, RiverSlope, Slope, Soil_Header, Soil_Maps, Subcatchment, Deflatelevel=0, Lai, Months=12)
 
    # Path_NetCDF_Full  = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
    Path_NetCDF_Full = joinpath(Path_Root_NetCDF, Filename_NetCDF_Instates)
@@ -208,7 +208,7 @@ function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Fi
    println(Keys)
 
 
-   # == DEM input ==========================================
+   # == DTM input ==========================================
    Keys = splitext(Filename_Dtm)[1]
    Dtm_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x", "y"), fillvalue=NaN; deflatelevel=Deflatelevel,)
    Dtm_NetCDF .= Array(Dtm)
@@ -271,6 +271,23 @@ function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Fi
    println(Keys)
 
 
+   # == RIVER-BankElevation input ==========================================
+   Keys = splitext(Filename_RiverBankElevation)[1]
+   RiverBankElevation_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x", "y"), fillvalue=NaN; deflatelevel=Deflatelevel,)
+   RiverBankElevation_NetCDF .= Array(RiverBankElevation)
+   RiverBankElevation_NetCDF.attrib["units"] = "m"
+   RiverBankElevation_NetCDF.attrib["comments"] = "Derived from hydromt"
+   println(Keys)
+
+
+   # == RIVER-BANK ELEVATION input ==========================================
+   Keys = splitext(Filename_RiverBottomElevation)[1]
+   RiverBottomElevation_NetCDF = NCDatasets.defVar(NetCDF, Keys, Float64, ("x", "y"), fillvalue=NaN; deflatelevel=Deflatelevel,)
+   RiverBottomElevation_NetCDF .= Array(RiverBottomElevation)
+   RiverBottomElevation_NetCDF.attrib["units"] = "m"
+   RiverBottomElevation_NetCDF.attrib["comments"] = "Derived from hydromt"
+   println(Keys)
+
    # # == RIVER MAPS input ==========================================
    if 🎏_RiverMap
       printstyled("==== RIVER MAPS ====\n"; color=:green)
@@ -304,7 +321,7 @@ function TIFF_2_NETCDF(; Dtm, Filename_Dtm, Filename_ObservationEcologyPoint, Fi
 
 
    # == LEAF AREA INDEX input ==========================================
-   if 🎏_Lai_2_Wflow
+   if 🎏_Lai_Select
       printstyled("==== LEAF AREA INDEX MAPS ====\n"; color=:green)
 
       Keys = "Lai"

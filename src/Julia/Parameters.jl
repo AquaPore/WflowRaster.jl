@@ -92,19 +92,22 @@
    Filename_Julia_StreamOrder = "StreamOrder.tiff"
 
 # === Output wflow ===
+   FileName_Lai                     = "Lai_"
    Filename_Dtm                     = "Dtm.tiff"
    Filename_Gauge                   = "Gauges_grdc.tiff"
    Filename_Ldd                     = "Ldd.tiff"
    Filename_ObservationEcologyPoint = "ObservationEcologyPoint.tiff"
+   Filename_RiverBankElevation      = "RiverBankElevation.tiff"
+   Filename_RiverBottomElevation    = "RiverBottomElevation.tiff"
+   Filename_RiverDepth              = "RiverDepth.tiff"
    Filename_RiverLength             = "RiverLength.tif"
    Filename_RiverSlope              = "RiverSlope.tiff"
    Filename_Rivers                  = "River.tiff"
    Filename_Slope                   = "Slope.tiff"
    Filename_Subcatchment            = "Subcatchment.tiff"
-   FileName_Lai                     = "Lai_"
 
 # === Output netCDF ===
-   Filename_NetCDF_Forcing = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
+   Filename_NetCDF_Forcing  = "forcing-" * 🎏_CatchmentName # on purpose remove the .nc
    Filename_NetCDF_Instates = "staticmaps-" * 🎏_CatchmentName * ".nc"
 
 # SENTINEL DATA
