@@ -26,7 +26,7 @@ module efficiency
       𝝀 = (Qsim_𝝈 / Qsim_𝝁) / (Qobs_𝝈 / Qobs_𝝁)  # Variability ratio
 
 		# Calculate KGE using the formula
-		Kge = 1.0 - √ ((r - 1.0)^2 + (β - 1.0)^2 + (𝝀 - 1.0)^2)
+    Kge = 1.0 - √ ((r - 1.0)^2 + (β - 1.0)^2 + (𝝀 - 1.0)^2)
 
 		Kge = floor(Kge, digits=3)
 	return Kge
